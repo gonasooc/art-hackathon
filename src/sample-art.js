@@ -1,0 +1,36 @@
+/** Original vector samples made for this prototype; not historical artist records. */
+export const sampleArt = {
+  paint: {
+    id: 'paint',
+    title: '겹의 자리',
+    study: './public/assets/samples/paint-study.svg',
+    final: './public/assets/samples/paint-final.svg',
+    motif: '황토빛 밑칠 위에 여러 번 그어진 붉은 호',
+    kind: 'sample',
+    provenance: '시제품용 창작 SVG · 가상의 습작과 완성 이미지',
+    width: 1200,
+    height: 800,
+  },
+  fashion: {
+    id: 'fashion',
+    title: '몸을 따라 남은 선',
+    study: './public/assets/samples/fashion-study.svg',
+    final: './public/assets/samples/fashion-final.svg',
+    motif: '몸을 비스듬히 감싸는 코발트색 옷의 접힘',
+    kind: 'sample',
+    provenance: '시제품용 창작 SVG · 가상의 패턴 연구와 의상 일러스트',
+    width: 1200,
+    height: 800,
+  },
+  stage: {
+    id: 'stage',
+    title: '공간 작품 샘플',
+    study: './public/assets/samples/stage-study.svg',
+    final: './public/assets/samples/stage-final.svg',
+    motif: '높이가 다른 다섯 빛의 면과 바닥에 남은 잔광',
+    kind: 'sample',
+    provenance: '시제품용 창작 SVG · 가상의 공간 계획과 전시 시안',
+    width: 1200,
+    height: 800,
+  },
+};

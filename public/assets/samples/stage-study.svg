@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">공간 작품 샘플 — 스케치</title>
+  <desc id="desc">다섯 개의 떠 있는 면과 그 조명을 계획하는 투시도. 높이와 간격을 조정한 선이 겹친 가상 과정 자료.</desc>
+  <defs><pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M25 0H0V25" fill="none" stroke="#b4b9ad" stroke-opacity=".22" stroke-width=".7"/></pattern></defs>
+  <rect width="1200" height="800" fill="#eeeadd"/>
+  <rect x="58" y="47" width="1084" height="700" fill="url(#grid)"/>
+  <g fill="none" stroke="#49616a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M91 94L252 195H945L1101 92M252 195V502L91 567M945 195V502L1101 567M252 502H945M91 94V699H1101V92"/>
+    <path d="M90 568L1101 567M443 503L376 699M607 503V699M785 503L849 699M172 601H1030M95 667H1094" opacity=".35"/>
+    <path d="M91 94L253 502M1101 92L945 502" stroke-dasharray="3 8" opacity=".4"/>
+    <path d="M329 231L375 234 372 464 332 469Z M443 217L500 221 495 491 447 496Z M565 200L630 205 626 514 568 518Z M698 219L757 223 752 493 703 498Z M823 239L872 243 867 466 827 471Z" stroke-width="2.2"/>
+    <path d="M334 197V232M371 197V234M448 197V219M495 197V222M570 168V202M625 168V205M704 197V221M752 197V224M829 197V241M867 197V244"/>
+    <path d="M342 238L338 462M456 223L454 489M582 209L579 510M712 226L710 489M837 247L834 463" stroke-width=".8"/>
+    <path d="M320 219L367 223 365 453 324 458Z M437 230L494 234 489 505 442 509Z M691 228L751 232 747 502 697 509Z" stroke-dasharray="5 5" opacity=".35"/>
+    <path d="M329 231L303 551 405 552 375 234M443 217L420 583 522 585 500 221M565 200L542 611 653 609 630 205M698 219L680 585 787 581 757 223M823 239L804 553 906 553 872 243" stroke-dasharray="3 7" opacity=".55"/>
+  </g>
+  <g fill="#bd6448" opacity=".13"><path d="M329 231L375 234 372 464 332 469Z"/><path d="M443 217L500 221 495 491 447 496Z"/><path d="M565 200L630 205 626 514 568 518Z"/><path d="M698 219L757 223 752 493 703 498Z"/><path d="M823 239L872 243 867 466 827 471Z"/></g>
+  <g fill="none" stroke="#b74733" stroke-width="1.5" stroke-linecap="round">
+    <path d="M324 217L367 456M321 457L368 224M447 506L492 232M438 232L489 503" opacity=".55"/>
+    <path d="M558 549Q602 564 641 544M558 546L563 556M639 539L644 549"/>
+    <path d="M930 304Q968 274 1000 310M984 300L1000 310 995 291"/>
+    <path d="M606 137V181M599 172L606 183 613 172"/>
+    <path d="M196 400Q163 432 188 460M183 445L188 460 173 456"/>
+    <path d="M1024 210L1026 235 1039 224 1051 241"/>
+  </g>
+  <g fill="none" stroke="#58646a" stroke-width="1" opacity=".7">
+    <path d="M322 623H879M322 617V629M381 617V629M438 617V629M503 617V629M561 617V629M632 617V629M694 617V629M760 617V629M818 617V629M879 617V629"/>
+    <path d="M224 204V514M218 204H230M218 514H230"/>
+  </g>
+  <g fill="#58646a" font-family="Georgia, serif" font-size="13" font-style="italic"><text x="343" y="649">01</text><text x="464" y="649">02</text><text x="591" y="649">03</text><text x="723" y="649">04</text><text x="845" y="649">05</text><text x="168" y="355" transform="rotate(-90 168 355)">2800</text><text x="587" y="128">+ 120</text></g>
+  <g fill="none" stroke="#475e66" stroke-width="1.6"><circle cx="1004" cy="535" r="7"/><path d="M1004 542V573L993 600M1004 573L1012 600M1004 550L990 569M1004 551L1015 567"/></g>
+</svg>

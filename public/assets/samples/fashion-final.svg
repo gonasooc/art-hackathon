@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">접힌 파랑 — 패션 일러스트레이션 샘플</title>
+  <desc id="desc">따뜻한 종이 위에 그린 길게 늘어진 인물과 비대칭 코발트 코트. 가슴을 가로지르는 커다란 접힘이 중심 모티프다. 시제품을 위해 새로 제작한 가상 작품.</desc>
+  <defs>
+    <filter id="paper" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".68" numOctaves="3" seed="12" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".095"/></feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+    <filter id="edge" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="19" result="grain"/>
+      <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.65" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2451cc"/>
+      <stop offset=".47" stop-color="#2449bc"/>
+      <stop offset="1" stop-color="#163483"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#7593e2"/><stop offset=".5" stop-color="#3a67d7"/><stop offset="1" stop-color="#284bb6"/>
+    </linearGradient>
+    <clipPath id="coatClip"><path d="M565 225 616 204 675 211 726 234 751 313 746 384 790 474 877 614 834 639 716 624 659 641 565 621 527 580 557 457 541 340Z"/></clipPath>
+  </defs>
+  <rect width="1200" height="800" fill="#eee9dd"/>
+  <g filter="url(#paper)">
+    <path d="M472 692c112-8 246 2 369 16 54 7 55 19-7 23-134 8-288-4-395-18-30-4-12-16 33-21Z" fill="#b4ac98" opacity=".14"/>
+    <path d="m671 617-6 52-21 61-27 7-3-13 17-66-1-40Z" fill="#272922"/>
+    <path d="m734 618 5 61 15 53 31 10 9-5-11-15-12-55-2-57Z" fill="#292a25"/>
+    <path d="m644 727-10 13-36 3-5-7 22-9Zm117 4 31 7 15 11-51-2-4-9Z" fill="#1b211f"/>
+    <path d="m625 165-4 42-21 12 61 18 25-19-37-19 7-29Z" fill="#c8ac8b"/>
+    <path d="M617 120c3-21 31-33 53-18 21 16 19 45 4 67-8 14-15 25-30 20-21-7-34-45-27-69Z" fill="#d6bea2"/>
+    <path d="M617 129c-10-16-4-31 11-39 21-13 45-7 55 11 8 15 3 30-1 37l-13-18-3-19-17 9-17-4-4 21Z" fill="#242723"/>
+    <path d="m671 136-5 18 9 2m-26 10 14 1m-37-34 10-2" fill="none" stroke="#5c5545" stroke-width="1.7" stroke-linecap="round"/>
+    <path d="M565 225 616 204 675 211 726 234 751 313 746 384 790 474 877 614 834 639 716 624 659 641 565 621 527 580 557 457 541 340Z" fill="url(#blue)" filter="url(#edge)"/>
+    <path d="m567 225-40 33-23 137-10 73 30 11 29-89 27-61 40-125Z" fill="#2448ac"/>
+    <path d="m496 463-9 23 3 31 9 8 5-17 3 18 7-2 5-42 5-14Z" fill="#ccb397"/>
+    <path d="m713 229 49 36 16 81-21 62-54-21 16-29-2-58Z" fill="#163787"/>
+    <path d="m727 363-23-8-22 3-15 14 14 2 15-5-10 12 7 6 31-13Z" fill="#d4bda1"/>
+    <path d="m616 204 35 45-55 64 117 37-32-65-6-74-32 15Z" fill="#132d71"/>
+    <path d="m617 207-38 81 40 18-56 108 142-60-64-76 33-67-24 33Z" fill="url(#fold)" filter="url(#edge)"/>
+    <path d="m577 294 40 12-53 108 142-59" fill="none" stroke="#96aeea" stroke-width="2" opacity=".83"/>
+    <path d="m562 415 92-10 73-29 13 25-83 22-88 12Z" fill="#15327d"/>
+    <path d="m633 404 14 20 73-21-8-22Z" fill="#385cc2"/>
+    <path d="m648 420 17-3 9 56-12 48-15-72Z" fill="#183478"/>
+    <path d="m665 417 19-2 24 38-10 13-29-26Z" fill="#4e70d0"/>
+    <g fill="none" stroke-linecap="round" clip-path="url(#coatClip)">
+      <path d="m635 429-20 91-7 103m59-192 31 194m5-203 30 98 106 114m-103-196 12 54 99 109m-264-179-13 86-22 64" stroke="#102e76" stroke-width="2.4" opacity=".83"/>
+      <path d="m641 436-11 90-3 96m53-181 28 175m10-167 39 90 79 82m-246-182-17 103-12 32" stroke="#7394e0" stroke-width="1.4" opacity=".75"/>
+      <path d="m532 562 24 27 43 17m-40-39 38 20m-25-38 24 12m173 38 29 15m-22-35 47 34m-36-9 26 20" stroke="#90a8e2" stroke-width="1" opacity=".55"/>
+      <path d="m726 500 95 110m-99-96 84 103m-91-88 66 87m-75-70 46 68m-56-50 32 49" stroke="#112c69" stroke-width=".8" opacity=".6"/>
+    </g>
+    <g fill="none" stroke="#272c30" stroke-width="1.2" opacity=".65">
+      <path d="m561 225-38 32-26 143-7 71m226-244 49 35 18 85-21 61m-207 25-31 148 39 42 97 21 57-17 119 15 45-27-88-144"/>
+      <path d="m623 88 39-2 20 15m-53 520-1 40-17 63m157-109 8 56 12 49"/>
+    </g>
+    <path d="m345 606 93-1m-76 11 45-1m-63 8 28-1" stroke="#b4ac98" stroke-width="1" fill="none" opacity=".5"/>
+    <path d="m875 177 16-3m-6-7-2 18" stroke="#697485" stroke-width="1.1" opacity=".6"/>
+    <text x="333" y="218" fill="#8b897e" font-family="Georgia,serif" font-size="18" font-style="italic">07</text>
+    <path d="m330 226 54-6" fill="none" stroke="#aaa493" stroke-width=".8"/>
+  </g>
+</svg>

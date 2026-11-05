@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build and release output
+/dist/
+/build/
+/release/
+
+# Local Sites workspace
+/.sites/
+
+# Environment variables (keep example files)
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.template
+
+# Logs and caches
+*.log
+.cache/
+.npm/
+.pnpm-store/
+.eslintcache
+*.tsbuildinfo
+
+# Test output
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Editor and temporary files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Operating system files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini

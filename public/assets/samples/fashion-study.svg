@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">접힌 파랑 — 드레이핑과 패턴 스터디 샘플</title>
+  <desc id="desc">코발트 코트의 접힌 앞섶을 검토하는 패턴 스터디. 인물의 가봉선, 서로 어긋나는 수정선과 왼편 재단 패턴이 보인다. 시제품을 위해 새로 제작한 가상 작업 기록.</desc>
+  <defs>
+    <filter id="paper" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".64" numOctaves="3" seed="12" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".09"/></feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+    <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(32)"><path d="M0 0V8" stroke="#5272bb" stroke-width=".6" opacity=".4"/></pattern>
+  </defs>
+  <rect width="1200" height="800" fill="#eee9dd"/>
+  <g filter="url(#paper)">
+    <g fill="none" stroke="#b0aa98" stroke-width=".8" opacity=".55">
+      <path d="M665 66v674M470 218h430M474 420h418M489 626h407M580 92h160M546 737h339" stroke-dasharray="6 7"/>
+      <path d="M642 86c-61 0-67 126-7 127 61 0 65-128 7-127ZM598 217l-29 187 121 19 40-180M620 423l15 223M697 423l50 210m-114 14-12 82m125-96 28 102"/>
+      <path d="m632 74-3 655M604 225l96 30-19 98-66 51-15-179"/>
+    </g>
+    <g fill="none" stroke="#5e615e" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M617 120c3-21 31-33 53-18 21 16 19 45 4 67-8 14-15 25-30 20-21-7-34-45-27-69Z" stroke-width="1.2"/>
+      <path d="m625 165-4 42-21 12m49-20 7-29m15-35-5 18 9 2m-26 11 14 1" stroke-width="1"/>
+      <path d="M617 129c-10-16-4-31 11-39 21-13 45-7 55 11l-17 0-17 9-17-4-4 21Z" fill="#424744" stroke-width="1" opacity=".9"/>
+      <path d="M565 225 616 204 675 211 726 234 751 313 746 384 790 474 877 614 834 639 716 624 659 641 565 621 527 580 557 457 541 340Z" stroke-width="1.4"/>
+      <path d="M554 220 607 196 681 204 734 230 763 317 758 385 809 477 897 610 846 650 711 633 657 652 555 631 516 583 547 452 532 339Z" stroke="#878d8b" opacity=".5" stroke-width="1"/>
+      <path d="m567 225-40 33-23 137-10 73 30 11 29-89 27-61m133-100 49 36 16 81-21 62-54-21 16-29-2-58" stroke-width="1.25"/>
+      <path d="m496 463-9 23 3 31 9 8 5-17 3 18 7-2 5-42m203-110-23-8-22 3-15 14 14 2 15-5-10 12 7 6 31-13" stroke-width="1"/>
+      <path d="m671 617-6 52-21 61-27 7-3-13 17-66-1-40m104 1 5 61 15 53 31 10 9-5-11-15-12-55-2-57" stroke-width="1.2"/>
+      <path d="m644 727-10 13-36 3-5-7 22-9m146 4 31 7 15 11-51-2-4-9" stroke-width="2"/>
+    </g>
+    <path d="m617 207-38 81 40 18-56 108 142-60-64-76 33-67-24 33Z" fill="#426ac1" opacity=".72"/>
+    <path d="m617 207-38 81 40 18-56 108 142-60-64-76 33-67-24 33Z" fill="url(#hatch)"/>
+    <path d="m617 207-38 81 40 18-56 108 142-60-64-76 33-67-24 33Z" fill="none" stroke="#244c9b" stroke-width="1.9"/>
+    <path d="m604 209-39 83 39 20-65 118 180-70-61-81 27-67" fill="none" stroke="#6d81ad" stroke-width="1.2" stroke-dasharray="4 6"/>
+    <path d="m562 415 92-10 73-29 13 25-83 22-88 12Zm86 5 17-3 9 56-12 48-15-72Z" fill="#9baed0" opacity=".65" stroke="#3f5e94" stroke-width=".8"/>
+    <g fill="none" stroke="#56637a" stroke-width=".9" opacity=".8">
+      <path d="m635 429-20 91-7 103m59-192 31 194m5-203 30 98 106 114m-103-196 12 54 99 109m-264-179-13 86-22 64"/>
+      <path d="m562 299 147 72m-4-23-112 52m-11-18 98-31m-89-48 18 17m-3-35 28 25"/>
+      <path d="m735 513 81 100m-92-85 72 89m-79-71 56 71m-68-47 36 46m-157-45 24 22m-22-40 33 24"/>
+    </g>
+    <g fill="none" stroke="#77766a" stroke-width="1" stroke-linejoin="round">
+      <path d="M181 195 244 176 265 229 310 255 281 330 295 530 147 541 167 346 129 265 163 232Z"/>
+      <path d="M190 202 239 187 258 239 297 260 270 328 285 520 158 529 178 343 140 266 173 237Z" stroke-dasharray="5 5" opacity=".65"/>
+      <path d="m214 190 5 344m-72-123 145-3m-124-63 115-16M157 478l129-8" stroke-dasharray="3 6" opacity=".6"/>
+      <path d="m219 245-7 21h14Zm1 199-7-21h14Z"/>
+      <path d="m186 330 34 45 33-49m-33 49 9 155"/>
+      <path d="m343 284 37-6 46 58-20 132-59-10-27-87Z"/>
+      <path d="m350 295 27-7 37 53-18 114-42-8-21-75Z" stroke-dasharray="4 5" opacity=".7"/>
+      <path d="m370 293 3 158m-49-80 91 10" stroke-dasharray="4 5" opacity=".6"/>
+      <path d="m156 565 140-10m-137 5 1 11m135-21 1 11M108 265l14 274m-20-272 13-1m1 272 13-1"/>
+    </g>
+    <g font-family="Georgia,serif" fill="#7d7e74" font-size="13" font-style="italic">
+      <text x="214" y="572">42</text><text x="93" y="405" transform="rotate(-92 93 405)">68</text>
+      <text x="361" y="492">02</text><text x="196" y="598">01</text><text x="899" y="215">07</text>
+    </g>
+    <g fill="none" stroke="#596b99" stroke-width="1.2" opacity=".75" stroke-linecap="round">
+      <path d="m733 307 80-39 67 1m-143 35-5 7 10-1M697 416l126-4 46 10m-166-11-7 5 9 3M725 563l79 27 41-3"/>
+      <path d="m888 260 28 6-25 10m-31 139 32 9-34 9"/>
+      <path d="m447 214 43 11-34 10m-10-7 44-16M464 534l34 19m-35 0 38-19"/>
+    </g>
+    <path d="m904 657 65-1m-48 10 52-1m-62 9 31-1" fill="none" stroke="#a7a18f" stroke-width="1" opacity=".6"/>
+  </g>
+</svg>

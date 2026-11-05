@@ -1,0 +1,96 @@
+/* The reply becomes the screen, then returns to its place in the conversation. */
+#app .chat-sidebar,
+#app .chat-topbar,
+#app .chat-composer,
+#app .chat-user-message,
+#app .chat-thinking,
+#app .chat-assistant-mark {
+  transition: opacity 500ms cubic-bezier(.22,1,.36,1);
+}
+#app.is-presenting .chat-sidebar,
+#app.is-presenting .chat-topbar,
+#app.is-presenting .chat-composer,
+#app.is-presenting .chat-user-message,
+#app.is-presenting .chat-thinking,
+#app.is-presenting .chat-assistant-mark {
+  opacity: 0;
+  pointer-events: none;
+}
+#app .chat-shell #player.player.is-expanded {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  z-index: 200;
+  border: 0;
+  border-radius: 0;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform-origin: 0 0;
+  outline: none;
+}
+#app .chat-shell #player.player.is-expanded .stage {
+  display: block;
+  inset: clamp(22px,4vw,64px);
+}
+#app .chat-shell #player.player.is-expanded .stage .work-surface {
+  width: min(86vw,1400px);
+  height: calc(100% - 52px);
+  max-height: 850px;
+}
+#app .chat-shell #player.player.is-expanded .stage-process .work-surface {
+  grid-template-columns: 1.1fr 1fr;
+  gap: 6vw;
+}
+#app .chat-shell #player.player.is-expanded .stage-plan { position: relative; inset: auto; opacity: 1; }
+#app .chat-shell #player.player.is-expanded .paper-note { font-size: clamp(28px,3.8vw,58px); line-height: 1.65; }
+#app .chat-shell #player.player.is-expanded .writing .small-rule { width: 64px; margin-bottom: 32px; }
+#app .chat-shell #player.player.is-expanded .writing-foot { font-size: 11px; margin-top: 28px; }
+#app .chat-shell #player.player.is-expanded .mark-tool { scale: 1; }
+#app .chat-shell #player.player.is-expanded .gesture-ring { width: 140px; height: 140px; }
+#app .chat-shell #player.player.is-expanded .paint-side-note { font-size: 18px; }
+#app .chat-shell #player.player.is-expanded .code-header { font-size: 12px; padding-bottom: 24px; }
+#app .chat-shell #player.player.is-expanded .code-text { font-size: clamp(18px,2.1vw,34px); line-height: 1.8; margin: 36px 0; }
+#app .chat-shell #player.player.is-expanded .source-line { font-size: 12px; }
+#app .chat-shell #player.player.is-expanded .code-ghost { font-size: 150px; }
+#app .chat-shell #player.player.is-expanded .sound-drawing { height: 260px; flex-basis: 260px; margin: 28px 0; }
+#app .chat-shell #player.player.is-expanded .music-top { font-size: 12px; }
+#app .chat-shell #player.player.is-expanded .music-notes { font-size: 28px; gap: 30px; }
+#app .chat-shell #player.player.is-expanded .music-result .music-title { font-size: clamp(38px,5vw,72px); }
+#app .chat-shell #player.player.is-expanded .fashion-scribble { font-size: 19px; }
+#app .chat-shell #player.player.is-expanded .fashion-measure { font-size: 11px; }
+#app .chat-shell #player.player.is-expanded .fabric-swatch { width: 50px; height: 68px; }
+#app .chat-shell #player.player.is-expanded .echo-grid { width: 92%; height: 90%; }
+#app .chat-shell #player.player.is-expanded .echo-text { font-size: clamp(24px,3vw,42px); }
+#app .chat-shell #player.player.is-expanded .result-caption { bottom: -30px; font-size: 14px; }
+#app .chat-shell #player.player.is-expanded .result-caption .result-medium { font-size: 10px; }
+#app .chat-shell #player.player.is-expanded .transport { left: 28px; right: 28px; bottom: 18px; }
+#app .chat-shell #player.player.is-expanded .transport .icon-button { width: 38px; height: 38px; }
+#app .chat-shell #player.player.is-expanded .transport #play-glyph { font-size: 23px; }
+#app .chat-shell #player.player.is-expanded .transport #restart-button { font-size: 22px; }
+#app .chat-shell #player.player.is-expanded .transport #restart-button span { font-size: 12px; }
+#app .chat-shell #player.player.is-expanded .reveal .sample-image { opacity: .55; }
+#app[data-returning="true"] .chat-thinking .thinking-dot { animation: none; opacity: .5; }
+@media (max-width:700px) {
+  #app .chat-shell #player.player.is-expanded .stage { inset: 22px 14px 38px; }
+  #app .chat-shell #player.player.is-expanded .stage .work-surface { width: 92%; height: calc(100% - 24px); }
+  #app .chat-shell #player.player.is-expanded .stage-process .work-surface { grid-template-columns: 1fr; }
+  #app .chat-shell #player.player.is-expanded .stage-plan { position: absolute; inset: 0; opacity: .3 !important; }
+  #app .chat-shell #player.player.is-expanded .paper-note { font-size: 30px; }
+  #app .chat-shell #player.player.is-expanded .code-text { font-size: 15px; line-height: 1.8; }
+  #app .chat-shell #player.player.is-expanded .code-header { font-size: 9px; }
+  #app .chat-shell #player.player.is-expanded .source-line { font-size: 9px; }
+  #app .chat-shell #player.player.is-expanded .music-top { font-size: 9px; }
+  #app .chat-shell #player.player.is-expanded .sound-drawing { height: 180px; flex-basis: 180px; }
+  #app .chat-shell #player.player.is-expanded .music-result .music-title { font-size: 36px; }
+  #app .chat-shell #player.player.is-expanded .music-notes { font-size: 20px; gap: 22px; }
+  #app .chat-shell #player.player.is-expanded .result-caption { font-size: 11px; bottom: -23px; }
+  #app .chat-shell #player.player.is-expanded .result-caption .result-medium { font-size: 8px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #app .chat-sidebar,#app .chat-topbar,#app .chat-composer,#app .chat-user-message,#app .chat-thinking,#app .chat-assistant-mark { transition: none; }
+}

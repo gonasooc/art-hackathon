@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">공간 작품 샘플 — 전시 시안</title>
+  <desc id="desc">어두운 전시 공간에 높이가 서로 다른 다섯 빛의 면이 떠 있고 바닥에 긴 빛의 흔적이 드리운 설치 작품의 가상 시안.</desc>
+  <defs>
+    <linearGradient id="room" x2="0" y2="1"><stop stop-color="#151c20"/><stop offset=".72" stop-color="#252c2d"/><stop offset="1" stop-color="#141a1d"/></linearGradient>
+    <linearGradient id="wall" x2="1" y2="1"><stop stop-color="#1c252a"/><stop offset=".6" stop-color="#333b38"/><stop offset="1" stop-color="#20282a"/></linearGradient>
+    <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#373c36"/><stop offset="1" stop-color="#151b1e"/></linearGradient>
+    <linearGradient id="panel" x2="1" y2="0"><stop stop-color="#a38f6b"/><stop offset=".18" stop-color="#e9d7ac"/><stop offset=".57" stop-color="#fff1cc"/><stop offset=".9" stop-color="#ccb88d"/><stop offset="1" stop-color="#8a795e"/></linearGradient>
+    <linearGradient id="beam" x2="0" y2="1"><stop stop-color="#efe1bc" stop-opacity=".25"/><stop offset="1" stop-color="#c6a577" stop-opacity="0"/></linearGradient>
+    <linearGradient id="reflection" x2="0" y2="1"><stop stop-color="#dbc394" stop-opacity=".22"/><stop offset="1" stop-color="#b59c69" stop-opacity="0"/></linearGradient>
+    <radialGradient id="pool"><stop stop-color="#f0d7a8" stop-opacity=".19"/><stop offset="1" stop-color="#e8c28c" stop-opacity="0"/></radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="9"/></filter>
+    <pattern id="grain" width="29" height="31" patternUnits="userSpaceOnUse"><path d="M3 4h1M17 11h2M8 25h1M22 21v1" stroke="#f5e6cd" stroke-width="1" opacity=".08"/></pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#room)"/>
+  <path d="M0 0H1200V525L985 485H219L0 552Z" fill="url(#wall)"/>
+  <path d="M0 0L219 111V485L0 552Z" fill="#111b20" opacity=".72"/>
+  <path d="M1200 0L985 111V485L1200 552Z" fill="#172126" opacity=".8"/>
+  <path d="M0 552L219 485H985L1200 552V800H0Z" fill="url(#floor)"/>
+  <path d="M0 0L219 111H985L1200 0Z" fill="#11191e"/>
+  <g stroke="#555e55" stroke-width="1" opacity=".23"><path d="M219 111V485M985 111V485M0 552L219 485H985L1200 552M420 485L312 800M607 485L611 800M792 485L909 800M124 617H1099M0 733H1200"/></g>
+  <ellipse cx="624" cy="550" rx="430" ry="145" fill="url(#pool)"/>
+  <g fill="url(#beam)" filter="url(#soft)">
+    <path d="M316 144L365 148 418 550 248 550Z"/>
+    <path d="M438 128L499 133 550 567 372 568Z"/>
+    <path d="M570 113L639 117 687 599 511 601Z"/>
+    <path d="M714 132L777 138 828 567 648 567Z"/>
+    <path d="M849 153L902 158 955 550 786 550Z"/>
+  </g>
+  <g stroke="#9c9a7e" stroke-width=".8" opacity=".55"><path d="M321 56V149M362 56V150M442 47V133M495 47V134M575 42V118M634 42V119M718 47V137M774 47V138M853 58V157M898 58V158"/></g>
+  <g>
+    <path d="M313 150L367 154 361 438 318 443Z" fill="url(#panel)"/>
+    <path d="M435 134L501 139 493 473 442 479Z" fill="url(#panel)"/>
+    <path d="M567 118L641 122 635 502 573 509Z" fill="url(#panel)"/>
+    <path d="M711 139L779 144 772 475 718 482Z" fill="url(#panel)"/>
+    <path d="M846 158L904 162 897 441 853 446Z" fill="url(#panel)"/>
+  </g>
+  <g fill="none" stroke="#fff5d7" opacity=".3"><path d="M331 153L328 441M452 138L455 477M590 122L586 507M730 144L731 478M865 163L864 444" stroke-width="2"/><path d="M346 154L347 441M480 140L481 475M617 124L620 505M755 145L756 477M885 164L886 443" stroke-width=".8"/></g>
+  <g fill="url(#reflection)"><path d="M318 443L361 438 376 742 277 735Z"/><path d="M442 479L493 473 512 790 407 800Z"/><path d="M573 509L635 502 657 800 557 800Z"/><path d="M718 482L772 475 816 800 706 800Z"/><path d="M853 446L897 441 960 744 850 750Z"/></g>
+  <path d="M1005 621V583C1006 569 1011 562 1019 562C1027 562 1033 570 1034 583L1037 621 1029 623 1027 664 1021 665 1018 625 1014 666 1008 666 1010 623Z" fill="#0d151a"/><ellipse cx="1020" cy="552" rx="8" ry="10" fill="#0d151a"/>
+  <path d="M1008 666L971 717 988 723 1027 667Z" fill="#11191b" opacity=".6"/>
+  <rect width="1200" height="800" fill="url(#grain)"/>
+  <path d="M0 0H1200V800H0Z" fill="none" stroke="#0e1418" stroke-width="36" opacity=".4"/>
+</svg>

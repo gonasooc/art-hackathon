@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">겹의 자리 — 회화 샘플 완성 이미지</title>
+  <desc id="desc">크림빛 종이 위에 황토색 밑칠과 겹겹의 붉은 호, 검은 마른 붓 자국이 남은 추상 회화. 시제품을 위해 만든 가상 작품.</desc>
+  <defs>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".62" numOctaves="3" seed="22"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".16"/></feComponentTransfer><feBlend in="SourceGraphic" mode="multiply"/></filter>
+    <pattern id="paper" width="17" height="19" patternUnits="userSpaceOnUse"><path d="M2 3h2M11 13h1M8 7v1M3 17h1" stroke="#afa28c" stroke-opacity=".16" stroke-width=".7"/></pattern>
+    <clipPath id="canvas"><path d="M98 65L1104 61 1110 737 93 742Z"/></clipPath>
+  </defs>
+  <rect width="1200" height="800" fill="#e8e2d4"/>
+  <path d="M98 65L1104 61 1110 737 93 742Z" fill="#f2ecde"/>
+  <g clip-path="url(#canvas)">
+    <g filter="url(#grain)">
+      <path d="M335 121L554 111 541 588 328 610 346 507 332 429 350 320 337 234Z" fill="#c49b50" opacity=".63"/>
+      <path d="M358 133L374 126 366 595 351 593Z" fill="#dfbe78"/>
+      <path d="M506 114L533 112 521 579 509 586 518 396Z" fill="#a87733" opacity=".46"/>
+      <path d="M301 596C355 557 361 479 370 391C381 261 441 154 576 142C702 119 824 186 858 306C878 368 877 457 844 527L802 540C827 461 832 387 812 326C780 226 698 180 601 187C489 191 441 274 424 377C413 448 414 514 381 571L343 615Z" fill="#bc3324"/>
+      <path d="M335 592C380 535 380 461 389 389C404 267 452 167 582 159C720 147 828 212 849 332" fill="none" stroke="#df4933" stroke-width="26" stroke-linecap="square" opacity=".9"/>
+      <path d="M359 565C392 505 386 408 412 321C441 225 496 176 592 174C714 172 801 228 825 323C849 410 826 467 812 510" fill="none" stroke="#9f271c" stroke-width="13"/>
+      <path d="M406 400C414 300 449 222 518 194" fill="none" stroke="#ed674b" stroke-width="8"/>
+      <path d="M621 157C753 153 829 219 852 315C872 393 855 454 839 491" fill="none" stroke="#d25236" stroke-width="9"/>
+      <path d="M794 530L811 519 806 560 786 580 799 542Z" fill="#b53022"/>
+      <path d="M283 587L343 565 436 575 529 552 650 571 701 557 774 578 933 559 984 584 913 615 824 608 730 623 616 608 516 625 429 607 336 632 280 614Z" fill="#242b27"/>
+      <path d="M300 592L445 590 541 579 648 590 780 593 917 582" fill="none" stroke="#51534a" stroke-width="8"/>
+      <path d="M318 617L418 599 518 616 630 597 745 612 856 598 949 602" fill="none" stroke="#e9dfca" stroke-width="4" opacity=".7"/>
+      <path d="M320 626L404 614 492 630M571 620L690 625M735 624L851 614M908 610L978 594" fill="none" stroke="#333a32" stroke-width="4"/>
+      <path d="M482 257L487 496 525 492 518 459 531 386 522 312 531 257Z" fill="#efe6d2" opacity=".84"/>
+      <path d="M490 260L495 482" fill="none" stroke="#fbf6eb" stroke-width="7" opacity=".9"/>
+    </g>
+    <g fill="none" stroke-linecap="round">
+      <path d="M286 578C341 524 343 450 352 360C365 229 457 114 588 119" stroke="#6a6053" stroke-width="1.3" opacity=".6"/>
+      <path d="M580 125C736 99 863 204 881 339" stroke="#746a5a" stroke-width="1" opacity=".4"/>
+      <path d="M302 649L966 624" stroke="#746a5a" stroke-width="1.2" opacity=".5"/>
+      <path d="M675 239L700 281 682 329" stroke="#a23024" stroke-width="2"/>
+      <path d="M695 240L717 282 698 327" stroke="#b04230" stroke-width="1"/>
+    </g>
+    <g fill="#ad3126"><circle cx="895" cy="386" r="2.1"/><circle cx="901" cy="401" r="1.4"/><circle cx="303" cy="560" r="1.8"/><circle cx="888" cy="366" r="1.2"/></g>
+    <rect x="90" y="60" width="1024" height="685" fill="url(#paper)"/>
+  </g>
+</svg>
