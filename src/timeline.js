@@ -18,7 +18,7 @@ export const scenes = [
   { id: 'fashion-second', start: 26.4, end: 28, type: 'process', material: 'fashion', pass: 1, label: '겹치는 윤곽' },
   { id: 'echoes', start: 28, end: 30.5, type: 'echoes', label: '서로의 잔상' },
   { id: 'breath', start: 30.5, end: 32, type: 'breath', label: '남아 있는 호흡' },
-  { id: 'stage-final', start: 32, end: 38, type: 'result', material: 'stage', label: '결과 01 · 공간 작품 샘플' },
+  { id: 'stage-final', start: 32, end: 38, type: 'result', material: 'stage', label: '결과 01 · 빛이 머무는 자리' },
   { id: 'code-final', start: 38, end: 44, type: 'result', material: 'code', label: '결과 02 · gonasooc' },
   { id: 'music-final', start: 44, end: 52, type: 'result', material: 'music', label: '결과 03 · 돌아오는 음' },
   { id: 'paint-final', start: 52, end: 58, type: 'result', material: 'paint', label: '결과 04 · 겹의 자리' },

@@ -15,7 +15,7 @@ for (const asset of assets) {
   code = code.replaceAll(asset, `data:${mime};base64,${bytes.toString('base64')}`);
 }
 let html = await readFile(path.join(root, 'index.html'), 'utf8');
-for (const stylesheet of ['styles.css', 'chat.css', 'presentation.css']) {
+for (const stylesheet of ['styles.css', 'chat.css', 'presentation.css', 'player.css']) {
   const css = await readFile(path.join(root, stylesheet), 'utf8');
   html = html.replace(`<link rel="stylesheet" href="./${stylesheet}">`, `<style>${css.replaceAll('</style', '<\\/style')}</style>`);
 }

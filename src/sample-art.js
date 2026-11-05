@@ -16,7 +16,7 @@ export const sampleArt = {
     title: '몸을 따라 남은 선',
     study: './public/assets/samples/fashion-study.svg',
     final: './public/assets/samples/fashion-final.svg',
-    motif: '몸을 비스듬히 감싸는 코발트색 옷의 접힘',
+    motif: '여러 겹의 재단선이 청회색 천의 접힘으로 남는 모습',
     kind: 'sample',
     provenance: '시제품용 창작 SVG · 가상의 패턴 연구와 의상 일러스트',
     width: 1200,
@@ -24,7 +24,7 @@ export const sampleArt = {
   },
   stage: {
     id: 'stage',
-    title: '공간 작품 샘플',
+    title: '빛이 머무는 자리',
     study: './public/assets/samples/stage-study.svg',
     final: './public/assets/samples/stage-final.svg',
     motif: '높이가 다른 다섯 빛의 면과 바닥에 남은 잔광',

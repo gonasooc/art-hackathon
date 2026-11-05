@@ -203,7 +203,7 @@ function renderAt(time) {
     $('#scene-live').textContent = scene.type === 'result' ? `완성작 ${resultOrder.indexOf(scene.material) + 1}. ${materials[scene.material].title}` : scene.label;
     $('#phase-label').textContent = scene.type === 'result' ? '남은 것들' : scene.type === 'wait' ? '잠시만요' : '그 사이의 시간';
     $('#result-count').textContent = scene.type === 'result' ? `${String(resultOrder.indexOf(scene.material) + 1).padStart(2, '0')} / 05` : '';
-    $('#player').dataset.surface = scene.material === 'music' || (scene.material === 'code' && scene.type === 'process') ? 'dark' : 'light';
+    $('#player').dataset.surface = scene.material === 'music' || (scene.material === 'code' && scene.type === 'process') || (scene.material === 'stage' && scene.type === 'result') ? 'dark' : 'light';
     $('#player').dataset.phase = scene.type;
     syncChatStatus();
   }
@@ -239,16 +239,16 @@ function buildScene(scene) {
     node.innerHTML = '<div class="waiting"><span></span><span></span><span></span></div>'; return;
   }
   if (scene.type === 'reveal') {
-    node.innerHTML = surface(image(materials.stage.study, 'sample-image'));
+    node.innerHTML = surface(`<div class="opening-sheet">${image(materials.stage.study, 'study-sheet')}</div>`, 'opening-composition');
     return;
   }
   if (scene.type === 'breath') {
-    node.innerHTML = '<div class="breath-line"></div>';
+    node.innerHTML = '<div class="afterimage"><span>그 사이에</span><span>남은 것들.</span></div>';
     updateScene = p => { node.style.opacity = String(1 - p * .8); }; return;
   }
   if (scene.type === 'echoes') {
-    node.innerHTML = `<div class="echo-grid"><div class="echo-piece">${image(materials.paint.image, '')}</div><div class="echo-piece">${image(materials.stage.study, '')}<div class="echo-text">지나가는 자리<br><span class="struck">머무는 시간</span></div></div><div class="echo-piece">${image(materials.fashion.study, '')}</div></div><div class="echo-line"></div>`;
-    updateScene = p => { if (!reducedMotion) node.querySelector('.echo-line').style.transform = `translateY(${(p - .5) * 160}px) rotate(-3deg)`; }; return;
+    node.innerHTML = surface(`<div class="echo-strip">${image(materials.paint.study, '')}${image(materials.stage.study, '')}${image(materials.fashion.study, '')}</div>`, 'echo-composition');
+    updateScene = p => { node.querySelector('.echo-strip').style.opacity = String(.9 - p * .4); }; return;
   }
   if (scene.type === 'result') { buildResult(node, scene); return; }
   if (scene.material === 'stage') buildWriting(node, scene);
@@ -258,102 +258,111 @@ function buildScene(scene) {
   if (scene.material === 'music') buildMusic(node, scene);
 }
 
+function sceneNote(kind, phrase) {
+  return `<div class="material-note"><span>${kind}</span><span>${phrase}</span></div>`;
+}
+
 function buildWriting(node, scene) {
-  node.innerHTML = surface(`<div class="stage-plan">${image(materials.stage.study, 'sample-image')}</div><div class="writing"><div class="small-rule"></div><div class="paper-note"></div><div class="writing-foot">빛 / 자리 / 머무는 시간</div></div>`);
-  const text = node.querySelector('.paper-note');
-  let previousText = '';
+  node.innerHTML = surface(`${sceneNote('공간', '빛이 머무는 자리')}<div class="spatial-sheet">${image(materials.stage.study, 'study-sheet')}</div><div class="revision-text"><span class="revision-prefix">빛이</span><div class="revision-word"></div><span class="revision-suffix">자리</span></div><div class="working-note">${scene.pass ? '남겨 둔 간격' : '지나가는 것과 머무는 것 사이'}</div>`, 'spatial-composition');
+  const word = node.querySelector('.revision-word');
+  const sheet = node.querySelector('.spatial-sheet');
+  let lastPhase = '';
   updateScene = p => {
-    const first = '빛이 지나가는 자리';
-    let markup;
-    if (scene.pass === 0) {
-      if (p < .43) markup = `${esc(first.slice(0, Math.ceil(first.length * ease(p / .43))))}<span class="writing-caret"></span>`;
-      else if (p < .7) markup = `빛이 <span class="struck">지나가는</span> 자리`;
-      else markup = `빛이 <span class="struck">지나가는</span> 자리<span class="replacement">머무는 자리</span>`;
-    } else {
-      const phrase = '빛이 머무는 자리';
-      markup = `${esc(phrase)}<br>${esc('서로 다른 다섯 개의 빛'.slice(0, Math.ceil(13 * ease(p))))}<span class="writing-caret"></span>`;
+    const phase = scene.pass ? 'resolved' : p < .34 ? 'first' : p < .63 ? 'erased' : 'revised';
+    if (phase !== lastPhase) {
+      const erased = phase !== 'first';
+      word.innerHTML = `<span class="earlier-word${erased ? ' is-erased' : ''}">지나가는</span>${phase === 'revised' || phase === 'resolved' ? '<span class="later-word">머무는</span>' : ''}`;
+      lastPhase = phase;
     }
-    if (markup !== previousText) { text.innerHTML = markup; previousText = markup; }
-    node.querySelector('.stage-plan').style.opacity = String(.35 + .35 * ease(p));
+    sheet.style.transform = reducedMotion ? 'none' : `translate3d(${(1 - ease(p)) * 12}px,0,0)`;
+    sheet.style.opacity = String(.62 + ease(p) * .38);
   };
 }
 
 function buildDrawing(node, scene) {
   const material = materials[scene.material];
-  const isPaint = scene.material === 'paint';
-  node.innerHTML = surface(`<div class="art-stack">${image(material.study, 'sample-image study-art')}${image(material.image, 'sample-image final-art')}</div><div class="mark-tool"></div>${isPaint ? '<div class="gesture-ring"></div><span class="paint-side-note">한 번 더, 같은 자리.</span>' : '<div class="fashion-measure"><span>01</span><span>02</span><span>03</span><span>04</span></div><div class="fabric-swatch"></div><span class="fashion-scribble">선을 따라, 다시.</span>'}`);
-  const finalArt = node.querySelector('.final-art');
-  const tool = node.querySelector('.mark-tool');
+  const painting = scene.material === 'paint';
+  node.innerHTML = surface(`${sceneNote(painting ? '회화' : '의복', scene.pass ? '다시, 같은 자리' : '남겨진 선')}<div class="study-fragment">${image(material.study, 'study-image')}</div><div class="material-layer">${image(material.study, 'under-drawing')}${image(material.image, 'over-drawing')}</div><div class="working-note">${painting ? '지운 뒤에도 남는 것' : '평면이 몸을 기억하는 방식'}</div>`, `material-composition ${painting ? 'pigment-composition' : 'cloth-composition'}`);
+  const over = node.querySelector('.over-drawing');
+  const under = node.querySelector('.under-drawing');
+  const fragment = node.querySelector('.study-fragment');
   updateScene = p => {
-    const progress = scene.pass === 0 ? ease(p) * .65 : .35 + ease(p) * .65;
-    const wipe = isPaint ? `inset(0 ${100 - progress * 100}% 0 0)` : `inset(${100 - progress * 100}% 0 0 0)`;
-    finalArt.style.clipPath = reducedMotion ? (p < .5 ? 'inset(0 50% 0 0)' : 'inset(0)') : wipe;
-    if (reducedMotion) {
-      tool.style.left = '50%'; tool.style.top = '55%';
-    } else if (isPaint) {
-      tool.style.left = `${12 + progress * 65}%`;
-      tool.style.top = `${54 - Math.sin(progress * Math.PI) * 28}%`;
-    } else {
-      tool.style.left = `${50 + Math.sin(progress * Math.PI * 2) * 8}%`;
-      tool.style.top = `${84 - progress * 67}%`;
-    }
-    tool.style.opacity = p > .91 ? '0' : '.85';
-    if (!reducedMotion) finalArt.style.transform = `scale(${1.02 + progress * .025})`;
+    // Layers share their geometry: revision is visible as accumulated material,
+    // not an imitation tool drawing over a finished image.
+    const amount = scene.pass ? .36 + ease(p) * .64 : ease(p) * .62;
+    over.style.opacity = String(reducedMotion ? (p < .5 ? .35 : .85) : amount);
+    under.style.opacity = String(1 - amount * .7);
+    over.style.transform = reducedMotion ? 'none' : `translate3d(${(1 - amount) * (painting ? 8 : -6)}px,${(1 - amount) * 4}px,0)`;
+    fragment.style.opacity = String(.5 + (1 - amount) * .36);
   };
 }
 
 function buildCode(node, scene) {
-  // Keep the process anonymous. The author appears in the result and credits.
   const fragment = materials.code.fragments[scene.pass ? 1 : 2];
   const code = fragment.text.split('\n').map(line => line.replace(/^ {4}/, '')).join('\n');
-  node.innerHTML = surface(`<div class="code-header"><span>${esc(fragment.file)}</span><span>EXCERPT / ${String(fragment.startLine).padStart(3, '0')}</span></div><div class="code-ghost">{ }</div><pre class="code-text"></pre><div class="source-line">${scene.pass ? '.works-box' : '#990011'}</div>`);
-  const pre = node.querySelector('.code-text');
+  const lines = code.split('\n');
+  const manuscript = lines.map((line, i) => `<div class="code-row"><span class="code-line-number">${fragment.startLine + i}</span><div class="code-line-layers"><pre class="code-imprint">${esc(line || ' ')}</pre><pre class="code-text"></pre></div></div>`).join('');
+  node.innerHTML = surface(`${sceneNote('코드', fragment.file)}<div class="code-manuscript">${manuscript}</div><div class="working-note">한 줄을 쓰고, 다시 읽는 시간</div>`, 'code-composition');
+  const rows = [...node.querySelectorAll('.code-text')];
   let lastLength = -1;
   updateScene = (_p, time) => {
     const length = typedLengthAt(scene, time, code.length);
     if (length === lastLength) return;
     lastLength = length;
-    const text = esc(code.slice(0, length)).replace(/(#[0-9A-Fa-f]{6}|&quot;.*?&quot;)/g, '<span class="code-focus">$1</span>');
-    pre.innerHTML = `${text}<span class="code-caret"></span>`;
+    let offset = 0;
+    rows.forEach((pre, i) => {
+      const line = lines[i];
+      const visible = Math.max(0, Math.min(line.length, length - offset));
+      const cursor = length >= offset && length <= offset + line.length;
+      const markup = esc(line.slice(0, visible)) + (cursor ? '<span class="code-caret"></span>' : '');
+      if (pre.innerHTML !== markup) pre.innerHTML = markup;
+      offset += line.length + 1;
+    });
   };
 }
 
 function buildMusic(node, scene) {
   const final = scene.type === 'result';
   node.classList.add(final ? 'music-result' : 'music-process');
-  node.innerHTML = surface(`${final ? '<h2 class="music-title">돌아오는 음</h2>' : ''}<div class="music-top"><span class="tape-label">D — A — F — G</span><span>${final ? 'A PHRASE, RETURNED' : '…'}</span></div><div class="sound-drawing"><div class="music-grid">${'<i></i>'.repeat(8)}</div><canvas class="wave-canvas" width="1200" height="300"></canvas>${!final ? '<div class="cut-mark"></div>' : ''}</div><div class="music-notes"><span>D</span><span>A</span><span>F</span><span>G</span><div class="music-rule"></div><span style="font:10px var(--mono)">4 NOTES</span></div>`);
+  node.innerHTML = surface(`${sceneNote('소리', final ? '네 음의 잔향' : '멈춘 구절')}<div class="resonance-field"><canvas class="resonance-canvas" width="1600" height="800"></canvas></div><div class="score-notes"><span>D</span><span>A</span><span>F</span><span>G</span></div><div class="working-note">${final ? '돌아오는 음' : '소리가 멎은 자리에도'}</div>`, 'sound-composition');
   const canvas = node.querySelector('canvas');
   const ctx = canvas.getContext('2d');
-  const notes = [...node.querySelectorAll('.music-notes>span')].slice(0, 4);
-  updateScene = (p, time) => {
-    const plucks = audioEvents.filter(e => e.type === 'pluck' && e.sceneId === scene.id && time >= e.at && time < e.at + e.duration);
-    const latest = plucks.at(-1);
-    const active = latest ? musicMotif.findIndex(f => f === latest.frequency) : -1;
-    notes.forEach((note, i) => note.classList.toggle('on', i === active));
+  const notes = [...node.querySelectorAll('.score-notes > span')];
+  const score = audioEvents.filter(e => e.type === 'pluck' && e.sceneId === scene.id);
+  updateScene = (_p, time) => {
+    const active = score.filter(e => time >= e.at && time < e.at + e.duration);
+    const latest = active.at(-1);
+    const noteIndex = latest ? musicMotif.findIndex(f => f === latest.frequency) : -1;
+    notes.forEach((note, i) => note.classList.toggle('on', i === noteIndex));
     if (!ctx) return;
-    ctx.clearRect(0, 0, 1200, 300);
-    const ink = '#c4c7b7';
-    for (let strand = 0; strand < 3; strand++) {
-      ctx.beginPath(); ctx.strokeStyle = strand === 1 ? '#d65b40' : ink;
-      ctx.globalAlpha = strand === 1 ? .85 : .25;
-      ctx.lineWidth = strand === 1 ? 1.9 : 1;
-      for (let x = 0; x <= 1200; x += 3) {
-        let y = 150;
-        const edge = Math.sin(x / 1200 * Math.PI) ** .7;
-        for (const event of plucks) {
-          const age = time - event.at;
-          const decay = Math.exp(-age * 2.2);
-          const spatial = event.frequency / 20;
-          y += Math.sin((x / 1200 * spatial * Math.PI * 2) - (reducedMotion ? 0 : age * 9) + strand * .4) * decay * 45 * edge;
+    const voices = active.map(event => ({
+      age: time - event.at,
+      amplitude: Math.exp(-(time - event.at) * 2.2),
+      frequency: event.frequency / musicMotif[0],
+    }));
+    ctx.clearRect(0, 0, 1600, 800);
+    // An engraving of the same four-note score; every movement follows a note's
+    // onset and decay. Pausing or seeking therefore also freezes or seeks it.
+    for (let strand = 0; strand < 56; strand++) {
+      const band = strand / 55;
+      ctx.beginPath();
+      ctx.strokeStyle = strand === 28 ? '#b19476' : '#b5bdb4';
+      ctx.globalAlpha = strand === 28 ? .85 : .28 + Math.sin(band * Math.PI) * .32;
+      ctx.lineWidth = strand === 28 ? 1.35 : .8;
+      for (let x = 0; x <= 1400; x += 6) {
+        const u = x / 1400;
+        const edge = Math.sin(u * Math.PI) ** 1.6;
+        let vibration = 0;
+        for (const voice of voices) {
+          vibration += Math.sin(u * Math.PI * 6 * voice.frequency + band * 5 - (reducedMotion ? 0 : voice.age * 2.4)) * voice.amplitude;
         }
-        y += Math.sin(x / 1200 * Math.PI * 3 + strand) * 3;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        const arch = Math.sin(u * Math.PI * 2.2 + band * 1.7) * 55;
+        const y = 213 + band * 330 + edge * (arch + vibration * (reducedMotion ? 0 : 48));
+        x === 0 ? ctx.moveTo(x + 100, y) : ctx.lineTo(x + 100, y);
       }
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
-    const cut = node.querySelector('.cut-mark');
-    if (cut) cut.style.opacity = latest ? '.12' : '.8';
   };
 }
 
@@ -361,10 +370,11 @@ function buildResult(node, scene) {
   const material = materials[scene.material];
   node.classList.add('result');
   if (scene.material === 'music') { buildMusic(node, scene); return; }
-  node.innerHTML = surface(`${image(material.image, 'result-art', material.title)}<div class="result-caption"><span>${esc(material.title)}</span><span class="result-medium">${esc(material.medium)}</span></div>`);
+  const number = String(resultOrder.indexOf(scene.material) + 1).padStart(2, '0');
+  node.innerHTML = surface(`<div class="result-plate">${image(material.image, 'result-art', material.title)}</div><div class="result-caption"><span class="result-index">${number}</span><span class="result-title">${esc(material.title)}</span><span class="result-medium">${esc(material.medium)}</span></div>`, 'result-composition');
   const art = node.querySelector('.result-art');
   updateScene = p => {
-    if (!reducedMotion) art.style.transform = `scale(${1 + ease(p) * .018})`;
+    if (!reducedMotion) art.style.transform = `scale(${1.012 - ease(p) * .012})`;
   };
 }
 

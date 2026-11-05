@@ -9,7 +9,7 @@ const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=u
 const server = http.createServer(async (req, res) => {
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    const allowed = pathname === '/' || pathname === '/index.html' || ['/styles.css', '/chat.css', '/presentation.css'].includes(pathname) || pathname.startsWith('/src/') || pathname.startsWith('/public/');
+    const allowed = pathname === '/' || pathname === '/index.html' || ['/styles.css', '/chat.css', '/presentation.css', '/player.css'].includes(pathname) || pathname.startsWith('/src/') || pathname.startsWith('/public/');
     const file = path.resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);
     if (!allowed || !file.startsWith(`${root}${path.sep}`) || pathname.split('/').some(part => part.startsWith('.'))) {
       res.writeHead(404); res.end('Not found'); return;
