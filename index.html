@@ -3,22 +3,114 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="예술 해커톤 프로젝트 모음">
-  <title>Art Hackathon</title>
+  <meta name="theme-color" content="#f4f3ee">
+  <meta name="description" content="예술과 기술 사이, 새로운 감각을 만나는 두 개의 실험. Art Hackathon 온라인 작품 모음.">
+  <title>Art Hackathon — 예술과 기술 사이</title>
   <style>
-    body { max-width: 44rem; margin: 4rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif; line-height: 1.7; }
-    h1 { line-height: 1.2; }
-    a { text-underline-offset: .2em; }
+    :root { color-scheme: light; --paper: #f4f3ee; --ink: #202520; --muted: #646a62; --line: #d6d9cf; --accent: #d9f780; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Avenir Next", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible { outline: 3px solid #386a27; outline-offset: 6px; }
+    ::selection { background: var(--accent); color: var(--ink); }
+    .shell { width: min(1280px, calc(100% - 112px)); margin: auto; }
+    .masthead { display: flex; justify-content: space-between; align-items: center; min-height: 100px; border-bottom: 1px solid var(--line); gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 700; letter-spacing: -.5px; }
+    .brand-mark { width: 28px; height: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; transform: rotate(-8deg); }
+    .brand-mark i { background: var(--ink); border-radius: 2px; }
+    .brand-mark i:last-child { border-radius: 50%; background: #7c9151; }
+    .edition, .eyebrow, .section-label, .art-label, .footer { font-size: 11px; font-weight: 500; letter-spacing: 1.6px; }
+    .edition { color: var(--muted); }
+    .hero { padding: 68px 0 60px; display: grid; grid-template-columns: 1.4fr 1fr; align-items: end; gap: 40px; }
+    .eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 23px; }
+    .eyebrow::before { content: ''; width: 7px; height: 7px; background: #6d853e; border-radius: 50%; }
+    h1 { font-size: clamp(44px, 5.2vw, 74px); line-height: 1.18; letter-spacing: -.07em; font-weight: 600; margin: 0; word-break: keep-all; }
+    h1 span { color: #7b8471; }
+    .intro { padding-bottom: 4px; justify-self: end; }
+    .intro p { font-size: 15px; line-height: 1.9; color: var(--muted); margin: 0; word-break: keep-all; }
+    .intro .invitation { color: var(--ink); margin-top: 17px; font-size: 13px; }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding: 20px 0; }
+    .section-label { margin: 0; font-weight: 600; }
+    .count { font-size: 12px; color: var(--muted); letter-spacing: .5px; }
+    .projects { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin: 0; padding: 0; list-style: none; }
+    .project { display: block; border-radius: 3px; }
+    .artwork { height: clamp(240px, 24vw, 330px); position: relative; overflow: hidden; isolation: isolate; border-radius: 4px; }
+    .art-label { position: absolute; top: 24px; left: 26px; z-index: 2; font-size: 10px; }
+    .art-number { position: absolute; right: 25px; top: 21px; font-size: 12px; opacity: .65; }
+    .time-art { background: #dfe6d8; color: #3c4a34; display: grid; place-items: center; }
+    .time-art::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(#697f5010 1px, transparent 1px), linear-gradient(90deg, #697f5010 1px, transparent 1px); background-size: 32px 32px; }
+    .time-orbit { position: absolute; width: 238px; height: 238px; border: 1px solid #8b9c7870; border-radius: 50%; transition: transform .65s ease; }
+    .time-orbit::before, .time-orbit::after { content: ''; position: absolute; inset: 17px; border: 1px solid #8b9c7840; border-radius: 50%; }
+    .time-orbit::after { inset: -22px; }
+    .key { display: flex; justify-content: center; align-items: center; gap: 22px; width: 170px; height: 100px; background: #f6f8ee; border: 1px solid #fff; border-radius: 15px; box-shadow: 0 9px 0 #bdc9ae, 0 10px 0 1px #a6b399, 12px 24px 28px #34432920; transform: rotate(-13deg); transition: transform .4s ease, box-shadow .4s ease; }
+    .key-text { font-size: 30px; font-weight: 600; letter-spacing: -2px; }
+    .key-arrow { font-size: 29px; font-weight: 400; color: #6f805c; }
+    .art-caption { position: absolute; bottom: 23px; left: 26px; font-size: 10px; letter-spacing: 2px; opacity: .75; }
+    .gaze-art { background: #232e2d; color: #e0e9db; display: grid; place-items: center; }
+    .gaze-art::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 110%, #637c5960, transparent 65%); }
+    .portal { position: absolute; width: 154px; height: 213px; border: 1px solid #b2c5a28c; transform: perspective(550px) rotateY(-22deg); box-shadow: 0 0 40px #b8db7410, inset 0 0 30px #c2e2a008; transition: transform .65s ease; }
+    .portal::before, .portal::after { content: ''; position: absolute; inset: 20px 16px; border: 1px solid #adc89970; }
+    .portal::after { inset: 40px 32px; background: linear-gradient(135deg, #c7dda319, #c7dda302); }
+    .gaze-line { width: 310px; height: 100px; border: 1px solid #9eae8550; border-radius: 50%; transform: rotate(-24deg); position: absolute; }
+    .gaze-point { width: 13px; height: 13px; border-radius: 50%; background: #d9f780; box-shadow: 0 0 30px #d9f78077; position: absolute; margin-left: 148px; margin-top: -55px; }
+    .project-info { display: grid; grid-template-columns: 1fr auto; gap: 16px; padding: 24px 0 27px; }
+    .category { font-size: 10px; letter-spacing: 1.5px; color: var(--muted); margin: 0 0 10px; }
+    h3 { font-size: clamp(20px, 2vw, 27px); font-weight: 600; letter-spacing: -1.1px; margin: 0 0 10px; }
+    .description { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0; word-break: keep-all; }
+    .open { width: 43px; height: 43px; border: 1px solid #c8cdc0; border-radius: 50%; display: grid; place-items: center; font-size: 23px; align-self: center; transition: background .2s, transform .2s, border-color .2s; }
+    .project:hover .open, .project:focus-visible .open { background: var(--accent); border-color: var(--accent); transform: rotate(45deg); }
+    .project:hover .key { transform: translateY(-6px) rotate(-8deg); }
+    .project:hover .time-orbit { transform: scale(1.07); }
+    .project:hover .portal { transform: perspective(550px) rotateY(0deg); }
+    .footer { border-top: 1px solid var(--line); padding: 25px 0 30px; margin-top: 12px; display: flex; justify-content: space-between; gap: 20px; color: var(--muted); font-size: 10px; }
+    .footer p { margin: 0; }
+    .footer p:last-child { letter-spacing: 0; font-size: 12px; }
+    @media (min-width: 1600px) { .hero { padding-top: 86px; padding-bottom: 76px; } }
+    @media (max-width: 760px) {
+      .shell { width: calc(100% - 40px); }
+      .masthead { min-height: 78px; }
+      .edition { font-size: 9px; letter-spacing: 1px; }
+      .brand { font-size: 15px; }
+      .hero { grid-template-columns: 1fr; padding: 43px 0 35px; gap: 24px; }
+      .intro { justify-self: start; }
+      .intro p { font-size: 14px; }
+      .intro .invitation { margin-top: 10px; }
+      .projects { grid-template-columns: 1fr; gap: 12px; }
+      .artwork { height: 290px; }
+      .project-info { padding-top: 21px; }
+      h3 { font-size: 24px; }
+      .footer { margin-top: 4px; flex-wrap: wrap; gap: 12px; }
+    }
+    @media (max-width: 360px) { .edition { display: none; } h1 { font-size: 40px; } .artwork { height: 260px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Art Hackathon</h1>
-    <p>예술 해커톤 프로젝트 모음</p>
-    <ul>
-      <li><a href="./chatgpt/">딸깍 — 그 사이의 시간</a></li>
-      <li><a href="./metaverse/">시선이 데려가는 곳</a></li>
-    </ul>
-  </main>
+  <div class="shell">
+    <header class="masthead">
+      <a class="brand" href="./" aria-label="Art Hackathon 홈"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Art Hackathon</a>
+      <span class="edition">ART × TECHNOLOGY</span>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="intro-title">
+        <div><p class="eyebrow">A COLLECTION OF EXPERIMENTS</p><h1 id="intro-title">예술과 기술 사이,<br><span>새로운 감각을 만나다.</span></h1></div>
+        <div class="intro"><p>한 번의 클릭, 한 번의 시선.<br>익숙한 행동에서 시작되는 낯선 경험.<br>예술과 기술이 만나는 작은 실험들을 소개합니다.</p><p class="invitation">마음이 닿는 작품으로 들어가 보세요. ↘</p></div>
+      </section>
+      <section aria-labelledby="projects-title">
+        <div class="section-heading"><h2 class="section-label" id="projects-title">SELECTED WORKS</h2><span class="count">02 projects</span></div>
+        <ul class="projects">
+          <li><a class="project" href="./chatgpt/" aria-labelledby="time-title" aria-describedby="time-description">
+            <div class="artwork time-art" aria-hidden="true"><span class="art-label">THE TIME IN BETWEEN</span><span class="art-number">01 /</span><div class="time-orbit"></div><div class="key"><span class="key-text">딸깍</span><span class="key-arrow">↵</span></div><span class="art-caption">ONE CLICK. COUNTLESS MOMENTS.</span></div>
+            <div class="project-info"><div><p class="category">AUDIOVISUAL · 시청각 경험</p><h3 id="time-title">딸깍 — 그 사이의 시간</h3><p class="description" id="time-description">한 번의 클릭 뒤에 가려진, 창작의 시간을 마주하다.</p></div><span class="open" aria-hidden="true">↗</span></div>
+          </a></li>
+          <li><a class="project" href="./metaverse/" aria-labelledby="gaze-title" aria-describedby="gaze-description">
+            <div class="artwork gaze-art" aria-hidden="true"><span class="art-label">WHERE YOUR GAZE TAKES YOU</span><span class="art-number">02 /</span><div class="gaze-line"></div><div class="portal"></div><div class="gaze-point"></div><span class="art-caption">LOOK CLOSER. GO FURTHER.</span></div>
+            <div class="project-info"><div><p class="category">INTERACTIVE · 시선 기반 경험</p><h3 id="gaze-title">시선이 데려가는 곳</h3><p class="description" id="gaze-description">바라보는 행위가 움직임이 되는 공간을 탐험하다.</p></div><span class="open" aria-hidden="true">↗</span></div>
+          </a></li>
+        </ul>
+      </section>
+    </main>
+    <footer class="footer"><p>ART HACKATHON — EXPERIMENTS IN PROGRESS</p><p>예술을 경험하는 또 다른 방식.</p></footer>
+  </div>
 </body>
 </html>
