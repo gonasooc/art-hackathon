@@ -8,6 +8,7 @@ import { GazeParticles } from './gaze-particles.js';
 import { VisualInspector } from './visual-inspector.js';
 import { VisualDemo } from './visual-demo.js';
 import { PlanetPrologue } from './prologue.js';
+import { JourneyAudio } from './journey-audio.js';
 
 const byId=id=>document.getElementById(id);
 const gazePhases=new Set(['walking','boarding','aligning','objects','car-transition']);
@@ -30,6 +31,7 @@ class Experience {
       onProgress:(progress,reduced)=>this.world.prologueProgress(progress,reduced),onDone:()=>this.finishPrologue(),
       onError:()=>this.showMessage('prologue-error','도입 영상을 불러오지 못했어요','기차 앞에서 체험을 계속할 수 있습니다.','기차 앞에서 계속',()=>this.prologue.finish())});
     byId('prologue-skip').addEventListener('click',()=>this.prologue.finish());
+    this.audio=new JourneyAudio(byId('prologue-video'));
     this.visual=new VisualInspector(this.world);
     this.demo=new VisualDemo(this.world);
     byId('visual-start').addEventListener('click',()=>this.startVisual({restart:true}));
@@ -63,6 +65,7 @@ class Experience {
         if(!['loading','calibrating','validating'].includes(this.phase))this.world.render(!frozen&&(this.phase==='visual'?!this.visual.paused:['walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase))?dt:0);
         this.gazeParticles.render(performance.now(),this.latest,{active:!frozen&&gazePhases.has(this.phase),reducedMotion:this.world.motionPreference.matches});
       }
+      this.audio.update({phase:this.phase,carId:this.navigation.carId,finale:this.world.finale.active,paused:document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['prologue','walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase)});
       this.raf=requestAnimationFrame(frame);
     };
     this.raf=requestAnimationFrame(frame);
@@ -118,6 +121,7 @@ class Experience {
   }
   release() {
     this.prologue?.pause();
+    this.audio?.stop();
     this.visual?.stop();
     this.demo?.stop();byId('demo-blink').style.opacity=0;
     delete document.body.dataset.demoTarget;delete document.body.dataset.demoStage;delete document.body.dataset.demoPaused;
@@ -369,14 +373,14 @@ class Experience {
   }
   boardTrain() {
     if(!this.navigation.beginBoarding())return;
-    this.setPhase('boarding');this.world.startBoarding();this.updateJourneyStatus(this.navigation.snapshot());
+    this.setPhase('boarding');this.world.startBoarding();this.audio.play('horn');this.updateJourneyStatus(this.navigation.snapshot());
     this.boardElapsed=0;this.boardDuration=this.world.motionPreference.matches ? .01 : TRAIN.boardingSeconds;
   }
   arrive(id) {
     this.navigation.invalidate();this.blink.reset();
     if(this.exitOpen){
       if(this.navigation.nextCarId){
-        this.setPhase('car-transition');this.changeElapsed=0;this.changedCar=false;
+        this.setPhase('car-transition');this.audio.play('door');this.changeElapsed=0;this.changedCar=false;
       }else this.finish();
       return;
     }
@@ -389,6 +393,7 @@ class Experience {
     byId('restart').focus({preventScroll:true});
   }
   visibilityChanged() {
+    if(document.hidden)this.audio.update({phase:this.phase,paused:true});
     this.navigation.invalidate();this.latest=null;this.tracker.setPaused(document.hidden||this.phase==='prologue');
     if(this.phase==='prologue'){
       if(document.hidden)this.prologue.pause();else if(!(this.mode==='demo'&&this.demo.paused))this.prologue.resume();
