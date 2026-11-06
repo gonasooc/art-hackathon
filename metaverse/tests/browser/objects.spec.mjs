@@ -16,16 +16,12 @@ async function gazeAt(page,position){
    setTimeout(()=>{window.__eyes=gaze;window.__emitEyeSample(valid());resolve();},120);
  }),gaze);
 }
-test('gaze plus blink dissolves objects and opens the hospital carriage without video',async({page})=>{
+test('womb passes without objects; hospital gaze and blink dissolve the two objects',async({page})=>{
  test.setTimeout(120000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&m.text().includes('THREE.WebGLProgram'))errors.push(m.text());});
  await simulatedEyes(page);await startAndWalk(page,.5);
- await expect(page.locator('body')).toHaveAttribute('data-phase','objects',{timeout:30000});
- await gazeAt(page,[-9,2.15,-7.9]);
- await mkdir(new URL('../../.cache/verification/',import.meta.url),{recursive:true});
- await page.waitForTimeout(500);await page.screenshot({path:new URL('../../.cache/verification/smoke-00.png',import.meta.url).pathname});
- await expect(page.locator('body')).toHaveAttribute('data-phase','walking',{timeout:10000});
- await page.evaluate(()=>window.__eyes={x:.5,y:.5});
- await expect(page.locator('body')).toHaveAttribute('data-carriage','01',{timeout:20000});
+ await expect(page.locator('#object-hint')).toHaveCount(0);
+ expect(await page.locator('#world').evaluate(c=>JSON.parse(c.dataset.objectState).some(t=>t.id.startsWith('00-')))).toBe(false);
+ await expect(page.locator('body')).toHaveAttribute('data-carriage','01',{timeout:30000});
  await expect(page.locator('body')).toHaveAttribute('data-phase','objects',{timeout:20000});
  await mkdir(new URL('../../.cache/verification/',import.meta.url),{recursive:true});
  await page.screenshot({path:new URL('../../.cache/verification/hospital-01.png',import.meta.url).pathname});

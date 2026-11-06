@@ -33,7 +33,7 @@ export class TrainJourney {
     const car=CARRIAGES.find(car=>car.id===id);
     if(this.stage!=='boarding'||!car?.implemented||(this.carId===null&&id!=='00'))return false;
     this.carId=id;this.stage='carriage';
-    this.walker=this.makeWalker(TRAIN.interiorLength,TRAIN.interiorHalfWidth,id);
+    this.walker=this.makeWalker(id==='00'?TRAIN.exitLength:TRAIN.interiorLength,TRAIN.interiorHalfWidth,id);
     return true;
   }
   openExit() {

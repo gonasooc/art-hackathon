@@ -37,8 +37,6 @@ function smokeTexture(){const c=document.createElement('canvas');c.width=c.heigh
 export class MemoryObjects {
  constructor(scene){
   this.scene=scene;this.targets=[];this.ray=new THREE.Raycaster();this.sprite=smokeTexture();this.car='00';
-  const seed=new THREE.Group();ellipsoid(seed,[0,1.1,0],[.5,.72,.5],new THREE.MeshStandardMaterial({color:0xf0bb8c,emissive:0xaa603b,emissiveIntensity:.35,roughness:.3}));
-  this.add('00-seed','00',seed,[-9,TRAIN.floorY,TRAIN.centerZ]);
   this.add('01-leopard','01',leopard(),[-9,TRAIN.floorY,TRAIN.centerZ+.55]);
   const seat=chair();seat.rotation.y=Math.PI/2;seat.scale.setScalar(.85);
   this.add('01-chair','01',seat,[-8.25,TRAIN.floorY,TRAIN.centerZ-.85]);
@@ -46,28 +44,30 @@ export class MemoryObjects {
  }
  add(id,car,group,position){
   group.position.set(...position);group.name=id;group.updateMatrixWorld(true);
-  const target={id,car,group,progress:null,gone:false,uniforms:[]};
+  const target={id,car,group,progress:null,gone:false,uniforms:[],focusUniforms:[]};
   group.traverse(m=>{if(!m.isMesh)return;m.userData.memoryId=id;m.material=m.material.clone();m.material.transparent=true;
-   const uniform={value:0};target.uniforms.push(uniform);
+   const uniform={value:0},focus={value:0};target.uniforms.push(uniform);target.focusUniforms.push(focus);
    m.material.onBeforeCompile=shader=>{
-    shader.uniforms.memoryDissolve=uniform;
+    shader.uniforms.memoryDissolve=uniform;shader.uniforms.memoryFocus=focus;
     shader.fragmentShader=`uniform float memoryDissolve;
+uniform float memoryFocus;
 float memoryHash(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,42.731)))*43758.5453);}
 float memoryNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(mix(memoryHash(i),memoryHash(i+vec3(1,0,0)),f.x),mix(memoryHash(i+vec3(0,1,0)),memoryHash(i+vec3(1,1,0)),f.x),f.y),mix(mix(memoryHash(i+vec3(0,0,1)),memoryHash(i+vec3(1,0,1)),f.x),mix(memoryHash(i+vec3(0,1,1)),memoryHash(i+vec3(1,1,1)),f.x),f.y),f.z);}
 `+shader.fragmentShader;
     shader.fragmentShader=shader.fragmentShader.replace('#include <alphatest_fragment>',`#include <alphatest_fragment>\nfloat grain=0.65*memoryNoise(vViewPosition*7.0)+0.35*memoryNoise(vViewPosition*21.0); if(memoryDissolve>grain) discard;`);
-   };m.material.customProgramCacheKey=()=> 'memory-smoke-v1';
+    shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`float memoryRim=pow(1.0-abs(dot(normal,normalize(vViewPosition))),2.5); outgoingLight+=vec3(0.48,0.65,0.59)*memoryFocus*memoryRim*(1.0-memoryDissolve);\n#include <opaque_fragment>`);
+   };m.material.customProgramCacheKey=()=> 'memory-smoke-v2';
   });
   this.scene.add(group);this.targets.push(target);
  }
- setCar(car){this.car=car;for(const t of this.targets)t.group.visible=t.car===car&&!t.gone;}
+ setCar(car){this.car=car;this.focusedId=null;for(const t of this.targets)t.group.visible=t.car===car&&!t.gone;}
  reset(){for(const t of this.targets){t.gone=false;t.progress=null;t.group.traverse(m=>{if(m.isMesh){m.material.opacity=1;m.material.depthWrite=true;}});t.uniforms.forEach(u=>u.value=0);if(t.smoke){this.scene.remove(t.smoke);t.smoke.geometry.dispose();t.smoke.material.dispose();t.smoke=null;}}this.setCar('00');}
  pick(gaze,camera){
-  if(!gaze?.valid)return null;
+  if(!gaze?.valid){this.focusedId=null;return null;}
   camera.updateMatrixWorld();this.ray.setFromCamera(new THREE.Vector2(gaze.x*2-1,1-gaze.y*2),camera);
   const active=this.targets.filter(t=>t.car===this.car&&!t.gone&&t.progress===null);
   const hit=this.ray.intersectObjects(active.map(t=>t.group),true).find(hit=>hit.distance<6);
-  return hit?.object.userData.memoryId||null;
+  this.focusedId=hit?.object.userData.memoryId||null;return this.focusedId;
  }
  dissolve(id){
   const t=this.targets.find(t=>t.id===id&&t.car===this.car&&!t.gone&&t.progress===null);if(!t)return false;
@@ -79,6 +79,8 @@ float memoryNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mi
   t.origins=origin;this.scene.add(t.smoke);return true;
  }
  update(dt,reduced){
+  this.cueTime=(this.cueTime||0)+dt;
+  for(const t of this.targets){const strength=t.car===this.car&&!t.gone&&t.progress===null?(this.focusedId===t.id?.2:(reduced?.055:.055+.015*Math.sin(this.cueTime*.9))):0;t.focusUniforms.forEach(u=>u.value=strength);}
   for(const t of this.targets){if(t.progress===null)continue;t.progress+=dt;const duration=reduced?.7:2.6,p=Math.min(1,t.progress/duration);
    t.uniforms.forEach(u=>u.value=Math.min(1,p*1.3));t.group.traverse(m=>{if(m.isMesh)m.material.opacity=1-p;});t.group.visible=p<.85;
    const attr=t.smoke.geometry.attributes.position;

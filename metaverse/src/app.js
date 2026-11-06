@@ -60,7 +60,7 @@ class Experience {
     byId('message').hidden=!['error','calibration-failed','playback-blocked','video-error','resize-required'].includes(phase);
     byId('leave').hidden=['idle','ended'].includes(phase);
     byId('pause-notice').hidden=true;
-    byId('journey-status').hidden=!gazePhases.has(phase);byId('object-hint').hidden=phase!=='objects';
+    byId('journey-status').hidden=!gazePhases.has(phase);
     byId('boarding-veil').hidden=!['boarding','car-transition'].includes(phase);
     this.updateMotionControl();
     this.updateGazeControl();
@@ -168,7 +168,6 @@ class Experience {
         document.body.dataset.gazeTarget=target||'';
         const hit=this.blink.observe({...sample,valid},target);
         document.body.dataset.blinkArmed=this.blink.armed||'';
-        if(this.phase==='objects')byId('object-hint').textContent=target?({"00-seed":"빛의 씨앗","01-chair":"의자","01-leopard":"표범"}[target]+'에 시선이 머물고 있어요. 눈을 한 번 깜빡여 주세요.'):'오브젝트에 시선을 두고, 눈을 한 번 깜빡여 주세요.';
         if(hit){document.body.dataset.blinkActivated=hit;this.world.objects.dissolve(hit);}
       }else this.blink.reset();
       return;
@@ -253,7 +252,7 @@ class Experience {
       this.world.boardingProgress(progress);
       byId('boarding-veil').style.opacity=this.world.motionPreference.matches?0:Math.sin(progress*Math.PI)*.92;
       if(progress>=1){
-        this.navigation.enterCar('00');this.latest=null;this.walkStarted=now;
+        this.navigation.enterCar('00');this.exitOpen=true;this.latest=null;this.walkStarted=now;
         this.setPhase('walking');this.world.walk(this.navigation.snapshot());this.updateJourneyStatus(this.navigation.snapshot());
       }
     }else if(this.phase==='aligning'){
