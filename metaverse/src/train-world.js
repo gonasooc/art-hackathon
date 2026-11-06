@@ -1,6 +1,13 @@
 import * as THREE from '../vendor/three/three.module.js';
 import { TRAIN, WORLD, clamp } from './config.js';
 import { MemoryObjects, buildHospital } from './memory-objects.js';
+import { buildChildhoodHomeCarriage } from './carriages/childhood-home.js';
+import { buildPlaygroundCarriage } from './carriages/playground.js';
+import { buildCafeCarriage } from './carriages/cafe.js';
+import { buildForestCarriage } from './carriages/forest.js';
+import { buildDeathHospitalCarriage } from './carriages/death-hospital.js';
+import { buildIncenseCarriage } from './carriages/incense.js';
+import { sunlitRoom } from './carriages/memory-room-kit.js';
 import { HandheldMotion } from './handheld.js';
 import { box, boxes, tube, archGeometry, buildTrain, buildInterior, plaque } from './train-geometry.js';
 
@@ -11,7 +18,12 @@ export class TrainWorld {
     this.canvas=canvas;this.handheld=new HandheldMotion();this.handheldEnabled=true;
     this.motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+    this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFShadowMap;
+    // Software WebGL must leave main-thread time for live eye samples. Keep the
+    // same geometry and filtered shadows, reducing only the raster resolution.
+    const gl=this.renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
+    const software=debug&&/SwiftShader|llvmpipe|Software/i.test(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL));
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio,software?.75:1.5));
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xe2b4a4);
@@ -43,7 +55,11 @@ export class TrainWorld {
     this.groundTexture=loadTexture('ground.png',[1,1]);
     this.groundTexture.wrapS=this.groundTexture.wrapT=THREE.MirroredRepeatWrapping;
     this.interiorTexture=this.membraneTexture.clone();this.interiorTexture.repeat.set(2.8,1.2);
+    const existing=new Set(this.scene.children);
     this.buildEnvironment();
+    this.exteriorEnvironment=new THREE.Group();
+    for(const child of [...this.scene.children])if(!existing.has(child))this.exteriorEnvironment.add(child);
+    this.scene.add(this.exteriorEnvironment);
     const train=buildTrain(this.materials);this.train=train.group;this.wheels=train.wheels;this.scene.add(this.train);
     const interior=buildInterior(this.materials,this.interiorTexture);
     this.interior=interior.group;this.liningMaterial=interior.liningMaterial;this.lamps=interior.lamps;this.scene.add(this.interior);
@@ -54,13 +70,19 @@ export class TrainWorld {
 
     this.hospital=buildHospital();this.hospital.visible=false;this.scene.add(this.hospital);
     this.objects=new MemoryObjects(this.scene);
+    this.extraCarriages=new Map();
+    for(const [id,build] of [['02',buildChildhoodHomeCarriage],['03',buildPlaygroundCarriage],['04',buildCafeCarriage],['05',buildForestCarriage],['06',buildDeathHospitalCarriage],['07',buildIncenseCarriage]]){
+      const spec=build();if(['02','03','04'].includes(id))spec.sunlight=sunlitRoom(spec.group,spec.targets,id==='04'?0xe9eff5:0xffe5be);spec.group.visible=false;this.scene.add(spec.group);this.extraCarriages.set(id,spec);
+      for(const target of spec.targets){this.objects.add(target.id,id,target.group,target.position,target.aim);}
+    }
+    this.finale=this.extraCarriages.get('07').finale;
     this.ready=Promise.all(loads).then(()=>{
       this.interiorTexture.needsUpdate=true;
       const environment=this.membraneTexture.clone();environment.repeat.set(1,1);
       environment.mapping=THREE.EquirectangularReflectionMapping;environment.needsUpdate=true;
       const generator=new THREE.PMREMGenerator(this.renderer);
       this.environmentTarget=generator.fromEquirectangular(environment);
-      this.scene.environment=this.environmentTarget.texture;this.scene.environmentIntensity=.65;
+      this.scene.environment=this.environmentTarget.texture;this.setCar(this.activeCar||'00');
       generator.dispose();environment.dispose();
       this.needsRender=true;
       this.canvas.dataset.assets='ready';
@@ -134,13 +156,31 @@ export class TrainWorld {
   }
 
   setCar(id) {
-    this.activeCar=id;this.hemi.intensity=id==='01'?.8:2;this.sun.intensity=id==='01'?.5:2.6;this.rim.intensity=id==='01'?.2:1.6;this.scene.environmentIntensity=id==='01'?.25:.65;for(const light of this.wombLights)light.visible=id==='00';this.interior.visible=id==='00';this.hospital.visible=id==='01';
-    this.objects?.setCar(id);this.needsRender=true;
-    this.canvas.dataset.carriage=id;
+    if(this.activeCar!==id)this.resetFinale();
+    const palettes={
+      '00':{background:0xe2b4a4,hemi:2,sun:2.6,rim:1.6,env:.65,sky:0xffead5,ground:0x5f3c35,near:35,far:115},
+      '01':{background:0x20241f,hemi:.8,sun:.5,rim:.2,env:.25,sky:0xffead5,ground:0x5f3c35,near:35,far:115},
+      '02':{background:0xb7b197,hemi:.8,sun:.2,rim:.2,env:.12,sky:0xffe3b6,ground:0x68462c,near:25,far:65},
+      '03':{background:0xa7ae85,hemi:.75,sun:.2,rim:.3,env:.2,sky:0xffedc4,ground:0x6c6742,near:18,far:55},
+      '04':{background:0xbcc8ca,hemi:.85,sun:.2,rim:.3,env:.16,sky:0xe4e7e7,ground:0x64645e,near:35,far:90},
+      '05':{background:0x899a8c,hemi:1.25,sun:1.15,rim:.25,env:.4,sky:0xe0e7d8,ground:0x566750,near:10,far:34},
+      '06':{background:0x101a18,hemi:1.2,sun:.65,rim:.12,env:.18,sky:0xc8e2d8,ground:0x232824,near:25,far:55},
+      '07':{background:0x030303,hemi:.09,sun:0,rim:0,env:.015,sky:0xbab4a9,ground:0x030303,near:12,far:30},
+    };
+    const p=palettes[id];if(!p)throw new Error(`Unknown carriage ${id}`);
+    this.activeCar=id;this.hemi.intensity=p.hemi;this.hemi.color.setHex(p.sky);this.hemi.groundColor.setHex(p.ground);
+    this.sun.intensity=p.sun;this.rim.intensity=p.rim;this.scene.environmentIntensity=p.env;
+    this.scene.background.setHex(p.background);this.scene.fog=new THREE.Fog(p.background,p.near,p.far);
+    for(const light of this.wombLights)light.visible=id==='00';
+    this.interior.visible=id==='00';this.hospital.visible=id==='01';
+    this.train.visible=id==='00'||id==='01';this.exteriorEnvironment.visible=id==='00'||id==='01';
+    for(const [key,spec] of this.extraCarriages)spec.group.visible=key===id;
+    this.objects?.setCar(id);this.needsRender=true;this.canvas.dataset.carriage=id;
   }
   resize() {this.renderer.setSize(innerWidth,innerHeight,false);this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();this.needsRender=true;}
 
   reset() {
+    this.resetFinale();
     this.handheld.reset();
     this.objects?.reset();this.setCar('00');
 
@@ -157,6 +197,12 @@ export class TrainWorld {
   platformPosition(state) {
     const rise=smooth(clamp((state.z-TRAIN.stairStart)/(TRAIN.approachLength-TRAIN.stairStart),0,1));
     return new THREE.Vector3(state.x,WORLD.eyeHeight+TRAIN.floorY*rise,TRAIN.exteriorStartZ-state.z);
+  }
+  prologueProgress(progress,reduced=false){
+    // Only the cinematic camera moves; the passenger's navigation stays at zero.
+    const p=reduced?1:1-Math.pow(1-clamp(progress,0,1),3);
+    this.camera.position.set(0,2.5+(WORLD.eyeHeight-2.5)*p,18+(TRAIN.exteriorStartZ-18)*p);
+    this.camera.rotation.set(0,0,0,'YXZ');this.handheld.reset();this.needsRender=true;
   }
 
   walk(state,dt=0) {
@@ -198,11 +244,38 @@ export class TrainWorld {
     this.needsRender=true;
     const a=this.alignment,s=smooth(t);this.camera.position.lerpVectors(a.fromPosition,a.position,s);this.camera.quaternion.slerpQuaternions(a.fromQuaternion,a.quaternion,s);
   }
+  resetFinale(){
+    this.finale?.reset();this.finalCamera=null;this.canvas.dataset.finale='hidden';this.canvas.dataset.finaleTime='0';
+  }
+  startFinale(){
+    if(this.activeCar!=='07'||!this.objects.complete()||this.finale.active)return false;
+    this.finale.start();
+    const target=this.camera.clone();target.position.set(-2,3.1,TRAIN.centerZ);target.lookAt(new THREE.Vector3(-9,3.05,TRAIN.centerZ));
+    this.finalCamera={elapsed:0,from:this.camera.position.clone(),rotation:this.camera.quaternion.clone(),to:target.position.clone(),toRotation:target.quaternion.clone()};
+    this.boarded=false;this.canvas.dataset.trainMoving='false';this.needsRender=true;return true;
+  }
   render(dt=0) {
     this.objects?.update(dt,this.motionPreference.matches);
+    if(this.activeCar==='07'){
+      if(dt>0&&this.objects.complete())this.startFinale();
+      this.finale.update(dt,this.motionPreference.matches);
+      if(this.finale.active){
+        this.canvas.dataset.finale=this.finale.complete?'held':'blooming';this.canvas.dataset.finaleTime=this.finale.elapsed.toFixed(3);
+        if(dt>0)this.needsRender=true;
+      }
+      if(this.finalCamera){
+        const c=this.finalCamera;c.elapsed+=dt;
+        const p=this.motionPreference.matches?1:smooth(Math.min(1,c.elapsed/4.5));
+        this.camera.position.lerpVectors(c.from,c.to,p);this.camera.quaternion.slerpQuaternions(c.rotation,c.toRotation,p);this.needsRender=true;
+        if(p>=1)this.finalCamera=null;
+      }
+    }
+    if(this.lastFocusedId!==this.objects.focusedId){this.lastFocusedId=this.objects.focusedId;this.needsRender=true;}
+    const extra=this.extraCarriages?.get(this.activeCar);
+    if(extra?.update){extra.update(dt,this.motionPreference.matches);if(dt>0)this.needsRender=true;}
     if(this.objects)this.canvas.dataset.objectState=JSON.stringify(this.objects.targets.map(t=>({id:t.id,progress:t.progress,gone:t.gone})));
     if(this.objects?.targets.some(t=>t.progress!==null))this.needsRender=true;
-    const animate=this.boarded&&!this.motionPreference.matches&&dt>0;
+    const animate=this.boarded&&this.exteriorEnvironment.visible&&!this.motionPreference.matches&&dt>0;
 
     if(!this.needsRender&&!animate)return;
     if(animate){
@@ -214,6 +287,12 @@ export class TrainWorld {
       for(let i=0;i<this.lamps.length;i++)this.lamps[i].rotation.z=Math.sin(this.rideTime*.8+i*.6)*.012;
       this.liningMaterial.opacity=.8+Math.sin(this.rideTime*1.1)*.008;
     }
+    // These rooms have stationary sunlight. Redraw its depth map only when an
+    // object starts disappearing, is restored, or the room changes.
+    if(extra?.sunlight){
+      const key=this.activeCar+this.objects.targets.filter(t=>t.car===this.activeCar).map(t=>t.gone||t.progress!==null?'0':'1').join('');
+      if(key!==this.shadowState){extra.sunlight.shadow.needsUpdate=true;this.shadowState=key;}
+    }else this.shadowState=null;
     this.renderer.render(this.scene,this.camera);
     this.needsRender=false;
   }

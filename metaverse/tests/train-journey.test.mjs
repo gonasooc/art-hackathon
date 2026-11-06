@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { TrainJourney } from '../src/train-journey.js';
-import { TRAIN, CARRIAGES } from '../src/config.js';
+import { TRAIN, CARRIAGES, JOURNEY_ORDER } from '../src/config.js';
 
 const walkToBoundary=(journey,direction,from=0)=>{
   let now=from;
@@ -41,7 +41,21 @@ test('a moving train never advances a passenger who has no valid gaze; restart r
   journey.reset();assert.equal(journey.snapshot().stage,'platform');assert.equal(journey.snapshot().boarded,false);
 });
 
-test('the documented 00–11 sequence exists but only the womb and hospital are implemented',()=>{
-  assert.deepEqual(CARRIAGES.map(car=>car.id),Array.from({length:12},(_,i)=>String(i).padStart(2,'0')));
-  assert.deepEqual(CARRIAGES.filter(car=>car.implemented).map(car=>car.id),['00','01']);
+test('eight implemented carriages advance only after their exit boundary',()=>{
+  assert.deepEqual(CARRIAGES.map(car=>car.id),Array.from({length:15},(_,i)=>String(i).padStart(2,'0')));
+  assert.deepEqual(CARRIAGES.filter(car=>car.implemented).map(car=>car.id),JOURNEY_ORDER);
+  assert.deepEqual(JOURNEY_ORDER,['00','01','02','03','04','05','06','07']);
+  assert.deepEqual(CARRIAGES.slice(1,6).map(car=>car.title),['병원','유년의 집','놀이터','카페','숲']);
+  const journey=new TrainJourney();let now=walkToBoundary(journey,.5);
+  journey.beginBoarding();journey.enterCar('00');
+  for(const id of JOURNEY_ORDER){
+    assert.equal(journey.carId,id);assert.equal(journey.nextCar(),false);
+    now=walkToBoundary(journey,.5,now+100);
+    if(id!=='00'){
+      assert.equal(journey.nextCar(),false);
+      journey.openExit();now=walkToBoundary(journey,.5,now+100);
+    }
+    assert.equal(journey.nextCar(),id!=='07');
+  }
+  assert.equal(journey.nextCarId,null);
 });

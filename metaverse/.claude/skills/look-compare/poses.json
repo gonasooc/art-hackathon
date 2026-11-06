@@ -1,0 +1,9 @@
+{
+  "02-frame-1": {
+    "car": "02",
+    "ref": ".cache/forest-references/frame-1.png",
+    "pose": [-1.0, 2.67, -8.3, -0.19, 1.65],
+    "ignoreBottom": 0.12,
+    "note": "숲.mp4 1초 프레임. 소실점 위치로 추정한 대략값이에요. 비주얼 테스트에서 다듬어 갱신하세요."
+  }
+}

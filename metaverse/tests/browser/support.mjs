@@ -1,7 +1,9 @@
 import { readFile } from 'node:fs/promises';
-export async function simulatedEyes(page,{wrongValidation=false,speed=9,validationOutlier='none'}={}) {
-  // Only the tracker boundary and timing are replaced. There is no production query flag,
-  // input endpoint or keyboard shortcut capable of supplying test gaze / skipping validation.
+import { expect } from '@playwright/test';
+export async function simulatedEyes(page,{wrongValidation=false,speed=9,validationOutlier='none',fullPrologue=false}={}) {
+  if(!fullPrologue)await page.route('**/src/prologue.js',async route=>route.fulfill({contentType:'text/javascript',body:(await readFile(new URL('../../src/prologue.js',import.meta.url),'utf8')).replace('handoffAt:10.4,blendSeconds:3.2,stillSeconds:1.8','handoffAt:.15,blendSeconds:.15,stillSeconds:.1')}));
+  // Only the tracker boundary and timing are replaced. Visual inspection is a separate
+  // explicit mode; it never supplies gaze samples or bypasses validation in the eye experience.
   await page.route('**/src/config.js',async route=>{
     const original=await readFile(new URL('../../src/config.js',import.meta.url),'utf8');
     await route.fulfill({contentType:'text/javascript',body:original
@@ -37,4 +39,22 @@ export async function startAndWalk(page,direction=.5) {
   await page.evaluate(x=>{window.__eyes={x};},direction);
   await page.getByRole('button',{name:'시선으로 시작'}).click();
   await page.waitForSelector('body[data-phase="walking"]');
+}
+
+export async function gazeAt(page,position,id){
+ const gaze=await page.evaluate(async position=>{
+  const T=await import('./vendor/three/three.module.js');const {TRAIN,WORLD}=await import('./src/config.js');
+  const c=new T.PerspectiveCamera(48,innerWidth/innerHeight,.04,180);c.position.set(TRAIN.interiorStartX-TRAIN.interiorLength,WORLD.eyeHeight+TRAIN.floorY,TRAIN.centerZ);c.lookAt(new T.Vector3(-9,2,TRAIN.centerZ));c.updateMatrixWorld();
+  const p=new T.Vector3(...position).project(c);return{x:(p.x+1)/2,y:(1-p.y)/2};
+ },position);
+ await page.evaluate(gaze=>window.__eyes=gaze,gaze);await page.waitForTimeout(900);
+ await expect(page.locator('body')).toHaveAttribute('data-gaze-target',id);
+ await page.evaluate(gaze=>new Promise(resolve=>{
+   const valid=()=>({valid:true,features:[(gaze.x-.5)*.18,(gaze.y-.5)*.08],pose:[.5,.5,.3,0,0],time:performance.now()});
+   window.__emitEyeSample(valid());window.__eyes={invalid:'blink'};
+   window.__emitEyeSample({valid:false,reason:'blink',blinkClosed:true,time:performance.now()});
+   setTimeout(()=>{window.__eyes=gaze;window.__emitEyeSample(valid());resolve();},120);
+ }),gaze);
+ await expect(page.locator('body')).toHaveAttribute('data-blink-activated',id);
+ await expect.poll(()=>page.locator('#world').evaluate((c,id)=>JSON.parse(c.dataset.objectState).find(t=>t.id===id)?.gone,id),{timeout:15000}).toBe(true);
 }

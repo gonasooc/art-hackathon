@@ -37,15 +37,15 @@ function smokeTexture(){const c=document.createElement('canvas');c.width=c.heigh
 export class MemoryObjects {
  constructor(scene){
   this.scene=scene;this.targets=[];this.ray=new THREE.Raycaster();this.sprite=smokeTexture();this.car='00';
-  this.add('01-leopard','01',leopard(),[-9,TRAIN.floorY,TRAIN.centerZ+.55]);
+  this.add('01-leopard','01',leopard(),[-9,TRAIN.floorY,TRAIN.centerZ+.55],[-9,1.65,-7.35]);
   const seat=chair();seat.rotation.y=Math.PI/2;seat.scale.setScalar(.85);
-  this.add('01-chair','01',seat,[-8.25,TRAIN.floorY,TRAIN.centerZ-.85]);
+  this.add('01-chair','01',seat,[-8.25,TRAIN.floorY,TRAIN.centerZ-.85],[-8.48,1.89,-8.75]);
   this.setCar('00');
  }
- add(id,car,group,position){
+ add(id,car,group,position,aim=position){
   group.position.set(...position);group.name=id;group.updateMatrixWorld(true);
-  const target={id,car,group,progress:null,gone:false,uniforms:[],focusUniforms:[]};
-  group.traverse(m=>{if(!m.isMesh)return;m.userData.memoryId=id;m.material=m.material.clone();m.material.transparent=true;
+  const target={id,car,group,aim:new THREE.Vector3(...aim),progress:null,gone:false,uniforms:[],focusUniforms:[]};
+  group.traverse(m=>{if(!m.isMesh)return;m.userData.memoryId=id;m.userData.memoryCastsShadow=m.castShadow;m.material=m.material.clone();m.material.transparent=true;
    const uniform={value:0},focus={value:0};target.uniforms.push(uniform);target.focusUniforms.push(focus);
    m.material.onBeforeCompile=shader=>{
     shader.uniforms.memoryDissolve=uniform;shader.uniforms.memoryFocus=focus;
@@ -61,17 +61,17 @@ float memoryNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mi
   this.scene.add(group);this.targets.push(target);
  }
  setCar(car){this.car=car;this.focusedId=null;for(const t of this.targets)t.group.visible=t.car===car&&!t.gone;}
- reset(){for(const t of this.targets){t.gone=false;t.progress=null;t.group.traverse(m=>{if(m.isMesh){m.material.opacity=1;m.material.depthWrite=true;}});t.uniforms.forEach(u=>u.value=0);if(t.smoke){this.scene.remove(t.smoke);t.smoke.geometry.dispose();t.smoke.material.dispose();t.smoke=null;}}this.setCar('00');}
+ reset(){for(const t of this.targets){t.gone=false;t.progress=null;t.group.traverse(m=>{if(m.isMesh){m.material.opacity=1;m.material.depthWrite=true;m.castShadow=m.userData.memoryCastsShadow;}});t.uniforms.forEach(u=>u.value=0);if(t.smoke){this.scene.remove(t.smoke);t.smoke.geometry.dispose();t.smoke.material.dispose();t.smoke=null;}}this.setCar('00');}
  pick(gaze,camera){
   if(!gaze?.valid){this.focusedId=null;return null;}
   camera.updateMatrixWorld();this.ray.setFromCamera(new THREE.Vector2(gaze.x*2-1,1-gaze.y*2),camera);
   const active=this.targets.filter(t=>t.car===this.car&&!t.gone&&t.progress===null);
-  const hit=this.ray.intersectObjects(active.map(t=>t.group),true).find(hit=>hit.distance<6);
+  const hit=this.ray.intersectObjects(active.map(t=>t.group),true).find(hit=>hit.distance<6&&hit.object.userData.memoryId);
   this.focusedId=hit?.object.userData.memoryId||null;return this.focusedId;
  }
  dissolve(id){
   const t=this.targets.find(t=>t.id===id&&t.car===this.car&&!t.gone&&t.progress===null);if(!t)return false;
-  t.progress=0;t.group.traverse(m=>{if(m.isMesh)m.material.depthWrite=false;});t.group.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(t.group),size=bounds.getSize(new THREE.Vector3());
+  t.progress=0;t.group.traverse(m=>{if(m.isMesh){m.material.depthWrite=false;m.castShadow=false;}});t.group.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(t.group),size=bounds.getSize(new THREE.Vector3());
   const positions=new Float32Array(180*3),origin=[];
   for(let i=0;i<180;i++){const p=[bounds.min.x+((i*37.13)%1)*size.x,bounds.min.y+((i*23.71)%1)*size.y,bounds.min.z+((i*61.17)%1)*size.z];positions.set(p,i*3);origin.push(p);}
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));

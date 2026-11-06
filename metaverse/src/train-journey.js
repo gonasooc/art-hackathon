@@ -1,5 +1,5 @@
 import { Navigation } from './navigation.js';
-import { TRAIN, WORLD, CARRIAGES, clamp } from './config.js';
+import { TRAIN, WORLD, CARRIAGES, JOURNEY_ORDER, clamp } from './config.js';
 
 // Locomotion remains local to the platform / carriage. Scenery animation never changes it.
 export class TrainJourney {
@@ -40,9 +40,11 @@ export class TrainJourney {
     this.walker.rules.length=TRAIN.exitLength;this.walker.arrived=null;
     this.walker.yaw=0;this.walker.pitch=-.15;this.walker.filtered={x:.5,y:.5};this.invalidate();
   }
+  get nextCarId() { return JOURNEY_ORDER[JOURNEY_ORDER.indexOf(this.carId)+1]||null; }
   nextCar() {
-    if(this.stage!=='carriage'||this.carId!=='00'||this.walker.z<TRAIN.exitLength)return false;
-    this.stage='boarding';return this.enterCar('01');
+    const next=this.nextCarId;
+    if(this.stage!=='carriage'||!next||this.walker.z<TRAIN.exitLength)return false;
+    this.stage='boarding';return this.enterCar(next);
   }
   snapshot() {
     const snapshot=this.walker.snapshot();

@@ -16,7 +16,7 @@ for (const [source,destination] of copies) {
   await mkdir(path.dirname(path.join(root,destination)),{recursive:true});
   await copyFile(path.join(root,source),path.join(root,destination));
 }
-const assets=['assets/models/face_landmarker.task','assets/films/resonance.mp4','assets/films/afterimage.mp4','assets/films/ready.mp4','assets/train/membrane.png','assets/train/ground.png'];
+const assets=['assets/models/face_landmarker.task','assets/films/resonance.mp4','assets/films/afterimage.mp4','assets/films/ready.mp4','assets/films/planet-womb.mp4','assets/films/planet-womb.jpg','assets/train/membrane.png','assets/train/ground.png'];
 const manifest={three:'0.187.0',mediapipe:'1.2.2',files:{}};
 for (const file of [...copies.map(c=>c[1]),...assets]) {
   await access(path.join(root,file));

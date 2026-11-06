@@ -16,10 +16,13 @@ export const CALIBRATION = Object.freeze({
 });
 
 export const CARRIAGES = Object.freeze([
-  ['00','자궁 · 탄생'],['01','병원'],['02','놀이터'],['03','학교'],
-  ['04','카페'],['05','연인의 거리'],['06','함께 살던 집'],['07','숲'],
-  ['08','미술관'],['09','전망 마당'],['10','병원 · 임종'],['11','향이 놓인 자리'],
-].map(([id,title])=>Object.freeze({id,title,implemented:id==='00'||id==='01'})));
+  ['00','자궁 · 탄생'],['01','병원'],['02','유년의 집'],['03','놀이터'],['04','카페'],
+  ['05','숲'],['06','병원 · 임종'],['07','향이 놓인 자리'],
+  ['08','연인의 거리'],['09','함께 살던 집'],['10','숲'],
+  ['11','미술관'],['12','전망 마당'],['13','병원 · 임종'],['14','향이 놓인 자리'],
+].map(([id,title])=>Object.freeze({id,title,implemented:Number(id)<=7})));
+
+export const JOURNEY_ORDER = Object.freeze(CARRIAGES.filter(car=>car.implemented).map(car=>car.id));
 
 export const TRAIN = Object.freeze({
   approachLength:12.2, approachHalfWidth:2.4, doorHalfWidth:.54,

@@ -13,6 +13,8 @@
 <body data-phase="idle">
   <canvas id="world" aria-label="기차 앞에서 시작해 탄생의 00칸으로 이어지는 전시 공간"></canvas>
   <canvas id="gaze-particles" hidden aria-hidden="true"></canvas>
+  <div id="prologue-layer" hidden aria-label="자궁빛 행성에서 기차가 있는 공간으로 들어가는 도입 장면"><video id="prologue-video" muted playsinline preload="none" poster="./assets/films/planet-womb.jpg" aria-hidden="true"></video><img id="prologue-still" src="./assets/films/planet-womb.jpg" alt="" hidden></div>
+  <div id="prologue-light" aria-hidden="true"></div>
   <div class="vignette" aria-hidden="true"></div>
   <div id="boarding-veil" hidden aria-hidden="true"></div>
   <header class="masthead"><a href="../" aria-label="프로젝트 목록으로 돌아가기">FORGOTTEN TOWN</a><span>THE MEMORY TRAIN <i>00</i></span></header>
@@ -22,7 +24,8 @@
       <h1 id="title">시선이<br>데려가는 곳<span class="period">.</span></h1>
       <p class="intro-copy">당신 앞에, 아직 떠나지 않은 기차.<br>눈길을 따라 열린 문을 지나면<br>첫 숨이 되기 전의 시간이 흐릅니다.</p>
       <button id="start" class="primary" type="button">시선으로 시작 <span aria-hidden="true">↗</span></button>
-      <p class="entry-meta">00 탄생 → 01 병원 · 카메라 사용</p>
+      <button id="visual-start" class="visual-entry" type="button">비주얼 테스트 <span>카메라 없이 처음부터 자동 시연 →</span></button>
+      <p class="entry-meta">00 탄생에서 07 향이 놓인 자리까지 · 카메라 사용</p>
       <p class="privacy">카메라는 눈의 움직임을 읽는 데 사용됩니다.<br>영상은 이 기기 안에서 처리하며 저장·전송하지 않습니다.</p>
     </section>
     <section id="setup" class="setup" hidden aria-labelledby="setup-title">
@@ -35,11 +38,32 @@
       <button id="message-home" class="text-button" type="button">처음으로</button>
     </section>
     <section id="ending" class="ending" hidden aria-labelledby="ending-title"><span id="work-label" class="eyebrow"></span><h2 id="ending-title">사라진 자리에도<br>기억은 남습니다.</h2><p id="work-title"></p><p class="ending-copy">다시, 다른 시선으로 이 칸을 만날 수 있습니다.</p><button id="restart" class="primary" type="button">다시 탑승하기 <span aria-hidden="true">↗</span></button><button id="end-home" class="text-button" type="button">처음으로</button></section>
+    <div id="finale-controls" class="finale-controls" hidden><p class="screen-reader-text" role="status">No click, one blink.</p><button id="finale-restart" type="button">다시 탑승하기</button><button id="finale-home" type="button">처음으로</button></div>
     <div id="journey-status" class="journey-status" hidden role="status"><span id="journey-number">PLATFORM</span><span id="journey-title">탑승 전</span></div>
     <div id="pause-notice" class="pause-notice" hidden role="status"><span class="status-dot"></span><span id="pause-copy"></span><button id="recalibrate" type="button">다시 맞추기</button></div>
     <button id="leave" class="leave" type="button" hidden>체험 종료 <span aria-hidden="true">×</span></button>
     <button id="motion-toggle" class="motion-toggle" type="button" aria-pressed="true" hidden>흔들림 끄기</button>
     <button id="gaze-toggle" class="gaze-toggle" type="button" aria-pressed="true" title="중심의 작은 빛이 현재 추정된 시선 위치입니다" hidden>시선 표시 끄기</button>
+    <button id="demo-switch" type="button" hidden>자동 시연으로 전환 <span>현재 위치에서 계속 →</span></button>
+    <button id="prologue-skip" type="button" hidden>도입 건너뛰기</button>
+    <div id="demo-controls" hidden><span id="demo-label" role="status">자동 시연</span><button id="demo-pause" type="button" aria-pressed="false">일시정지</button><button id="demo-restart" type="button">처음부터 시연</button></div>
+    <div id="demo-blink" aria-hidden="true"></div>
+    <div id="visual-badge" class="visual-badge" hidden><span>VISUAL STUDY</span><strong id="visual-room-title">기차 앞</strong><small>카메라 사용 안 함</small></div>
+    <button id="visual-tools-toggle" class="motion-toggle" type="button" aria-expanded="true" aria-controls="visual-panel" hidden>도구 숨기기 · H</button>
+    <section id="visual-panel" class="visual-panel" hidden aria-label="비주얼 테스트 도구">
+      <div class="visual-controls">
+        <label>공간<select id="visual-room"><option value="platform">기차 앞</option></select></label>
+        <div class="visual-views" role="group" aria-label="카메라 위치"><span>카메라 위치</span><div><button type="button" data-visual-view="entrance">입구</button><button type="button" data-visual-view="inspection">관찰 위치</button><button type="button" data-visual-view="exit">출구</button></div></div>
+        <label>오브젝트<select id="visual-object"></select></label>
+        <div class="visual-actions"><button id="visual-dissolve" type="button">소멸 보기</button><button id="visual-restore" type="button">오브젝트 복원</button></div>
+      </div>
+      <div class="visual-adjustments">
+        <label for="visual-exposure">밝기 <output id="visual-exposure-value">1.0×</output></label><input id="visual-exposure" type="range" min="0.5" max="3" step="0.1" value="1" aria-label="미리보기 밝기">
+        <button id="visual-light-reset" type="button">원래 밝기</button><button id="visual-animation" type="button" aria-pressed="false">애니메이션 정지</button>
+      </div>
+      <p class="visual-help">드래그로 둘러보기 · WASD / 방향키 이동 · Q / E 높이 · Shift 빠르게 · Space 소멸 · H 도구 숨기기</p>
+      <p id="visual-status" class="visual-status" role="status" aria-live="polite">공간을 선택해 자유롭게 살펴보세요.</p>
+    </section>
   </main>
   <footer class="colophon"><span>BEFORE THE FIRST BREATH.</span><span>00 / 탄생의 기억</span></footer>
   <noscript>이 전시는 카메라와 JavaScript가 필요합니다. 데스크톱 Chrome에서 JavaScript를 허용해 주세요.</noscript>
