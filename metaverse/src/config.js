@@ -15,22 +15,17 @@ export const CALIBRATION = Object.freeze({
   maxJitter: 0.12, maxRetryPoints: 2, maxValidationRetries: 1, retrySettleMs: 1000,
 });
 
-export const WORKS = Object.freeze([
-  { id: '00', title: '첫 숨이 되기 전', subtitle: 'CAR 00 · ORIGIN', src: new URL('../assets/films/resonance.mp4', import.meta.url).href },
-]);
-
 export const CARRIAGES = Object.freeze([
-  ['00','병원 · 탄생'],['01','유년의 집'],['02','놀이터'],['03','학교'],
+  ['00','자궁 · 탄생'],['01','병원'],['02','놀이터'],['03','학교'],
   ['04','카페'],['05','연인의 거리'],['06','함께 살던 집'],['07','숲'],
   ['08','미술관'],['09','전망 마당'],['10','병원 · 임종'],['11','향이 놓인 자리'],
-].map(([id,title])=>Object.freeze({id,title,implemented:id==='00'})));
+].map(([id,title])=>Object.freeze({id,title,implemented:id==='00'||id==='01'})));
 
 export const TRAIN = Object.freeze({
   approachLength:12.2, approachHalfWidth:2.4, doorHalfWidth:.54,
   exteriorStartZ:6, nearSideZ:-6, centerZ:-7.9, floorY:1.05,
   stairStart:9.8, boardingSeconds:1.65,
-  interiorStartX:-.65, interiorLength:10.8, interiorHalfWidth:.78,
-  memoryX:-14, memoryY:2.45,
+  interiorStartX:-.65, interiorLength:4.8, exitLength:10.8, interiorHalfWidth:.78,
   scenerySpeed:1.6,
 });
 

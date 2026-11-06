@@ -12,7 +12,7 @@ export async function simulatedEyes(page,{wrongValidation=false,speed=9,validati
   await page.route('**/src/tracker.js',route=>route.fulfill({contentType:'text/javascript',body:`
     export class EyeTracker {
       constructor(callback){this.callback=callback;}
-      async start(){this.stop();this.paused=false;let frame=0;
+      async start(){this.stop();this.paused=false;let frame=0;window.__emitEyeSample=sample=>this.callback(sample);
         this.timer=setInterval(()=>{
           if(this.paused||window.__eyes?.noUpdates)return;
           const phase=document.body.dataset.phase,target=document.getElementById('target');
@@ -35,6 +35,6 @@ export async function simulatedEyes(page,{wrongValidation=false,speed=9,validati
 export async function startAndWalk(page,direction=.5) {
   await page.goto('./');
   await page.evaluate(x=>{window.__eyes={x};},direction);
-  await page.getByRole('button',{name:'소리와 함께 시작'}).click();
+  await page.getByRole('button',{name:'시선으로 시작'}).click();
   await page.waitForSelector('body[data-phase="walking"]');
 }

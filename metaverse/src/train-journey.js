@@ -31,10 +31,18 @@ export class TrainJourney {
   }
   enterCar(id='00') {
     const car=CARRIAGES.find(car=>car.id===id);
-    if(this.stage!=='boarding'||!car?.implemented)return false;
+    if(this.stage!=='boarding'||!car?.implemented||(this.carId===null&&id!=='00'))return false;
     this.carId=id;this.stage='carriage';
     this.walker=this.makeWalker(TRAIN.interiorLength,TRAIN.interiorHalfWidth,id);
     return true;
+  }
+  openExit() {
+    this.walker.rules.length=TRAIN.exitLength;this.walker.arrived=null;
+    this.walker.yaw=0;this.walker.pitch=-.15;this.walker.filtered={x:.5,y:.5};this.invalidate();
+  }
+  nextCar() {
+    if(this.stage!=='carriage'||this.carId!=='00'||this.walker.z<TRAIN.exitLength)return false;
+    this.stage='boarding';return this.enterCar('01');
   }
   snapshot() {
     const snapshot=this.walker.snapshot();

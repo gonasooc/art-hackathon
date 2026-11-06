@@ -1,5 +1,6 @@
 import * as THREE from '../vendor/three/three.module.js';
 import { TRAIN, WORLD, clamp } from './config.js';
+import { MemoryObjects, buildHospital } from './memory-objects.js';
 import { HandheldMotion } from './handheld.js';
 import { box, boxes, tube, archGeometry, buildTrain, buildInterior, plaque } from './train-geometry.js';
 
@@ -16,9 +17,9 @@ export class TrainWorld {
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xe2b4a4);
     this.scene.fog=new THREE.Fog(0xe6b6a2,35,115);
     this.camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.04,180);
-    this.scene.add(new THREE.HemisphereLight(0xffead5,0x5f3c35,2));
-    const sun=new THREE.DirectionalLight(0xffeed3,2.6);sun.position.set(4,15,10);this.scene.add(sun);
-    const rim=new THREE.DirectionalLight(0xe4bdc5,1.6);rim.position.set(-12,7,-20);this.scene.add(rim);
+    this.hemi=new THREE.HemisphereLight(0xffead5,0x5f3c35,2);this.scene.add(this.hemi);
+    const sun=new THREE.DirectionalLight(0xffeed3,2.6);sun.position.set(4,15,10);this.scene.add(sun);this.sun=sun;
+    const rim=new THREE.DirectionalLight(0xe4bdc5,1.6);rim.position.set(-12,7,-20);this.scene.add(rim);this.rim=rim;
     this.materials={
       navy:new THREE.MeshStandardMaterial({color:0x10293f,metalness:.5,roughness:.28}),
       gold:new THREE.MeshStandardMaterial({color:0xc39b5b,metalness:.62,roughness:.31}),
@@ -46,10 +47,13 @@ export class TrainWorld {
     const train=buildTrain(this.materials);this.train=train.group;this.wheels=train.wheels;this.scene.add(this.train);
     const interior=buildInterior(this.materials,this.interiorTexture);
     this.interior=interior.group;this.liningMaterial=interior.liningMaterial;this.lamps=interior.lamps;this.scene.add(this.interior);
+    this.wombLights=[];
     for(const x of [-2.5,-7,-11.5]){
-      const light=new THREE.PointLight(0xffc093,5,8,2);light.position.set(x,3.15,TRAIN.centerZ);this.scene.add(light);
+      const light=new THREE.PointLight(0xffc093,5,8,2);light.position.set(x,3.15,TRAIN.centerZ);this.scene.add(light);this.wombLights.push(light);
     }
-    this.buildMemory();
+
+    this.hospital=buildHospital();this.hospital.visible=false;this.scene.add(this.hospital);
+    this.objects=new MemoryObjects(this.scene);
     this.ready=Promise.all(loads).then(()=>{
       this.interiorTexture.needsUpdate=true;
       const environment=this.membraneTexture.clone();environment.repeat.set(1,1);
@@ -129,36 +133,23 @@ export class TrainWorld {
     this.dust=new THREE.Points(particleGeometry,new THREE.PointsMaterial({color:0xffe4c0,size:.045,transparent:true,opacity:.45,depthWrite:false}));this.scene.add(this.dust);
   }
 
-  buildMemory() {
-    const center=TRAIN.centerZ;
-    const mask=document.createElement('canvas');mask.width=512;mask.height=512;
-    const ctx=mask.getContext('2d');ctx.fillStyle='#000';ctx.fillRect(0,0,512,512);
-    ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(256,256,246,238,0,0,Math.PI*2);ctx.fill();
-    const alphaMap=new THREE.CanvasTexture(mask);
-    const material=new THREE.MeshBasicMaterial({color:0xf5bf99,alphaMap,transparent:true,toneMapped:false,side:THREE.DoubleSide});
-    this.memoryScreen=new THREE.Mesh(new THREE.PlaneGeometry(2.7,1.65),material);
-    this.memoryScreen.rotation.y=Math.PI/2;this.memoryScreen.position.set(TRAIN.memoryX,TRAIN.memoryY,center);
-    this.memoryScreen.name='car-00-memory';this.scene.add(this.memoryScreen);
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(1,.022,8,80),this.materials.gold);
-    ring.scale.set(1.38,.85,1);ring.rotation.y=Math.PI/2;ring.position.copy(this.memoryScreen.position);ring.position.x+=.02;this.scene.add(ring);
-    const halo=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),new THREE.MeshStandardMaterial({
-      map:this.interiorTexture,color:0xf1bdab,emissive:0xd49c81,emissiveIntensity:.2,roughness:.55,transparent:true,opacity:.3,depthWrite:false,
-    }));
-    halo.scale.set(.32,1.2,1.55);halo.position.set(TRAIN.memoryX-.1,TRAIN.memoryY,center);this.scene.add(halo);this.memoryHalo=halo;
-    plaque(this.scene,'00','ORIGIN',.48,.23,[TRAIN.memoryX+.035,1.35,center],[0,Math.PI/2,0]);
+  setCar(id) {
+    this.activeCar=id;this.hemi.intensity=id==='01'?.8:2;this.sun.intensity=id==='01'?.5:2.6;this.rim.intensity=id==='01'?.2:1.6;this.scene.environmentIntensity=id==='01'?.25:.65;for(const light of this.wombLights)light.visible=id==='00';this.interior.visible=id==='00';this.hospital.visible=id==='01';
+    this.objects?.setCar(id);this.needsRender=true;
+    this.canvas.dataset.carriage=id;
   }
-
   resize() {this.renderer.setSize(innerWidth,innerHeight,false);this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();this.needsRender=true;}
 
   reset() {
-    this.handheld.reset();this.texture?.dispose();this.texture=null;
-    this.memoryScreen.material.map=null;this.memoryScreen.material.color.set(0xf5bf99);this.memoryScreen.material.needsUpdate=true;
+    this.handheld.reset();
+    this.objects?.reset();this.setCar('00');
+
     this.boarded=false;this.rideTime=0;this.transition=null;this.alignment=null;
     this.sleepers.position.x=0;this.passingLights.position.x=0;this.dust.position.x=0;
     this.ground.position.x=0;this.groundTexture.offset.set(0,0);this.membraneTexture.offset.set(0,0);
     for(const wheel of this.wheels)wheel.rotation.z=0;
     for(const lamp of this.lamps)lamp.rotation.z=0;
-    this.liningMaterial.opacity=.8;this.memoryHalo.scale.y=1.2;this.needsRender=true;
+    this.liningMaterial.opacity=.8;this.needsRender=true;
     this.camera.position.set(5.5,2.6,16);this.camera.lookAt(-1,2,-7.1);
     this.canvas.dataset.trainMoving='false';this.canvas.dataset.carriage='';this.canvas.dataset.journeyStage='platform';this.canvas.dataset.sceneryDistance='0';
   }
@@ -198,9 +189,8 @@ export class TrainWorld {
   }
 
   align(id) {
-    if(id!=='00')throw new Error(`Carriage ${id} is not implemented`);
-    const position=new THREE.Vector3(TRAIN.memoryX+2.8,WORLD.eyeHeight+TRAIN.floorY,TRAIN.centerZ);
-    const target=this.camera.clone();target.position.copy(position);target.lookAt(this.memoryScreen.position);
+    const position=new THREE.Vector3(TRAIN.interiorStartX-TRAIN.interiorLength,WORLD.eyeHeight+TRAIN.floorY,TRAIN.centerZ);
+    const target=this.camera.clone();target.position.copy(position);target.lookAt(new THREE.Vector3(-9,2,TRAIN.centerZ));
     this.alignment={fromPosition:this.camera.position.clone(),fromQuaternion:this.camera.quaternion.clone(),position,quaternion:target.quaternion.clone()};this.handheld.reset();
   }
   alignProgress(t) {
@@ -208,16 +198,13 @@ export class TrainWorld {
     this.needsRender=true;
     const a=this.alignment,s=smooth(t);this.camera.position.lerpVectors(a.fromPosition,a.position,s);this.camera.quaternion.slerpQuaternions(a.fromQuaternion,a.quaternion,s);
   }
-  showFilm(id,video) {
-    if(id!=='00')throw new Error(`Carriage ${id} is not implemented`);
-    this.texture?.dispose();this.texture=new THREE.VideoTexture(video);this.texture.colorSpace=THREE.SRGBColorSpace;
-    this.memoryScreen.material.map=this.texture;this.memoryScreen.material.color.set(0xffffff);this.memoryScreen.material.needsUpdate=true;
-    this.needsRender=true;
-  }
   render(dt=0) {
+    this.objects?.update(dt,this.motionPreference.matches);
+    if(this.objects)this.canvas.dataset.objectState=JSON.stringify(this.objects.targets.map(t=>({id:t.id,progress:t.progress,gone:t.gone})));
+    if(this.objects?.targets.some(t=>t.progress!==null))this.needsRender=true;
     const animate=this.boarded&&!this.motionPreference.matches&&dt>0;
-    const videoPlaying=this.texture?.image&&!this.texture.image.paused;
-    if(!this.needsRender&&!animate&&!videoPlaying)return;
+
+    if(!this.needsRender&&!animate)return;
     if(animate){
       this.rideTime+=Math.min(dt,.08);const distance=this.rideTime*TRAIN.scenerySpeed;
       this.canvas.dataset.sceneryDistance=distance.toFixed(3);
@@ -225,7 +212,7 @@ export class TrainWorld {
       this.ground.position.x=-(distance%10);this.membraneTexture.offset.x=distance/160;
       for(const wheel of this.wheels)wheel.rotation.z=-distance/.38;
       for(let i=0;i<this.lamps.length;i++)this.lamps[i].rotation.z=Math.sin(this.rideTime*.8+i*.6)*.012;
-      this.liningMaterial.opacity=.8+Math.sin(this.rideTime*1.1)*.008;this.memoryHalo.scale.y=1.2+Math.sin(this.rideTime*1.1)*.014;
+      this.liningMaterial.opacity=.8+Math.sin(this.rideTime*1.1)*.008;
     }
     this.renderer.render(this.scene,this.camera);
     this.needsRender=false;

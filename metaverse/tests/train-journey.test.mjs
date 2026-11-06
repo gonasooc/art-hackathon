@@ -41,7 +41,7 @@ test('a moving train never advances a passenger who has no valid gaze; restart r
   journey.reset();assert.equal(journey.snapshot().stage,'platform');assert.equal(journey.snapshot().boarded,false);
 });
 
-test('the documented 00–11 sequence exists but only 00 is implemented',()=>{
+test('the documented 00–11 sequence exists but only the womb and hospital are implemented',()=>{
   assert.deepEqual(CARRIAGES.map(car=>car.id),Array.from({length:12},(_,i)=>String(i).padStart(2,'0')));
-  assert.deepEqual(CARRIAGES.filter(car=>car.implemented).map(car=>car.id),['00']);
+  assert.deepEqual(CARRIAGES.filter(car=>car.implemented).map(car=>car.id),['00','01']);
 });

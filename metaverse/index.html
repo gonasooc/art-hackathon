@@ -17,12 +17,13 @@
   <div id="boarding-veil" hidden aria-hidden="true"></div>
   <header class="masthead"><a href="../" aria-label="프로젝트 목록으로 돌아가기">FORGOTTEN TOWN</a><span>THE MEMORY TRAIN <i>00</i></span></header>
   <main>
+    <div id="object-hint" class="pause-notice" hidden>남겨진 오브젝트에 시선을 두고, 눈을 한 번 깜빡여 주세요.</div>
     <section id="intro" class="intro" aria-labelledby="title">
-      <div class="edition"><span class="rule"></span> 첫 번째 기억으로 가는 기차</div>
+      <div class="edition"><span class="rule"></span> 깜빡임 사이로 사라지는 기억</div>
       <h1 id="title">시선이<br>데려가는 곳<span class="period">.</span></h1>
       <p class="intro-copy">당신 앞에, 아직 떠나지 않은 기차.<br>눈길을 따라 열린 문을 지나면<br>첫 숨이 되기 전의 시간이 흐릅니다.</p>
-      <button id="start" class="primary" type="button">소리와 함께 시작 <span aria-hidden="true">↗</span></button>
-      <p class="entry-meta">00 — 탄생 · 노트북 Chrome · 카메라와 소리</p>
+      <button id="start" class="primary" type="button">시선으로 시작 <span aria-hidden="true">↗</span></button>
+      <p class="entry-meta">00 탄생 → 01 병원 · 카메라 사용</p>
       <p class="privacy">카메라는 눈의 움직임을 읽는 데 사용됩니다.<br>영상은 이 기기 안에서 처리하며 저장·전송하지 않습니다.</p>
     </section>
     <section id="setup" class="setup" hidden aria-labelledby="setup-title">
@@ -34,7 +35,7 @@
       <span id="message-label" class="eyebrow">A MOMENT</span><h2 id="message-title" tabindex="-1"></h2><p id="message-copy"></p><button id="message-action" class="primary" type="button"></button>
       <button id="message-home" class="text-button" type="button">처음으로</button>
     </section>
-    <section id="ending" class="ending" hidden aria-labelledby="ending-title"><span id="work-label" class="eyebrow"></span><h2 id="ending-title">모든 기억의<br>처음에 머물다.</h2><p id="work-title"></p><p class="ending-copy">다시, 다른 시선으로 이 칸을 만날 수 있습니다.</p><button id="restart" class="primary" type="button">다시 탑승하기 <span aria-hidden="true">↗</span></button><button id="end-home" class="text-button" type="button">처음으로</button></section>
+    <section id="ending" class="ending" hidden aria-labelledby="ending-title"><span id="work-label" class="eyebrow"></span><h2 id="ending-title">사라진 자리에도<br>기억은 남습니다.</h2><p id="work-title"></p><p class="ending-copy">다시, 다른 시선으로 이 칸을 만날 수 있습니다.</p><button id="restart" class="primary" type="button">다시 탑승하기 <span aria-hidden="true">↗</span></button><button id="end-home" class="text-button" type="button">처음으로</button></section>
     <div id="journey-status" class="journey-status" hidden role="status"><span id="journey-number">PLATFORM</span><span id="journey-title">탑승 전</span></div>
     <div id="pause-notice" class="pause-notice" hidden role="status"><span class="status-dot"></span><span id="pause-copy"></span><button id="recalibrate" type="button">다시 맞추기</button></div>
     <button id="leave" class="leave" type="button" hidden>체험 종료 <span aria-hidden="true">×</span></button>
@@ -42,7 +43,6 @@
     <button id="gaze-toggle" class="gaze-toggle" type="button" aria-pressed="true" title="중심의 작은 빛이 현재 추정된 시선 위치입니다" hidden>시선 표시 끄기</button>
   </main>
   <footer class="colophon"><span>BEFORE THE FIRST BREATH.</span><span>00 / 탄생의 기억</span></footer>
-  <video id="film" playsinline preload="auto" aria-hidden="true" hidden></video>
   <noscript>이 전시는 카메라와 JavaScript가 필요합니다. 데스크톱 Chrome에서 JavaScript를 허용해 주세요.</noscript>
 </body>
 </html>

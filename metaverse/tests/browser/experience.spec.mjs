@@ -56,7 +56,7 @@ test('actual camera pipeline blocks entry when no face is present',async({page})
     const getUserMedia=navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
     navigator.mediaDevices.getUserMedia=async constraints=>{const stream=await getUserMedia(constraints);window.__cameraStream=stream;return stream;};
   });
-  await page.goto('./');await page.getByRole('button',{name:'소리와 함께 시작'}).click();
+  await page.goto('./');await page.getByRole('button',{name:'시선으로 시작'}).click();
   await expect(page.locator('body')).toHaveAttribute('data-phase','calibrating',{timeout:45000});
   await expect(page.locator('#tracking-status')).toContainText('얼굴');
   await expect(page.locator('body')).toHaveAttribute('data-validation','pending');
@@ -64,46 +64,9 @@ test('actual camera pipeline blocks entry when no face is present',async({page})
   expect(await page.evaluate(()=>window.__cameraStream.getTracks().every(track=>track.readyState==='ended'))).toBe(true);
 });
 
-for(const [direction,approach] of [[.1,'left'],[.9,'right']]){
-  test(`calibration gate, ${approach} gaze approach, boarding car 00, video and ending work together`,async({page})=>{
-    const errors=[];page.on('pageerror',error=>errors.push(error.message));
-    await simulatedEyes(page);await startAndWalk(page,direction);
-    const stopsBeforeArrival=await page.evaluate(()=>window.__trackerStops);
-    await expect(page.locator('body')).toHaveAttribute('data-validation','passed');
-    await expect(page.locator('body')).toHaveAttribute('data-journey-stage','platform');
-    await expect(page.locator('#world')).toHaveAttribute('data-train-moving','false');
-    await page.screenshot({path:new URL(`../../.cache/verification/train-platform-${approach}.png`,import.meta.url).pathname});
-    await expect(page.locator('body')).toHaveAttribute('data-phase','boarding',{timeout:20000});
-    await expect(page.locator('#world')).toHaveAttribute('data-train-moving','true');
-    await expect(page.locator('body')).toHaveAttribute('data-carriage','00');
-    await page.screenshot({path:new URL(`../../.cache/verification/car-00-${approach}.png`,import.meta.url).pathname});
-    await expect(page.locator('body')).toHaveAttribute('data-phase','playing',{timeout:20000});
-    await expect(page.locator('body')).toHaveAttribute('data-destination','00');
-    await expect(page.locator('#gaze-particles')).toBeVisible();
-    expect(await page.evaluate(()=>window.__trackerStops)).toBe(stopsBeforeArrival);
-    const playback=await page.locator('#film').evaluate(video=>({muted:video.muted,volume:video.volume,paused:video.paused,src:video.currentSrc}));
-    expect(playback.muted).toBe(false);expect(playback.volume).toBeGreaterThan(0);expect(playback.paused).toBe(false);
-    expect(playback.src).toContain('resonance.mp4');
-    await expect.poll(()=>page.locator('#film').evaluate(video=>video.currentTime)).toBeGreaterThan(.2);
-    const position=await page.locator('#world').getAttribute('data-z');
-    await page.evaluate(()=>{window.__eyes={x:0,y:0};});
-    await page.waitForTimeout(200);expect(await page.locator('#world').getAttribute('data-z')).toBe(position);
-    await page.screenshot({path:new URL(`../../.cache/verification/car-00-film-${approach}.png`,import.meta.url).pathname});
-    // Observe a real natural end on one path; verify seeking/range support on the other.
-    if(approach==='right')await page.locator('#film').evaluate(video=>{video.currentTime=video.duration-.3;});
-    await expect(page.locator('body')).toHaveAttribute('data-phase','ended',{timeout:18000});
-    await expect(page.locator('#gaze-particles')).toBeHidden();
-    expect(await page.evaluate(()=>window.__trackerStops)).toBeGreaterThan(stopsBeforeArrival);
-    await expect(page.getByRole('button',{name:'다시 탑승하기'})).toBeVisible();expect(errors).toEqual([]);
-    await page.getByRole('button',{name:'다시 탑승하기'}).click();
-    await expect(page.locator('body')).toHaveAttribute('data-phase','calibrating');
-    await expect(page.locator('#world')).toHaveAttribute('data-train-moving','false');
-  });
-}
-
 test('failed independent validation cannot enter the world',async({page})=>{
   await simulatedEyes(page,{wrongValidation:true});await page.goto('./');
-  await page.getByRole('button',{name:'소리와 함께 시작'}).click();
+  await page.getByRole('button',{name:'시선으로 시작'}).click();
   await expect(page.locator('body')).toHaveAttribute('data-phase','calibration-failed');
   await expect(page.locator('body')).toHaveAttribute('data-validation','failed');
   await expect(page.getByRole('button',{name:'다시 맞추기',exact:true})).toBeVisible();
@@ -142,7 +105,7 @@ test('one noisy validation target is remeasured without repeating calibration',a
       if(document.body.dataset.phase==='calibrating')window.__trainingVisits.push(document.getElementById('target').dataset.index);
     }).observe(document.getElementById('target'),{attributes:true,attributeFilter:['data-index']});
   });
-  await page.getByRole('button',{name:'소리와 함께 시작'}).click();
+  await page.getByRole('button',{name:'시선으로 시작'}).click();
   await expect(page.locator('body')).toHaveAttribute('data-validation','retrying');
   await expect(page.locator('#setup-title')).toHaveText('이 점만 다시 확인할게요');
   await expect(page.locator('#target')).toHaveAttribute('data-index','0');
@@ -154,7 +117,7 @@ test('one noisy validation target is remeasured without repeating calibration',a
 
 test('a persistent validation outlier still blocks entry after one recheck',async({page})=>{
   await simulatedEyes(page,{validationOutlier:'always'});
-  await page.goto('./');await page.getByRole('button',{name:'소리와 함께 시작'}).click();
+  await page.goto('./');await page.getByRole('button',{name:'시선으로 시작'}).click();
   await expect(page.locator('body')).toHaveAttribute('data-validation','retrying');
   await expect(page.locator('body')).toHaveAttribute('data-phase','calibration-failed');
   await expect(page.locator('body')).toHaveAttribute('data-validation-attempt','2');
@@ -205,58 +168,6 @@ test('handheld is a tiny camera-only offset and reduced motion removes it',async
 
 test('camera denial has an actionable recovery and never starts movement',async({page})=>{
   await page.addInitScript(()=>{navigator.mediaDevices.getUserMedia=()=>Promise.reject(new DOMException('Denied','NotAllowedError'));});
-  await page.goto('./');await page.getByRole('button',{name:'소리와 함께 시작'}).click();
+  await page.goto('./');await page.getByRole('button',{name:'시선으로 시작'}).click();
   await expect(page.locator('body')).toHaveAttribute('data-phase','error');await expect(page.locator('#message-copy')).toContainText('카메라 권한');
-});
-
-test('audible autoplay rejection pauses at arrival and a deliberate retry restores playback',async({page})=>{
-  await simulatedEyes(page);
-  await page.addInitScript(()=>{
-    const original=HTMLMediaElement.prototype.play;
-    HTMLMediaElement.prototype.play=function(){
-      if(this.id==='film'&&!this.src.includes('ready.mp4')&&!window.__allowPlayback)return Promise.reject(new DOMException('Blocked','NotAllowedError'));
-      return original.call(this);
-    };
-  });
-  await startAndWalk(page,.9);
-  await expect(page.locator('body')).toHaveAttribute('data-destination','00',{timeout:25000});
-  await expect(page.locator('body')).toHaveAttribute('data-phase','playback-blocked');
-  await expect(page.getByRole('button',{name:'영상 재생',exact:true})).toBeVisible();
-  await page.evaluate(()=>{window.__allowPlayback=true;});await page.getByRole('button',{name:'영상 재생',exact:true}).click();
-  await expect(page.locator('body')).toHaveAttribute('data-phase','playing');
-  expect(await page.locator('#film').evaluate(video=>video.muted)).toBe(false);
-});
-
-test('backgrounding stops travel and audio until visible/resumed without reviving stale gaze',async({page})=>{
-  await simulatedEyes(page);await startAndWalk(page,.5);
-  await page.evaluate(()=>{
-    window.__background=true;
-    Object.defineProperty(document,'hidden',{configurable:true,get:()=>window.__background});
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  const position=await page.locator('#world').getAttribute('data-z');
-  await page.waitForTimeout(300);expect(await page.locator('#world').getAttribute('data-z')).toBe(position);
-  await page.evaluate(()=>{window.__background=false;document.dispatchEvent(new Event('visibilitychange'));});
-  await expect(page.locator('body')).toHaveAttribute('data-destination','00',{timeout:25000});
-  await expect(page.locator('body')).toHaveAttribute('data-phase','playing');
-  await page.evaluate(()=>{window.__background=true;document.dispatchEvent(new Event('visibilitychange'));});
-  await expect(page.locator('body')).toHaveAttribute('data-phase','playback-blocked');
-  expect(await page.locator('#film').evaluate(video=>video.paused)).toBe(true);
-  await page.evaluate(()=>{window.__background=false;document.dispatchEvent(new Event('visibilitychange'));});
-  expect(await page.locator('#film').evaluate(video=>video.paused)).toBe(true);
-  await page.getByRole('button',{name:'이어서 보기',exact:true}).click();
-  await expect(page.locator('body')).toHaveAttribute('data-phase','playing');
-});
-
-test('a missing film shows a retry and successful recovery stays at the same destination',async({page})=>{
-  await simulatedEyes(page);let fail=true;
-  await page.route('**/assets/films/resonance.mp4',route=>fail?route.fulfill({status:404,body:'Missing'}):route.continue());
-  await startAndWalk(page,.1);
-  await expect(page.locator('body')).toHaveAttribute('data-destination','00',{timeout:25000});
-  await expect(page.locator('body')).toHaveAttribute('data-phase','video-error');
-  const destination=await page.locator('body').getAttribute('data-destination');
-  fail=false;await page.getByRole('button',{name:'다시 재생',exact:true}).click();
-  await expect(page.locator('body')).toHaveAttribute('data-phase','playing');
-  await expect.poll(()=>page.locator('#film').evaluate(video=>video.currentTime)).toBeGreaterThan(.1);
-  expect(await page.locator('body').getAttribute('data-destination')).toBe(destination);
 });

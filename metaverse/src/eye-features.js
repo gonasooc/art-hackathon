@@ -12,7 +12,7 @@ export function extractEyeFeatures(result, width=640, height=480) {
     return { x:(dx*ux+dy*uy)/span, y:(-dx*uy+dy*ux)/span, openness:distance(point(upper),point(lower))/span, span };
   });
   if (eyes.some(e=>!Number.isFinite(e.x)||!Number.isFinite(e.y)||e.span<14)) return {valid:false,reason:'distance'};
-  if ((scores.eyeBlinkLeft ?? 0)>.48 || (scores.eyeBlinkRight ?? 0)>.48 || eyes.some(e=>e.openness<.12)) return {valid:false,reason:'blink'};
+  if ((scores.eyeBlinkLeft ?? 0)>.48 || (scores.eyeBlinkRight ?? 0)>.48 || eyes.some(e=>e.openness<.12)) return {valid:false,reason:'blink',blinkClosed:((scores.eyeBlinkLeft??0)>.48&&(scores.eyeBlinkRight??0)>.48)||eyes.every(e=>e.openness<.12)};
   const nose=landmarks[1],faceWidth=Math.abs(landmarks[454].x-landmarks[234].x);
   const matrix=result.facialTransformationMatrixes?.[0]?.data;
   const pose=[nose.x,nose.y,faceWidth,matrix?.[2] ?? 0,matrix?.[6] ?? 0];

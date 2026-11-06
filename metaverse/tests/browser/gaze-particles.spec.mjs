@@ -8,7 +8,7 @@ test('particle center marks a fresh model estimate, ignores mouse input, and dis
   const marker = page.locator('#gaze-particles');
   await expect(marker).toBeHidden();
   await page.evaluate(() => { window.__eyes = { x: .74, y: .48 }; });
-  await page.getByRole('button', { name: '소리와 함께 시작' }).click();
+  await page.getByRole('button', { name: '시선으로 시작' }).click();
   await expect(page.locator('body')).toHaveAttribute('data-phase', 'calibrating');
   await expect(marker).toBeHidden();
   await expect(page.locator('body')).toHaveAttribute('data-phase', 'validating');

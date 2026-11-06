@@ -22,3 +22,5 @@ body:not([data-phase="walking"]) .gaze-toggle{right:calc(4.5vw + 118px)}
 body[data-phase="boarding"] .vignette{opacity:0}
 @media(max-width:1000px){.journey-status{top:86px;padding:9px 12px;font-size:11px}}
 .masthead>span,.masthead>span i{color:#624d42}
+
+body[data-phase="objects"] .vignette,body[data-phase="car-transition"] .vignette{opacity:0}

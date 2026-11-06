@@ -1,19 +1,20 @@
-import { CALIBRATION, WORLD, WORKS, TRAIN, clamp } from './config.js';
+import { CALIBRATION, WORLD, TRAIN, clamp } from './config.js';
 import { GazeModel, median, validateGaze } from './gaze-model.js';
+import { BlinkInteraction } from './blink-interaction.js';
 import { TrainJourney } from './train-journey.js';
 import { EyeTracker } from './tracker.js';
 import { GalleryWorld } from './world.js';
 import { GazeParticles } from './gaze-particles.js';
 
 const byId=id=>document.getElementById(id);
-const gazePhases=new Set(['walking','boarding','aligning','playing','playback-blocked','video-error']);
+const gazePhases=new Set(['walking','boarding','aligning','objects','car-transition']);
 const messages={face:'얼굴을 화면 정면에 두어 주세요.',blink:'눈을 뜨고 점을 바라봐 주세요.',distance:'화면에서 팔 길이 정도 떨어져 앉아 주세요.',pose:'보정할 때의 자세로 돌아와 주세요.',inference:'눈을 다시 읽고 있어요. 다른 카메라 앱과 무거운 탭을 닫아 주세요.',stale:'눈 추적이 느려 잠시 멈췄어요. 다른 탭을 닫아 주세요.'};
 const poseMatches=(pose,anchor)=>Math.abs(pose[0]-anchor[0])<.055&&Math.abs(pose[1]-anchor[1])<.065&&Math.abs(pose[2]/anchor[2]-1)<.2&&Math.abs(pose[3]-anchor[3])<.16&&Math.abs(pose[4]-anchor[4])<.16;
 
 class Experience {
   constructor() {
     this.phase='idle';this.serial=0;this.playAttempt=0;this.viewport=[innerWidth,innerHeight];
-    this.film=byId('film');this.model=new GazeModel();this.navigation=new TrainJourney();
+    this.blink=new BlinkInteraction();this.exitOpen=false;this.model=new GazeModel();this.navigation=new TrainJourney();
     this.gazeParticles=new GazeParticles(byId('gaze-particles'));
     this.tracker=new EyeTracker(sample=>this.receive(sample));
     try {this.world=new GalleryWorld(byId('world'));}
@@ -30,10 +31,6 @@ class Experience {
     this.world.motionPreference.addEventListener('change',()=>this.updateMotionControl());
     for (const id of ['leave','message-home','end-home']) byId(id).addEventListener('click',()=>this.home());
     byId('message-action').addEventListener('click',()=>this.action?.());
-    this.film.addEventListener('ended',()=>{if(this.phase==='playing')this.finish();});
-    this.film.addEventListener('error',()=>{
-      if (['aligning','playing','playback-blocked','video-error'].includes(this.phase)) this.showMessage('video-error','영상을 불러오지 못했어요','연결을 확인하고 다시 재생해 주세요. 도착한 위치는 그대로 유지됩니다.','다시 재생',()=>{this.film.load();this.playWork();});
-    });
     document.addEventListener('visibilitychange',()=>this.visibilityChanged());
     window.addEventListener('resize',()=>this.resized());
     window.addEventListener('pagehide',()=>this.release());
@@ -47,7 +44,7 @@ class Experience {
       if (!document.hidden) {
         this.update(now,dt);
         // The opaque eye-setup screen needs no 3D redraws; reserve GPU time for inference.
-        if(!['loading','calibrating','validating'].includes(this.phase))this.world.render(['walking','boarding','aligning','playing'].includes(this.phase)?dt:0);
+        if(!['loading','calibrating','validating'].includes(this.phase))this.world.render(['walking','boarding','aligning','objects','car-transition'].includes(this.phase)?dt:0);
         this.gazeParticles.render(performance.now(),this.latest,{active:gazePhases.has(this.phase),reducedMotion:this.world.motionPreference.matches});
       }
       this.raf=requestAnimationFrame(frame);
@@ -63,8 +60,8 @@ class Experience {
     byId('message').hidden=!['error','calibration-failed','playback-blocked','video-error','resize-required'].includes(phase);
     byId('leave').hidden=['idle','ended'].includes(phase);
     byId('pause-notice').hidden=true;
-    byId('journey-status').hidden=!gazePhases.has(phase);
-    byId('boarding-veil').hidden=phase!=='boarding';
+    byId('journey-status').hidden=!gazePhases.has(phase);byId('object-hint').hidden=phase!=='objects';
+    byId('boarding-veil').hidden=!['boarding','car-transition'].includes(phase);
     this.updateMotionControl();
     this.updateGazeControl();
     if(!gazePhases.has(phase))this.gazeParticles.clear();
@@ -83,8 +80,8 @@ class Experience {
   }
   updateJourneyStatus(state) {
     document.body.dataset.journeyStage=state.stage;document.body.dataset.carriage=state.carId||'';
-    const label=state.stage==='platform'?'PLATFORM':state.stage==='boarding'?'DEPARTURE':'00';
-    const title=state.stage==='platform'?'탑승 전':state.stage==='boarding'?'첫 번째 칸으로':'첫 숨이 되기 전';
+    const label=state.stage==='platform'?'PLATFORM':state.stage==='boarding'?'DEPARTURE':state.carId||'00';
+    const title=state.stage==='platform'?'탑승 전':state.stage==='boarding'?'첫 번째 칸으로':state.carId==='01'?'병원 · 남겨진 자리':'첫 숨이 되기 전';
     if(byId('journey-number').textContent!==label)byId('journey-number').textContent=label;
     if(byId('journey-title').textContent!==title)byId('journey-title').textContent=title;
   }
@@ -94,20 +91,20 @@ class Experience {
     byId('message-title').focus({preventScroll:true});
   }
   release() {
-    this.serial++;this.playAttempt++;this.tracker.stop();this.film.pause();this.navigation.invalidate();this.latest=null;
-    this.gazeParticles.clear();
+    this.serial++;this.playAttempt++;this.tracker.stop();this.navigation.invalidate();this.latest=null;
+    this.gazeParticles.clear();this.blink.reset();
     this.training=[];this.validation=[];this.currentPoint=null;this.anchor=null;
     this.validationOrder=[];this.validationAttempt=0;
   }
   home() {
     this.release();this.model.clear();this.world.reset();this.navigation.reset();this.work=null;
-    this.film.removeAttribute('src');this.film.load();this.setPhase('idle');byId('start').focus({preventScroll:true});
+    this.setPhase('idle');byId('start').focus({preventScroll:true});
     this.updateJourneyStatus(this.navigation.snapshot());
     delete document.body.dataset.destination;delete document.body.dataset.validation;delete document.body.dataset.validationAttempt;
   }
   async start() {
     this.release();const serial=this.serial;
-    this.model.clear();this.navigation.reset();this.world.reset();this.work=null;this.anchor=null;
+    this.model.clear();this.navigation.reset();this.world.reset();this.work=null;this.anchor=null;this.exitOpen=false;
     this.updateJourneyStatus(this.navigation.snapshot());
     this.viewport=[innerWidth,innerHeight];document.body.dataset.validation='pending';
     delete document.body.dataset.destination;delete document.body.dataset.validationAttempt;
@@ -119,17 +116,13 @@ class Experience {
     }
     this.setPhase('loading');byId('step-label').textContent='PREPARATION';byId('setup-title').textContent='공간과 눈을 연결하고 있어요';
     byId('setup-copy').textContent='카메라 사용을 허용하고, 편하게 정면을 바라봐 주세요.';byId('step-count').textContent='';byId('tracking-status').textContent='처음에는 눈 추적 모델을 준비하는 데 잠시 시간이 필요해요.';
-    // This play() runs directly in the user's click handler, on the SAME video element used later.
-    // Browser policy can still reject delayed playback; arrival always has a visible recovery action.
-    this.film.src=new URL('../assets/films/ready.mp4',import.meta.url).href;this.film.muted=false;this.film.volume=.65;
-    const prime=this.film.play().then(()=>{if(serial===this.serial&&this.phase==='loading')this.film.pause();}).catch(()=>{});
     try {
-      await Promise.all([this.tracker.start(),prime,this.world.ready]);
+      await Promise.all([this.tracker.start(),this.world.ready]);
       if(serial!==this.serial)return;
       this.training=[];this.validation=[];this.pointIndex=0;this.beginCalibrationPhase('calibrating');
     } catch(error) {
       if(serial!==this.serial||error.name==='AbortError')return;
-      this.tracker.stop();this.film.pause();
+      this.tracker.stop();
       const copy=error.name==='NotAllowedError'?'주소창의 카메라 권한을 허용한 뒤 다시 시작해 주세요.':error.name==='NotFoundError'?'연결된 카메라를 찾지 못했어요. 웹캠 연결을 확인해 주세요.':error.name==='NotReadableError'?'다른 앱이 카메라를 사용 중일 수 있어요. 해당 앱을 닫고 다시 시작해 주세요.':'모델 또는 카메라 준비가 끝나지 않았어요. 연결을 확인하고 다시 시도해 주세요.';
       this.showMessage('error','눈을 연결하지 못했어요',copy,'다시 시작',()=>this.start());
     }
@@ -169,7 +162,17 @@ class Experience {
     const prediction=valid&&this.model.ready?this.model.predict(sample.features):null;
     if(valid&&this.phase!=='calibrating'&&!prediction){valid=false;reason='pose';}
     this.latest={...prediction,valid,time:sample.time,reason};
-    if(gazePhases.has(this.phase))return;
+    if(gazePhases.has(this.phase)){
+      if(['walking','objects'].includes(this.phase)&&this.navigation.carId){
+        const target=this.world.objects.pick(this.latest,this.world.camera);
+        document.body.dataset.gazeTarget=target||'';
+        const hit=this.blink.observe({...sample,valid},target);
+        document.body.dataset.blinkArmed=this.blink.armed||'';
+        if(this.phase==='objects')byId('object-hint').textContent=target?({"00-seed":"빛의 씨앗","01-chair":"의자","01-leopard":"표범"}[target]+'에 시선이 머물고 있어요. 눈을 한 번 깜빡여 주세요.'):'오브젝트에 시선을 두고, 눈을 한 번 깜빡여 주세요.';
+        if(hit){document.body.dataset.blinkActivated=hit;this.world.objects.dissolve(hit);}
+      }else this.blink.reset();
+      return;
+    }
     byId('target').dataset.waiting=String(!valid);
     const copy=valid?'점이 채워질 때까지 시선을 머물러 주세요.':messages[reason]||messages.face;
     if(byId('tracking-status').textContent!==copy)byId('tracking-status').textContent=copy;
@@ -217,6 +220,17 @@ class Experience {
     this.showMessage('calibration-failed','눈을 다시 맞춰볼까요',reason,'다시 맞추기',()=>this.start());
   }
   update(now,dt) {
+    if(this.phase==='objects'&&this.world.objects.complete()){
+      this.exitOpen=true;this.navigation.openExit();this.latest=null;this.blink.reset();this.walkStarted=now;this.setPhase('walking');
+    }
+    if(this.phase==='car-transition'){
+      this.changeElapsed+=dt;const progress=Math.min(1,this.changeElapsed/1.5);
+      byId('boarding-veil').style.opacity=this.world.motionPreference.matches?0:Math.sin(progress*Math.PI);
+      if(progress>=.5&&!this.changedCar){this.navigation.nextCar();this.world.setCar('01');this.world.walk(this.navigation.snapshot());this.updateJourneyStatus(this.navigation.snapshot());this.changedCar=true;}
+      if(progress>=1){this.exitOpen=false;this.latest=null;this.blink.reset();this.walkStarted=now;this.setPhase('walking');}
+      return;
+    }
+
     if(['calibrating','validating'].includes(this.phase)){
       const elapsed=now-this.currentPoint.started;
       const samples=this.phase==='calibrating'?this.currentPoint.samples:this.currentPoint.predictions;
@@ -244,7 +258,7 @@ class Experience {
       }
     }else if(this.phase==='aligning'){
       this.alignElapsed+=dt;const progress=clamp(this.alignElapsed/this.alignDuration,0,1);this.world.alignProgress(progress);
-      if(progress>=1)this.playWork();
+      if(progress>=1)this.setPhase('objects');
     }
   }
   boardTrain() {
@@ -253,46 +267,32 @@ class Experience {
     this.boardElapsed=0;this.boardDuration=this.world.motionPreference.matches ? .01 : TRAIN.boardingSeconds;
   }
   arrive(id) {
-    this.work=WORKS.find(work=>work.id===id);this.navigation.invalidate();
-    this.setPhase('aligning');document.body.dataset.destination=id;
-    this.world.align(id);this.alignElapsed=0;this.alignDuration=matchMedia('(prefers-reduced-motion: reduce)').matches?0.01:WORLD.alignmentSeconds;
-    this.film.src=this.work.src;this.film.load();this.film.muted=false;this.film.volume=.65;
-  }
-  async playWork() {
-    if(!this.work||document.hidden)return;
-    const serial=this.serial,attempt=++this.playAttempt;
-    this.world.alignProgress(1);this.world.showFilm(this.work.id,this.film);this.setPhase('playing');
-    try {
-      await this.film.play();
-      if(serial!==this.serial||attempt!==this.playAttempt||document.hidden)this.film.pause();
-    }catch(error){
-      if(serial!==this.serial||attempt!==this.playAttempt)return;
-      this.film.pause();
-      if(error.name==='NotAllowedError')this.showMessage('playback-blocked','소리와 함께 만나 주세요','브라우저가 자동재생을 잠시 막았어요. 한 번 누르면 이 자리에서 영상이 시작됩니다.','영상 재생',()=>this.playWork());
-      else this.showMessage('video-error','영상을 불러오지 못했어요','연결을 확인하고 다시 재생해 주세요.','다시 재생',()=>{this.film.load();this.playWork();});
+    this.navigation.invalidate();this.blink.reset();
+    if(this.exitOpen){
+      if(id==='00'){
+        this.setPhase('car-transition');this.changeElapsed=0;this.changedCar=false;
+      }else this.finish();
+      return;
     }
+    this.setPhase('aligning');document.body.dataset.destination=id;
+    this.world.align(id);this.alignElapsed=0;this.alignDuration=this.world.motionPreference.matches?.01:WORLD.alignmentSeconds;
   }
   finish() {
     this.release();this.model.clear();this.setPhase('ended');
-    byId('work-label').textContent=this.work.subtitle;byId('work-title').textContent=this.work.title;
+    byId('work-label').textContent='01 · 병원';byId('work-title').textContent='의자와 표범이 머물던 자리';
     byId('restart').focus({preventScroll:true});
   }
   visibilityChanged() {
     this.navigation.invalidate();this.latest=null;this.tracker.setPaused(document.hidden);
-    this.gazeParticles.clear();
-    if(document.hidden){
-      if(this.phase==='playing'){
-        this.playAttempt++;this.film.pause();
-        this.showMessage('playback-blocked','잠시 멈춰두었어요','돌아오면 소리와 함께 이어서 볼 수 있어요.','이어서 보기',()=>this.playWork());
-      }
-    }else if(['calibrating','validating'].includes(this.phase))this.nextTarget();
+    this.gazeParticles.clear();this.blink.reset();
+    if(!document.hidden&&['calibrating','validating'].includes(this.phase))this.nextTarget();
   }
   resized() {
     this.world.resize();
     this.gazeParticles.resize();this.gazeParticles.clear();
     if(innerWidth===this.viewport[0]&&innerHeight===this.viewport[1])return;
     this.viewport=[innerWidth,innerHeight];
-    if(['calibrating','validating','walking','boarding'].includes(this.phase)){
+    if(['calibrating','validating','walking','boarding','objects','aligning','car-transition'].includes(this.phase)){
       this.release();this.model.clear();this.showMessage('resize-required','화면 크기가 달라졌어요','새로운 화면에 맞춰 눈을 한 번 더 맞춰 주세요.','다시 맞추기',()=>this.start());
     }else if(gazePhases.has(this.phase)){
       // The film may continue, but a calibration for another viewport must not draw a false point.
