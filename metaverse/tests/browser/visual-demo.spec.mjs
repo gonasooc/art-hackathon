@@ -3,7 +3,7 @@ import {readFile,mkdir} from 'node:fs/promises';
 import {simulatedEyes,startAndWalk,gazeAt} from './support.mjs';
 
 async function fastDemo(page,{walking=true}={}){
- if(walking)await page.route('**/src/config.js',async route=>route.fulfill({contentType:'text/javascript',body:(await readFile(new URL('../../src/config.js',import.meta.url),'utf8')).replace('speed: 0.9','speed: 6').replace('alignmentSeconds: 1.5','alignmentSeconds: 0.15')}));
+ if(walking)await page.route('**/src/config.js',async route=>route.fulfill({contentType:'text/javascript',body:(await readFile(new URL('../../src/config.js',import.meta.url),'utf8')).replace(/speed: [\d.]+/,'speed: 6').replace('alignmentSeconds: 1.5','alignmentSeconds: 0.15')}));
  await page.route('**/src/visual-demo.js',async route=>route.fulfill({contentType:'text/javascript',body:(await readFile(new URL('../../src/visual-demo.js',import.meta.url),'utf8')).replace('turn:1.2,dwell:1.1,blink:.16,after:.65','turn:.25,dwell:.3,blink:.16,after:.15')}));
 }
 const states=page=>page.locator('#world').evaluate(canvas=>JSON.parse(canvas.dataset.objectState));

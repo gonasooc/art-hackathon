@@ -7,7 +7,7 @@ export async function simulatedEyes(page,{wrongValidation=false,speed=9,validati
   await page.route('**/src/config.js',async route=>{
     const original=await readFile(new URL('../../src/config.js',import.meta.url),'utf8');
     await route.fulfill({contentType:'text/javascript',body:original
-      .replace('speed: 0.9',`speed: ${speed}`).replace('settleMs: 900, captureMs: 1000, minSamples: 12','settleMs: 50, captureMs: 120, minSamples: 4')
+      .replace(/speed: [\d.]+/,`speed: ${speed}`).replace('settleMs: 900, captureMs: 1000, minSamples: 12','settleMs: 50, captureMs: 120, minSamples: 4')
       .replace('firstSettleMs: 1800','firstSettleMs: 80')
       .replace('alignmentSeconds: 1.5','alignmentSeconds: 0.15')});
   });
