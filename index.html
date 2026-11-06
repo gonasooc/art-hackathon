@@ -3,73 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">
-  <meta name="description" content="익숙한 대화창에서 시작되는 약 68초의 시청각 작품 《딸깍》. 한 번의 클릭 뒤에 놓인 시간을 만납니다.">
-  <title>딸깍 — 그 사이의 시간</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23212121'/%3E%3Cpath d='M32 47V17m-12 12 12-12 12 12' stroke='white' fill='none' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./chat.css">
-  <link rel="stylesheet" href="./presentation.css">
-  <link rel="stylesheet" href="./player.css">
-  <script type="module" src="./src/app.js"></script>
+  <meta name="description" content="예술 해커톤 프로젝트 모음">
+  <title>Art Hackathon</title>
+  <style>
+    body { max-width: 44rem; margin: 4rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif; line-height: 1.7; }
+    h1 { line-height: 1.2; }
+    a { text-underline-offset: .2em; }
+  </style>
 </head>
 <body>
-  <svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-    <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></symbol>
-    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
-    <symbol id="i-write" viewBox="0 0 24 24"><path d="M13 4H6a3 3 0 0 0-3 3v11a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-7M16 3a2.1 2.1 0 0 1 3 3l-9 9-4 1 1-4 9-9Z"/></symbol>
-    <symbol id="i-image" viewBox="0 0 24 24"><rect x="6" y="3" width="15" height="15" rx="3"/><rect x="3" y="7" width="14" height="14" rx="3" transform="rotate(-10 10 14)"/><path d="m5 18 4-5 6 6"/><circle cx="12" cy="11" r="1"/></symbol>
-    <symbol id="i-plugin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 7 5 4-4 6m4-11 4 6-4 4-5-4"/></symbol>
-    <symbol id="i-plan" viewBox="0 0 24 24"><path d="m12 2 8 5v10l-8 5-8-5V7l8-5Zm0 5v10m-4-5h8"/></symbol>
-    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="m5.6 5.6 2.9 2.9m7 7 2.9 2.9m0-12.8-2.9 2.9m-7 7-2.9 2.9"/></symbol>
-    <symbol id="i-research" viewBox="0 0 24 24"><path d="m3 9 13-5 3 7-13 5-3-7Zm13-5 3-1 3 7-3 1M7 16l-2 5m7-7 4 7m-6-7 1 7"/></symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24"><path d="m9 3-1 3-3 1-2 4 2 3v3l4 3 3-1 3 1 4-3v-3l2-3-2-4-3-1-1-3H9Z"/><circle cx="12" cy="12" r="3"/></symbol>
-    <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 4h7v7m0-7-9 9M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
-    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3"/></symbol>
-    <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></symbol>
-    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h12M4 17h16"/></symbol>
-  </svg>
-  <div id="app" data-mode="home">
-    <div class="chat-shell">
-      <aside id="chat-sidebar" class="chat-sidebar" aria-label="사이드바">
-        <div class="chat-brand-row"><button class="chat-brand" id="brand-button" type="button" aria-label="ChatGPT"><span class="chat-label">ChatGPT</span><svg aria-hidden="true"><use href="#i-chevron"/></svg></button><button class="chat-sidebar-toggle" id="sidebar-toggle" type="button" aria-label="사이드바 접기" aria-expanded="true"><svg aria-hidden="true"><use href="#i-panel"/></svg></button></div>
-        <nav class="chat-nav" aria-label="대화 메뉴">
-          <button class="chat-nav-item" id="new-chat-button" type="button"><svg aria-hidden="true"><use href="#i-write"/></svg><span class="chat-label">새 채팅</span></button>
-          <button class="chat-nav-item" type="button" data-prompt="이미지 하나 만들어줘."><svg aria-hidden="true"><use href="#i-image"/></svg><span class="chat-label">이미지</span></button>
-          <button class="chat-nav-item" type="button" data-exhibition-info><svg aria-hidden="true"><use href="#i-plugin"/></svg><span class="chat-label">플러그인</span></button>
-          <button class="chat-nav-item" type="button" data-exhibition-info><svg aria-hidden="true"><use href="#i-plan"/></svg><span class="chat-label">플랜 및 가격 보기</span><svg class="chat-external" aria-hidden="true"><use href="#i-external"/></svg></button>
-          <button class="chat-nav-item" type="button" data-exhibition-info><svg aria-hidden="true"><use href="#i-help"/></svg><span class="chat-label">도움말</span><svg class="chat-external" aria-hidden="true"><use href="#i-external"/></svg></button>
-          <button class="chat-nav-item" type="button" data-prompt="하나의 작품이 만들어지는 과정을 보여줘."><svg aria-hidden="true"><use href="#i-research"/></svg><span class="chat-label">심층 리서치</span></button>
-          <button class="chat-nav-item" id="settings-button" type="button"><svg aria-hidden="true"><use href="#i-settings"/></svg><span class="chat-label">설정</span></button>
-        </nav>
-        <div class="chat-sidebar-bottom"><div class="chat-login-card"><h2>내게 맞춘 응답을 받으세요</h2><p>로그인해 저장된 채팅에 기반해 답변을 받고, 이미지 생성 및 파일 업로드도 이용하세요.</p><button type="button" data-exhibition-info>로그인</button></div></div>
-      </aside>
-      <button class="chat-sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="사이드바 닫기"></button>
-      <main class="chat-main">
-        <header class="chat-topbar"><button class="chat-mobile-brand" id="mobile-sidebar-button" type="button" aria-label="사이드바 열기" aria-expanded="false"><svg aria-hidden="true"><use href="#i-menu"/></svg><span>ChatGPT</span><svg aria-hidden="true"><use href="#i-chevron"/></svg></button><div class="chat-top-actions"><button class="chat-login-button" type="button" data-exhibition-info>로그인</button><button class="chat-signup-button" type="button" data-exhibition-info>무료로 회원가입</button></div></header>
-        <div class="chat-content" id="chat-content">
-          <section id="home" class="chat-home" aria-labelledby="home-title"><div class="chat-home-heading"><h1 id="home-title">오늘은 뭘 해볼까요?</h1><button id="explore-button" class="chat-explore-button" type="button" aria-expanded="false"><svg aria-hidden="true"><use href="#i-chevron"/></svg>탐색</button></div><div id="explore-panel" class="chat-explore-panel" hidden><button type="button" data-prompt="딸깍으로 만들어줘">딸깍으로 만들어줘</button><button type="button" data-prompt="이미지 하나 만들어줘.">이미지 하나 만들어줘.</button><button type="button" data-prompt="음악 하나 만들어줘.">음악 하나 만들어줘.</button></div></section>
-          <section id="conversation" class="chat-conversation" aria-label="대화" hidden>
-            <div class="chat-user-message" id="user-message"></div>
-            <div class="chat-assistant"><div class="chat-assistant-mark" aria-hidden="true"><span></span></div><div class="chat-assistant-content">
-              <div class="chat-thinking" id="chat-thinking"><span class="thinking-dot" aria-hidden="true"></span><span id="thinking-label" aria-live="polite">생각 중</span></div>
-              <section id="player" class="player" tabindex="-1" data-surface="light" aria-label="응답 안에서 재생되는 딸깍 작품" hidden>
-                <div id="stage" class="stage" aria-hidden="true"></div><div id="scene-live" class="sr-only" aria-live="polite"></div>
-                <div class="player-overlay"><span id="phase-label" class="phase-label">그 사이의 시간</span><span id="result-count" class="result-count"></span></div>
-                <div class="transport"><button id="play-button" class="icon-button" type="button" aria-label="일시정지"><span id="play-glyph" aria-hidden="true">Ⅱ</span></button><span id="current-time" class="time-label">00:00</span><div class="seek-wrap"><div class="seek-track"><div id="seek-fill"></div><span class="result-tick"></span></div><input id="seek" type="range" min="0" max="67.2" step="0.1" value="0" aria-label="재생 위치"></div><span class="time-label end-time">01:07</span><button id="restart-button" class="text-button" type="button" aria-label="처음부터 다시 재생">↺ <span>다시</span></button></div>
-              </section>
-              <section id="credits" class="credits" aria-labelledby="credits-title" hidden><div class="credits-intro"><span class="eyebrow">AFTER THE CLICK</span><h2 id="credits-title">당신이 본 것은,<br><em>그 시간의 일부.</em></h2><p>다섯 개의 결과.<br>그 안에 다 담기지 않은 시간들.</p></div><div id="credits-list" class="credits-list"></div><div class="credits-bottom"><button id="replay-button" class="replay-button" type="button">다시 딸깍 <span aria-hidden="true">↗</span></button><button id="back-button" class="text-button" type="button">새 채팅</button></div></section>
-            </div></div>
-          </section>
-        </div>
-        <form id="composer-form" class="chat-composer" aria-label="ChatGPT와 채팅"><button id="attachment-button" class="chat-add" type="button" aria-label="자료 보기"><svg aria-hidden="true"><use href="#i-plus"/></svg></button><label for="prompt-input" class="sr-only">ChatGPT와 채팅</label><textarea id="prompt-input" rows="1" maxlength="2000" placeholder="ChatGPT에게 물어보세요" aria-label="ChatGPT와 채팅">딸깍으로 만들어줘</textarea><div class="chat-composer-actions"><button id="mic-button" type="button" aria-label="소리 설정"><svg aria-hidden="true"><use href="#i-mic"/></svg></button><button id="start-button" class="chat-send" type="submit" aria-label="메시지 보내기"><svg aria-hidden="true"><use href="#i-send"/></svg></button><button id="chat-stop-button" class="chat-stop" type="button" aria-label="응답 일시정지" hidden><span aria-hidden="true"></span></button></div></form>
-      </main>
-    </div>
-    <dialog id="about-dialog" class="editorial-dialog" aria-labelledby="about-title"><button class="dialog-close icon-button" type="button" data-close aria-label="닫기">×</button><span class="eyebrow">ABOUT THIS WORK</span><h2 id="about-title">결과는 도착했다.<br>시간은 어디에 있을까.</h2><p>‘딸깍’으로 결과를 얻어도, 그 결과에 얽힌 시간과 경험까지 얻는 것은 아닙니다.</p><p>익숙한 대화창의 전송을 누르면, 응답을 기다리는 수십 초 안에서 서로 다른 작업의 쓰기·지우기·멈추기·다시 하기가 이어집니다. 마지막에는 앞서 지나간 조각을 다섯 결과물에서 다시 만납니다.</p><div class="about-note"><strong>계정 없이 관람하는 전시용 화면입니다.</strong><p>ChatGPT의 화면 형식을 참고한 《딸깍》 시제품입니다. 입력한 문장은 이 브라우저의 화면에만 표시되며 전송·저장되지 않습니다. 어떤 문장을 입력해도 같은 약 68초의 작품이 재생됩니다. 실제 자료는 gonasooc의 포트폴리오 소스와 기존 목업이며, 나머지 이미지·글·음악·작업음은 가상 샘플입니다. 코드 표시는 현재 소스의 재생 연출로 과거 수정 이력의 복원이 아닙니다.</p></div><p class="keyboard-note">ENTER 전송 <span>SHIFT + ENTER 줄바꿈</span> ESC 창 닫기</p></dialog>
-    <dialog id="settings-dialog" class="editorial-dialog chat-settings-dialog" aria-labelledby="settings-title"><button class="dialog-close icon-button" type="button" data-close aria-label="닫기">×</button><h2 id="settings-title">설정</h2><div class="chat-setting-row"><span>작업음과 음악</span><button class="icon-button" id="sound-button" type="button" aria-label="소리 끄기" aria-pressed="false" title="소리 켜기 / 끄기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path class="sound-wave" d="M17 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg></button></div><div class="chat-setting-row"><span>전체 화면으로 관람</span><button class="icon-button" id="fullscreen-button" type="button" aria-label="전체 화면"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button></div></dialog>
-    <dialog id="chapters-dialog" class="chapters-dialog" aria-labelledby="chapters-title"><button class="dialog-close icon-button" type="button" data-close aria-label="닫기">×</button><span class="eyebrow">SCENE INDEX</span><h2 id="chapters-title">시간의 조각들</h2><p class="chapter-intro">장면을 선택하면 같은 대화 화면 안에서 이어집니다.</p><div id="chapter-list" class="chapter-list"></div></dialog>
-    <div id="notice" class="notice" role="status" hidden></div><noscript>이 작품을 재생하려면 브라우저의 JavaScript를 켜주세요.</noscript>
-  </div>
+  <main>
+    <h1>Art Hackathon</h1>
+    <p>예술 해커톤 프로젝트 모음</p>
+    <ul>
+      <li><a href="./chatgpt/">딸깍 — 그 사이의 시간</a></li>
+    </ul>
+  </main>
 </body>
 </html>

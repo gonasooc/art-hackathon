@@ -2,12 +2,12 @@
 node_modules/
 
 # Build and release output
-/dist/
-/build/
-/release/
+dist/
+build/
+release/
 
 # Local Sites workspace
-/.sites/
+.sites/
 
 # Environment variables (keep example files)
 .env
