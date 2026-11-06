@@ -12,6 +12,7 @@
 </head>
 <body data-phase="idle">
   <canvas id="world" aria-label="두 작품으로 이어지는 전시 공간"></canvas>
+  <canvas id="gaze-particles" hidden aria-hidden="true"></canvas>
   <div class="vignette" aria-hidden="true"></div>
   <header class="masthead"><a href="../" aria-label="프로젝트 목록으로 돌아가기">ART HACKATHON</a><span>GAZE STUDY <i>001</i></span></header>
   <main>
@@ -36,6 +37,7 @@
     <div id="pause-notice" class="pause-notice" hidden role="status"><span class="status-dot"></span><span id="pause-copy"></span><button id="recalibrate" type="button">다시 맞추기</button></div>
     <button id="leave" class="leave" type="button" hidden>체험 종료 <span aria-hidden="true">×</span></button>
     <button id="motion-toggle" class="motion-toggle" type="button" aria-pressed="true" hidden>흔들림 끄기</button>
+    <button id="gaze-toggle" class="gaze-toggle" type="button" aria-pressed="true" title="중심의 작은 빛이 현재 추정된 시선 위치입니다" hidden>시선 표시 끄기</button>
   </main>
   <footer class="colophon"><span>LOOK. WANDER. ARRIVE.</span><span>몸이 먼저 도착하는 순간</span></footer>
   <video id="film" playsinline preload="auto" aria-hidden="true" hidden></video>

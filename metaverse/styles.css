@@ -8,3 +8,7 @@
 .setup-heading{top:28px}
 @media(max-height:760px){.setup-heading{top:16px}.setup-heading h2{font-size:16px;margin:8px 0 0}.setup-heading p{display:none}}
 @media(max-height:650px){body[data-phase="idle"]{height:auto;min-height:100vh;overflow-y:auto}body[data-phase="idle"] .intro{padding-bottom:50px}body[data-phase="idle"] .colophon{display:none}}
+#gaze-particles{position:fixed;left:0;top:0;width:128px;height:128px;z-index:7;pointer-events:none;contain:strict}
+.gaze-toggle{position:fixed;right:calc(4.5vw + 226px);top:30px;z-index:8;min-height:40px;padding:10px 12px;border:0;background:#1b241d99;color:#d9ceb3;font-size:11px}
+body:not([data-phase="walking"]) .gaze-toggle{right:calc(4.5vw + 118px)}
+.gaze-toggle[aria-pressed="false"]{color:#9da794}

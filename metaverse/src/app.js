@@ -3,8 +3,10 @@ import { GazeModel, median, validateGaze } from './gaze-model.js';
 import { Navigation } from './navigation.js';
 import { EyeTracker } from './tracker.js';
 import { GalleryWorld } from './world.js';
+import { GazeParticles } from './gaze-particles.js';
 
 const byId=id=>document.getElementById(id);
+const gazePhases=new Set(['walking','aligning','playing','playback-blocked','video-error']);
 const messages={face:'얼굴을 화면 정면에 두어 주세요.',blink:'눈을 뜨고 점을 바라봐 주세요.',distance:'화면에서 팔 길이 정도 떨어져 앉아 주세요.',pose:'보정할 때의 자세로 돌아와 주세요.',inference:'눈을 다시 읽고 있어요. 다른 카메라 앱과 무거운 탭을 닫아 주세요.',stale:'눈 추적이 느려 잠시 멈췄어요. 다른 탭을 닫아 주세요.'};
 const poseMatches=(pose,anchor)=>Math.abs(pose[0]-anchor[0])<.055&&Math.abs(pose[1]-anchor[1])<.065&&Math.abs(pose[2]/anchor[2]-1)<.2&&Math.abs(pose[3]-anchor[3])<.16&&Math.abs(pose[4]-anchor[4])<.16;
 
@@ -12,6 +14,7 @@ class Experience {
   constructor() {
     this.phase='idle';this.serial=0;this.playAttempt=0;this.viewport=[innerWidth,innerHeight];
     this.film=byId('film');this.model=new GazeModel();this.navigation=new Navigation();
+    this.gazeParticles=new GazeParticles(byId('gaze-particles'));
     this.tracker=new EyeTracker(sample=>this.receive(sample));
     try {this.world=new GalleryWorld(byId('world'));}
     catch {
@@ -23,6 +26,7 @@ class Experience {
     byId('restart').addEventListener('click',()=>this.start());
     byId('recalibrate').addEventListener('click',()=>this.start());
     byId('motion-toggle').addEventListener('click',()=>{this.world.handheldEnabled=!this.world.handheldEnabled;this.updateMotionControl();});
+    byId('gaze-toggle').addEventListener('click',()=>{this.gazeParticles.setEnabled(!this.gazeParticles.enabled);this.updateGazeControl();});
     this.world.motionPreference.addEventListener('change',()=>this.updateMotionControl());
     for (const id of ['leave','message-home','end-home']) byId(id).addEventListener('click',()=>this.home());
     byId('message-action').addEventListener('click',()=>this.action?.());
@@ -35,10 +39,14 @@ class Experience {
     window.addEventListener('pagehide',()=>this.release());
     byId('world').addEventListener('webglcontextlost',event=>{event.preventDefault();this.release();this.showMessage('error','공간이 잠시 끊겼어요','다른 그래픽 앱을 닫고 새로고침해 주세요.','새로고침',()=>location.reload());});
     let previous=performance.now();
-    const frame=now=>{
+    const frame=()=>{
+      // RAF's timestamp can precede an input callback from the same frame.
+      // Compare freshness using the same live clock that timestamps camera samples.
+      const now=performance.now();
       const dt=Math.min((now-previous)/1000,.08);previous=now;
       if (!document.hidden) {
         this.update(now,dt);this.world.render();
+        this.gazeParticles.render(performance.now(),this.latest,{active:gazePhases.has(this.phase),reducedMotion:this.world.motionPreference.matches});
       }
       this.raf=requestAnimationFrame(frame);
     };
@@ -54,12 +62,20 @@ class Experience {
     byId('leave').hidden=['idle','ended'].includes(phase);
     byId('pause-notice').hidden=true;
     this.updateMotionControl();
+    this.updateGazeControl();
+    if(!gazePhases.has(phase))this.gazeParticles.clear();
   }
   updateMotionControl() {
     const button=byId('motion-toggle');
     button.hidden=this.phase!=='walking'||!this.world||this.world.motionPreference.matches;
     button.textContent=this.world?.handheldEnabled?'흔들림 끄기':'흔들림 켜기';
     button.setAttribute('aria-pressed',String(Boolean(this.world?.handheldEnabled)));
+  }
+  updateGazeControl() {
+    const button=byId('gaze-toggle');
+    button.hidden=!gazePhases.has(this.phase)||!this.model.ready;
+    button.textContent=this.gazeParticles.enabled?'시선 표시 끄기':'시선 표시 켜기';
+    button.setAttribute('aria-pressed',String(this.gazeParticles.enabled));
   }
   showMessage(phase,title,copy,label,action) {
     this.setPhase(phase);this.action=action;
@@ -68,6 +84,7 @@ class Experience {
   }
   release() {
     this.serial++;this.playAttempt++;this.tracker.stop();this.film.pause();this.navigation.invalidate();this.latest=null;
+    this.gazeParticles.clear();
     this.training=[];this.validation=[];this.currentPoint=null;this.anchor=null;
   }
   home() {
@@ -121,7 +138,7 @@ class Experience {
   }
   receive(sample) {
     const now=performance.now();
-    if (!['calibrating','validating','walking'].includes(this.phase)||document.hidden)return;
+    if ((!['calibrating','validating'].includes(this.phase)&&!gazePhases.has(this.phase))||document.hidden)return;
     if (sample.reason==='camera-ended') {
       this.release();this.showMessage('error','카메라 연결이 끊겼어요','다시 연결한 뒤 눈을 맞춰 주세요.','다시 시작',()=>this.start());return;
     }
@@ -132,7 +149,7 @@ class Experience {
     const prediction=valid&&this.model.ready?this.model.predict(sample.features):null;
     if(valid&&this.phase!=='calibrating'&&!prediction){valid=false;reason='pose';}
     this.latest={...prediction,valid,time:sample.time,reason};
-    if(this.phase==='walking')return;
+    if(gazePhases.has(this.phase))return;
     byId('target').dataset.waiting=String(!valid);
     const copy=valid?'점이 채워질 때까지 시선을 머물러 주세요.':messages[reason]||messages.face;
     if(byId('tracking-status').textContent!==copy)byId('tracking-status').textContent=copy;
@@ -185,7 +202,7 @@ class Experience {
     }
   }
   arrive(id) {
-    this.work=WORKS.find(work=>work.id===id);this.tracker.stop();this.navigation.invalidate();this.latest=null;
+    this.work=WORKS.find(work=>work.id===id);this.navigation.invalidate();
     this.setPhase('aligning');document.body.dataset.destination=id;
     this.world.align(id);this.alignElapsed=0;this.alignDuration=matchMedia('(prefers-reduced-motion: reduce)').matches?0.01:WORLD.alignmentSeconds;
     this.film.src=this.work.src;this.film.load();this.film.muted=false;this.film.volume=.65;
@@ -211,6 +228,7 @@ class Experience {
   }
   visibilityChanged() {
     this.navigation.invalidate();this.latest=null;this.tracker.setPaused(document.hidden);
+    this.gazeParticles.clear();
     if(document.hidden){
       if(this.phase==='playing'){
         this.playAttempt++;this.film.pause();
@@ -220,10 +238,15 @@ class Experience {
   }
   resized() {
     this.world.resize();
+    this.gazeParticles.resize();this.gazeParticles.clear();
     if(innerWidth===this.viewport[0]&&innerHeight===this.viewport[1])return;
     this.viewport=[innerWidth,innerHeight];
     if(['calibrating','validating','walking'].includes(this.phase)){
       this.release();this.model.clear();this.showMessage('resize-required','화면 크기가 달라졌어요','새로운 화면에 맞춰 눈을 한 번 더 맞춰 주세요.','다시 맞추기',()=>this.start());
+    }else if(gazePhases.has(this.phase)){
+      // The film may continue, but a calibration for another viewport must not draw a false point.
+      this.tracker.stop();this.latest=null;this.model.clear();
+      this.updateGazeControl();
     }
   }
 }

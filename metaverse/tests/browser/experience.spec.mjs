@@ -67,9 +67,12 @@ for(const [direction,destination] of [[.1,'left'],[.9,'right']]){
   test(`calibration gate, ${destination} arrival, spatial audible video, and ending work together`,async({page})=>{
     const errors=[];page.on('pageerror',error=>errors.push(error.message));
     await simulatedEyes(page);await startAndWalk(page,direction);
+    const stopsBeforeArrival=await page.evaluate(()=>window.__trackerStops);
     await expect(page.locator('body')).toHaveAttribute('data-validation','passed');
     await expect(page.locator('body')).toHaveAttribute('data-phase','playing');
     await expect(page.locator('body')).toHaveAttribute('data-destination',destination);
+    await expect(page.locator('#gaze-particles')).toBeVisible();
+    expect(await page.evaluate(()=>window.__trackerStops)).toBe(stopsBeforeArrival);
     const playback=await page.locator('#film').evaluate(video=>({muted:video.muted,volume:video.volume,paused:video.paused,src:video.currentSrc}));
     expect(playback.muted).toBe(false);expect(playback.volume).toBeGreaterThan(0);expect(playback.paused).toBe(false);
     expect(playback.src).toContain(destination==='left'?'resonance.mp4':'afterimage.mp4');
@@ -81,6 +84,8 @@ for(const [direction,destination] of [[.1,'left'],[.9,'right']]){
     // Observe a real natural end on one path; verify seeking/range support on the other.
     if(destination==='right')await page.locator('#film').evaluate(video=>{video.currentTime=video.duration-.3;});
     await expect(page.locator('body')).toHaveAttribute('data-phase','ended',{timeout:18000});
+    await expect(page.locator('#gaze-particles')).toBeHidden();
+    expect(await page.evaluate(()=>window.__trackerStops)).toBeGreaterThan(stopsBeforeArrival);
     await expect(page.getByRole('button',{name:'다시 걸어보기'})).toBeVisible();expect(errors).toEqual([]);
     await page.getByRole('button',{name:'다시 걸어보기'}).click();
     await expect(page.locator('body')).toHaveAttribute('data-phase','calibrating');

@@ -1,11 +1,11 @@
 import { readFile } from 'node:fs/promises';
-export async function simulatedEyes(page,{wrongValidation=false}={}) {
+export async function simulatedEyes(page,{wrongValidation=false,speed=9}={}) {
   // Only the tracker boundary and timing are replaced. There is no production query flag,
   // input endpoint or keyboard shortcut capable of supplying test gaze / skipping validation.
   await page.route('**/src/config.js',async route=>{
     const original=await readFile(new URL('../../src/config.js',import.meta.url),'utf8');
     await route.fulfill({contentType:'text/javascript',body:original
-      .replace('speed: 0.9','speed: 9').replace('settleMs: 650, captureMs: 1000, minSamples: 12','settleMs: 50, captureMs: 120, minSamples: 4')
+      .replace('speed: 0.9',`speed: ${speed}`).replace('settleMs: 650, captureMs: 1000, minSamples: 12','settleMs: 50, captureMs: 120, minSamples: 4')
       .replace('alignmentSeconds: 1.5','alignmentSeconds: 0.15')});
   });
   await page.route('**/src/tracker.js',route=>route.fulfill({contentType:'text/javascript',body:`
@@ -13,7 +13,7 @@ export async function simulatedEyes(page,{wrongValidation=false}={}) {
       constructor(callback){this.callback=callback;}
       async start(){this.stop();this.paused=false;let frame=0;
         this.timer=setInterval(()=>{
-          if(this.paused)return;
+          if(this.paused||window.__eyes?.noUpdates)return;
           const phase=document.body.dataset.phase,target=document.getElementById('target');
           let x=.5,y=.5;
           if(phase==='calibrating'||phase==='validating') {x=Number(target.dataset.x);y=Number(target.dataset.y);}
