@@ -1,5 +1,5 @@
 export const WORLD = Object.freeze({
-  halfWidth: 4, length: 18, speed: 3.6, eyeHeight: 1.62,
+  halfWidth: 4, length: 18, speed: 2.7, eyeHeight: 1.62,
   yawLimit: Math.PI / 3, pitchLimit: Math.PI / 9,
   yawSpeed: 0.42, pitchSpeed: 0.25, deadZone: 0.16,
   inputGraceMs: 250, inputFreshMs: 180, smoothingSeconds: 0.14,

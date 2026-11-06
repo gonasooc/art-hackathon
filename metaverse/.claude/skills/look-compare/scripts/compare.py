@@ -1,8 +1,9 @@
 """Side-by-side composite and value/colour metrics for a reference image and a render.
 
-usage: python3 compare.py REF RENDER [--out PNG] [--height 540] [--ignore-bottom 0.12]
+usage: python3 compare.py REF RENDER [--out PNG] [--height 540] [--ignore-bottom 0.12] [--json OUT] [--quiet]
 """
 import argparse
+import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageStat
@@ -13,6 +14,10 @@ MEDIANCUT = getattr(getattr(Image, 'Quantize', Image), 'MEDIANCUT')
 # Heuristic thresholds for "still open" differences. Tune per room if needed.
 LIMITS = {'mean': 15, 'contrast': 10, 'shadows': .15, 'highlights': .10, 'saturation': .08, 'warmth': 12}
 GRID_LIMIT = 30
+ROWS = [('mean luma', 'mean', '{:.0f}'), ('contrast (luma std)', 'contrast', '{:.0f}'),
+        ('p10 / dark', 'p10', '{:.0f}'), ('p50 / median', 'p50', '{:.0f}'), ('p90 / bright', 'p90', '{:.0f}'),
+        ('shadows <64', 'shadows', '{:.2f}'), ('highlights >192', 'highlights', '{:.2f}'),
+        ('saturation', 'saturation', '{:.2f}'), ('warmth (R−B)', 'warmth', '{:.0f}')]
 
 
 def resolve(name):
@@ -66,10 +71,46 @@ def composite(ref, render, height, out):
     sheet.paste(left, (0, band))
     sheet.paste(right, (left.width + gap, band))
     draw = ImageDraw.Draw(sheet)
+    # PIL's default bitmap font is latin-1 only: keep these labels ASCII.
     draw.text((8, 8), 'REFERENCE', fill=(235, 235, 235))
     draw.text((left.width + gap + 8, 8), 'RENDER', fill=(235, 235, 235))
     out.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out)
+
+
+def report(a, b, aspect_note, out):
+    lines = [f'composite: {out}', aspect_note, f'\n{"metric":<22}{"ref":>9}{"render":>9}{"Δ":>9}']
+    open_items = []
+    for label, key, fmt in ROWS:
+        delta = b[key] - a[key]
+        flag = ' *' if key in LIMITS and abs(delta) > LIMITS[key] else ''
+        if flag:
+            open_items.append(label)
+        delta_text = ('+' if delta >= 0 else '') + fmt.format(delta)
+        lines.append(f'{label:<22}{fmt.format(a[key]):>9}{fmt.format(b[key]):>9}{delta_text:>9}{flag}')
+    lines.append('\n3×3 mean luma (ref | render | Δ)')
+    for r in range(3):
+        deltas = [b['grid'][r][c] - a['grid'][r][c] for c in range(3)]
+        if any(abs(d) > GRID_LIMIT for d in deltas):
+            open_items.append(f'grid row {r + 1}')
+        ref_cells = ' '.join(f'{v:4.0f}' for v in a['grid'][r])
+        render_cells = ' '.join(f'{v:4.0f}' for v in b['grid'][r])
+        lines.append(f'  {ref_cells} | {render_cells} | {" ".join(f"{d:+4.0f}" for d in deltas)}')
+    lines.append('\npalette (share)')
+    for name, data in (('ref', a), ('render', b)):
+        lines.append(f'  {name:<7}' + '  '.join(f'{colour} {share:.0%}' for colour, share in data['palette']))
+    lines.append('\nopen (heuristic): ' + (', '.join(open_items) if open_items else '없음 — 그래도 이미지를 직접 보고 판단하세요'))
+    return lines, open_items
+
+
+def rounded(value):
+    if isinstance(value, float):
+        return round(value, 3)
+    if isinstance(value, (list, tuple)):
+        return [rounded(item) for item in value]
+    if isinstance(value, dict):
+        return {key: rounded(item) for key, item in value.items()}
+    return value
 
 
 def main():
@@ -80,6 +121,8 @@ def main():
     parser.add_argument('--height', type=int, default=540)
     parser.add_argument('--ignore-bottom', type=float, default=0.0,
                         help='metrics ignore this bottom fraction of both images (captions)')
+    parser.add_argument('--json', dest='json_out', help='also write the metrics and open items as JSON')
+    parser.add_argument('--quiet', action='store_true', help='print only the composite path')
     args = parser.parse_args()
 
     ref_path, render_path = resolve(args.ref), resolve(args.render)
@@ -88,35 +131,21 @@ def main():
     composite(ref, render, args.height, out)
     a, b = analyse(ref, args.ignore_bottom), analyse(render, args.ignore_bottom)
 
-    print(f'composite: {out}')
     ref_aspect, render_aspect = ref.width / ref.height, render.width / render.height
-    note = '' if abs(ref_aspect - render_aspect) < .02 else '  ← 비율이 달라요. snap에 --ref나 --size를 주고 다시 찍으세요.'
-    print(f'aspect: ref {ref_aspect:.3f} · render {render_aspect:.3f}{note}')
-    print(f'\n{"metric":<22}{"ref":>9}{"render":>9}{"Δ":>9}')
-    rows = [('mean luma', 'mean', '{:.0f}'), ('contrast (luma std)', 'contrast', '{:.0f}'),
-            ('p10 / dark', 'p10', '{:.0f}'), ('p50 / median', 'p50', '{:.0f}'), ('p90 / bright', 'p90', '{:.0f}'),
-            ('shadows <64', 'shadows', '{:.2f}'), ('highlights >192', 'highlights', '{:.2f}'),
-            ('saturation', 'saturation', '{:.2f}'), ('warmth (R−B)', 'warmth', '{:.0f}')]
-    open_items = []
-    for label, key, fmt in rows:
-        delta = b[key] - a[key]
-        flag = ' *' if key in LIMITS and abs(delta) > LIMITS[key] else ''
-        if flag:
-            open_items.append(label)
-        delta_text = ('+' if delta >= 0 else '') + fmt.format(delta)
-        print(f'{label:<22}{fmt.format(a[key]):>9}{fmt.format(b[key]):>9}{delta_text:>9}{flag}')
-    print('\n3×3 mean luma (ref | render | Δ)')
-    for r in range(3):
-        deltas = [b['grid'][r][c] - a['grid'][r][c] for c in range(3)]
-        if any(abs(d) > GRID_LIMIT for d in deltas):
-            open_items.append(f'grid row {r + 1}')
-        ref_cells = ' '.join(f'{v:4.0f}' for v in a['grid'][r])
-        render_cells = ' '.join(f'{v:4.0f}' for v in b['grid'][r])
-        print(f'  {ref_cells} | {render_cells} | {" ".join(f"{d:+4.0f}" for d in deltas)}')
-    print('\npalette (share)')
-    for name, data in (('ref', a), ('render', b)):
-        print(f'  {name:<7}' + '  '.join(f'{colour} {share:.0%}' for colour, share in data['palette']))
-    print('\nopen (heuristic): ' + (', '.join(open_items) if open_items else '없음 — 그래도 이미지를 직접 보고 판단하세요'))
+    aspect_match = abs(ref_aspect - render_aspect) < .02
+    aspect_note = f'aspect: ref {ref_aspect:.3f} · render {render_aspect:.3f}' + (
+        '' if aspect_match else '  ← 비율이 달라요. snap에 --ref나 --size를 주고 다시 찍으세요.')
+    lines, open_items = report(a, b, aspect_note, out)
+    print(lines[0] if args.quiet else '\n'.join(lines))
+
+    if args.json_out:
+        target = resolve(args.json_out)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(rounded({
+            'ref': str(ref_path), 'render': str(render_path), 'composite': str(out),
+            'aspect': {'ref': ref_aspect, 'render': render_aspect, 'match': aspect_match},
+            'ignoreBottom': args.ignore_bottom, 'metrics': {'ref': a, 'render': b}, 'open': open_items,
+        }), ensure_ascii=False, indent=1), encoding='utf-8')
 
 
 if __name__ == '__main__':

@@ -1,9 +1,69 @@
 {
-  "02-frame-1": {
+  "platform-train": {
+    "car": "platform",
+    "ref": ".cache/train-references/selected-train.png",
+    "preset": "entrance",
+    "note": "기차 앞 외관. Figma 30:163·41:254·48:339 계열에서 고른 기차 이미지다."
+  },
+  "00-48-365": {
+    "car": "00",
+    "ref": ".cache/womb-references/48-365.png",
+    "figma": "48:365",
+    "preset": "entrance",
+    "note": "기차를 따라 이어지는 유기적인 터널(창밖 풍경·깊이감 참고). 00칸 내부는 자궁을 추상화하기로 해서 구도가 그대로 대응하지 않는다."
+  },
+  "01-video-1s": {
+    "car": "01",
+    "ref": ".cache/hospital-references/video-1s.png",
+    "source": { "video": "~/Desktop/예술해커톤_영상/출산병원.mp4", "t": 1 },
+    "preset": "entrance",
+    "ignoreBottom": 0.12,
+    "note": "레퍼런스의 사람은 의도적으로 뺐다(병원칸에는 사람을 넣지 않는다). 왼쪽 아래 자막은 비교 대상이 아니다."
+  },
+  "02-video-1s": {
     "car": "02",
+    "ref": ".cache/childhood-references/video-1s.png",
+    "source": { "video": "~/Desktop/예술해커톤_영상/옛날집.mp4", "t": 1 },
+    "preset": "entrance",
+    "ignoreBottom": 0.12,
+    "note": "왼쪽 아래 자막은 구현하지 않는다."
+  },
+  "03-video-1s": {
+    "car": "03",
+    "ref": ".cache/playground-references/video-1s.png",
+    "source": { "video": "~/Desktop/예술해커톤_영상/놀이터.mp4", "t": 1 },
+    "preset": "entrance",
+    "ignoreBottom": 0.12,
+    "note": "자막은 장면 구성에 포함하지 않는다. 같은 폴더에 정사각 이미지 놀이터01–05.png도 있다."
+  },
+  "04-91-785": {
+    "car": "04",
+    "ref": ".cache/cafe-references/91-785.png",
+    "figma": "91:785",
+    "preset": "entrance",
+    "note": "카페 대표 장면으로 추정한 노드다. 나머지 90:724·90:728·90:732·90:736은 docs/childhood-playground-cafe-reference.md."
+  },
+  "05-frame-1": {
+    "car": "05",
     "ref": ".cache/forest-references/frame-1.png",
+    "source": { "video": "~/Desktop/예술해커톤_영상/숲.mp4", "t": 1 },
     "pose": [-1.0, 2.67, -8.3, -0.19, 1.65],
     "ignoreBottom": 0.12,
-    "note": "숲.mp4 1초 프레임. 소실점 위치로 추정한 대략값이에요. 비주얼 테스트에서 다듬어 갱신하세요."
+    "note": "포즈는 소실점 위치로 추정한 대략값이다."
+  },
+  "06-video-1s": {
+    "car": "06",
+    "ref": ".cache/death-references/video-1s.png",
+    "source": { "video": "~/Desktop/예술해커톤_영상/임종병원.mp4", "t": 1 },
+    "preset": "entrance",
+    "ignoreBottom": 0.12,
+    "note": "레퍼런스의 사람은 의도적으로 뺐다. 같은 폴더의 frame-*.png는 영상이 바뀌기 전에 뽑은 것이라 쓰지 않는다."
+  },
+  "07-85-627": {
+    "car": "07",
+    "ref": ".cache/incense-references/85-627.png",
+    "figma": "85:627",
+    "preset": "inspection",
+    "note": "중앙 향 사진. 위·왼쪽·오른쪽·아래(66:73·66:65·66:69·66:80)와 연기 글씨(91:746)는 docs/incense-reference.md."
   }
 }

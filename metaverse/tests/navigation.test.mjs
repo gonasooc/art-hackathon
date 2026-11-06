@@ -12,10 +12,10 @@ test('no camera signal never produces travel or an encounter',()=>{
   const n=new Navigation();for(let t=0;t<60000;t+=50)n.step(.05,t,null);
   assert.equal(n.z,0);assert.equal(n.arrived,null);
 });
-test('eyes choose different destinations; arrivals stay within 5–10 seconds at the doubled walking speed',()=>{
+test('eyes choose different destinations; arrivals stay within 6.6–13.4 seconds at the adjusted walking speed',()=>{
   for(const [direction,id] of [[0,'left'],[1,'right'],[.5,'left'],[.37,'left'],[.63,'right']]){
     const {navigation:n,seconds}=walk(direction);
-    assert.equal(n.arrived,id);assert.ok(seconds>=4.99&&seconds<=10.1);
+    assert.equal(n.arrived,id);assert.ok(seconds>=6.6&&seconds<=13.4);
     assert.ok(Math.abs(n.x)<=WORLD.halfWidth);assert.ok(Math.abs(n.yaw)<=WORLD.yawLimit);
   }
 });
@@ -45,5 +45,5 @@ test('background invalidation and arrival prevent input from moving the camera',
 });
 test('extreme vertical gaze rotates only within pitch limits and does not change eye height or floor progression',()=>{
   const n=new Navigation();for(let t=0;t<2500;t+=50)n.step(.05,t,{valid:true,x:.5,y:0,time:t});
-  assert.equal(n.pitch,WORLD.pitchLimit);assert.equal(n.x,0);assert.ok(Math.abs(n.z-9)<.02);
+  assert.equal(n.pitch,WORLD.pitchLimit);assert.equal(n.x,0);assert.ok(Math.abs(n.z-6.75)<.02);
 });
