@@ -41,6 +41,14 @@
     "assets/films/ready.mp4": {
       "bytes": 2475,
       "sha256": "8956a78a900c073cef760c307b7dc28662559839b836e064a783815a91544ee7"
+    },
+    "assets/train/membrane.png": {
+      "bytes": 2399175,
+      "sha256": "cedfd0a626b20e746fa63a0ca540235c399ae026e94e8ed0e715d12add64d952"
+    },
+    "assets/train/ground.png": {
+      "bytes": 3097247,
+      "sha256": "ae795b96cd889b41c4ffec011290c4dc117f76b72c5f73fae8b2fad4547e8094"
     }
   }
 }

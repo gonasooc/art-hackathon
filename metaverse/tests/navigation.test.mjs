@@ -13,7 +13,7 @@ test('no camera signal never produces travel or an encounter',()=>{
   assert.equal(n.z,0);assert.equal(n.arrived,null);
 });
 test('eyes choose different destinations; both arrivals are within the agreed 20–40 seconds',()=>{
-  for(const [direction,id] of [[0,'left'],[1,'right'],[.5,'left']]){
+  for(const [direction,id] of [[0,'left'],[1,'right'],[.5,'left'],[.37,'left'],[.63,'right']]){
     const {navigation:n,seconds}=walk(direction);
     assert.equal(n.arrived,id);assert.ok(seconds>=20&&seconds<=40.1);
     assert.ok(Math.abs(n.x)<=WORLD.halfWidth);assert.ok(Math.abs(n.yaw)<=WORLD.yawLimit);

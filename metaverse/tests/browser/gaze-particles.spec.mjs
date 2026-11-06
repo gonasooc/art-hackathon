@@ -58,12 +58,19 @@ test('reduced motion keeps the particle shape static while the exact point still
   await startAndWalk(page, .65);
   const marker = page.locator('#gaze-particles');
   await expect(marker).toHaveAttribute('data-tracking', 'live');
-  const before = await marker.evaluate(canvas => canvas.toDataURL());
+  const shape=()=>marker.evaluate(canvas=>{
+    if(canvas.dataset.tracking!=='live')return null;
+    const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+    let hash=2166136261;for(const value of pixels)hash=Math.imul(hash^value,16777619);
+    return hash>>>0;
+  });
+  let before=null;
+  await expect.poll(async()=>{before=await shape();return before;}).not.toBeNull();
   await page.waitForTimeout(300);
-  expect(await marker.evaluate(canvas => canvas.toDataURL())).toBe(before);
+  await expect.poll(shape).toBe(before);
   await page.evaluate(() => { window.__eyes = { x: .3, y: .65 }; });
   await expect.poll(async () => parseFloat(await marker.getAttribute('data-x'))).toBeLessThan(.36);
-  expect(await marker.evaluate(canvas => canvas.toDataURL())).toBe(before);
+  await expect.poll(shape).toBe(before);
   await page.evaluate(() => { window.__eyes = { invalid: 'face' }; });
   await expect(marker).toBeHidden();
 });

@@ -14,6 +14,18 @@ test('calibration learns eye features and generalizes to targets not used during
   assert.ok(model.predict(features(.8,.3)).x>.7);
   assert.ok(model.predict(features(.2,.7)).x<.3);
 });
+
+test('training-only model selection favors a simple map and retains useful curvature',()=>{
+  for(const [curve,expected] of [[0,'affine'],[.35,'quadratic']]){
+    const feature=(x,y)=>[(x-.5-curve*(y-.5)**2)*.18,(y-.5)*.08];
+    const training=CALIBRATION.training.map(target=>({target,samples:Array.from({length:24},()=>({features:feature(...target),pose:[...pose]}))}));
+    const model=new GazeModel().fit(training);
+    assert.equal(model.modelType,expected);assert.ok(Number.isFinite(model.trainingCvError));
+    const unseen=CALIBRATION.validation.map(target=>({target,predictions:Array.from({length:24},()=>model.predict(feature(...target)))}));
+    assert.equal(validateGaze(unseen).passed,true);
+    assert.ok(validateGaze(unseen).medianError<.01);
+  }
+});
 test('constant eyes, insufficient data, out-of-range predictions and moved head cannot steer',()=>{
   assert.throws(()=>new GazeModel().fit(groups().map(g=>({...g,samples:g.samples.map(s=>({...s,features:[0,0]}))}))));
   assert.throws(()=>new GazeModel().fit(groups().slice(0,3)));
@@ -28,6 +40,30 @@ test('validation rejects center-only predictions, offset, jitter, and insufficie
   assert.equal(validateGaze(data.map(g=>({...g,predictions:[{x:g.target[0],y:g.target[1]}]}))).passed,false);
   const jitter=data.map(g=>({...g,predictions:Array.from({length:24},(_,i)=>({x:g.target[0]+(i%2?.3:-.3),y:g.target[1]}))}));
   assert.equal(validateGaze(jitter).passed,false);
+});
+test('validation uses the same left/center/right boundaries as actual steering',()=>{
+  const usable=CALIBRATION.validation.map(target=>({target,predictions:Array.from({length:24},()=>({
+    x:target[0]<.4?.37:target[0]>.6?.63:.5,y:target[1],
+  }))}));
+  const report=validateGaze(usable);
+  assert.equal(report.passed,true);assert.equal(report.regionAccuracy,1);
+  assert.ok(Math.abs(report.medianError-.15)<1e-9);
+  // Center drift that would turn the viewer is not falsely labeled as neutral.
+  const drifting=CALIBRATION.validation.map(target=>({target,predictions:Array.from({length:24},()=>({
+    x:target[0]===.5?.39:target[0],y:target[1],
+  }))}));
+  const drift=validateGaze(drifting);
+  assert.equal(drift.passed,false);assert.equal(drift.code,'direction');assert.deepEqual(drift.retryIndices,[2,5]);
+});
+test('an isolated outlier must pass fresh validation; widespread wrong signals are not given endless retries',()=>{
+  const make=(outlier=false)=>CALIBRATION.validation.map((target,index)=>({target,predictions:Array.from({length:24},()=>({x:target[0],y:target[1]+(outlier&&index===0?.25:0)}))}));
+  const bad=make(true),report=validateGaze(bad);
+  assert.equal(report.passed,false);assert.equal(report.code,'position');assert.deepEqual(report.retryIndices,[0]);
+  assert.equal(report.medianError,0);assert.ok(Math.abs(report.maxPointError-.25)<1e-9);
+  bad[0]=make()[0];assert.equal(validateGaze(bad).passed,true);
+  const centered=make().map(g=>({...g,predictions:g.predictions.map(()=>({x:.5,y:.5}))}));
+  const failed=validateGaze(centered);
+  assert.equal(failed.passed,false);assert.deepEqual(failed.retryIndices,[]);
 });
 test('face extraction uses iris position within eyes and rejects closed eyes or missing faces',()=>{
   const points=Array.from({length:478},()=>({x:.5,y:.5,z:0}));

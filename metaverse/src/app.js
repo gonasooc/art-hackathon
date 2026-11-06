@@ -1,19 +1,19 @@
-import { CALIBRATION, WORLD, WORKS, clamp } from './config.js';
+import { CALIBRATION, WORLD, WORKS, TRAIN, clamp } from './config.js';
 import { GazeModel, median, validateGaze } from './gaze-model.js';
-import { Navigation } from './navigation.js';
+import { TrainJourney } from './train-journey.js';
 import { EyeTracker } from './tracker.js';
 import { GalleryWorld } from './world.js';
 import { GazeParticles } from './gaze-particles.js';
 
 const byId=id=>document.getElementById(id);
-const gazePhases=new Set(['walking','aligning','playing','playback-blocked','video-error']);
+const gazePhases=new Set(['walking','boarding','aligning','playing','playback-blocked','video-error']);
 const messages={face:'얼굴을 화면 정면에 두어 주세요.',blink:'눈을 뜨고 점을 바라봐 주세요.',distance:'화면에서 팔 길이 정도 떨어져 앉아 주세요.',pose:'보정할 때의 자세로 돌아와 주세요.',inference:'눈을 다시 읽고 있어요. 다른 카메라 앱과 무거운 탭을 닫아 주세요.',stale:'눈 추적이 느려 잠시 멈췄어요. 다른 탭을 닫아 주세요.'};
 const poseMatches=(pose,anchor)=>Math.abs(pose[0]-anchor[0])<.055&&Math.abs(pose[1]-anchor[1])<.065&&Math.abs(pose[2]/anchor[2]-1)<.2&&Math.abs(pose[3]-anchor[3])<.16&&Math.abs(pose[4]-anchor[4])<.16;
 
 class Experience {
   constructor() {
     this.phase='idle';this.serial=0;this.playAttempt=0;this.viewport=[innerWidth,innerHeight];
-    this.film=byId('film');this.model=new GazeModel();this.navigation=new Navigation();
+    this.film=byId('film');this.model=new GazeModel();this.navigation=new TrainJourney();
     this.gazeParticles=new GazeParticles(byId('gaze-particles'));
     this.tracker=new EyeTracker(sample=>this.receive(sample));
     try {this.world=new GalleryWorld(byId('world'));}
@@ -45,7 +45,9 @@ class Experience {
       const now=performance.now();
       const dt=Math.min((now-previous)/1000,.08);previous=now;
       if (!document.hidden) {
-        this.update(now,dt);this.world.render();
+        this.update(now,dt);
+        // The opaque eye-setup screen needs no 3D redraws; reserve GPU time for inference.
+        if(!['loading','calibrating','validating'].includes(this.phase))this.world.render(['walking','boarding','aligning','playing'].includes(this.phase)?dt:0);
         this.gazeParticles.render(performance.now(),this.latest,{active:gazePhases.has(this.phase),reducedMotion:this.world.motionPreference.matches});
       }
       this.raf=requestAnimationFrame(frame);
@@ -61,6 +63,8 @@ class Experience {
     byId('message').hidden=!['error','calibration-failed','playback-blocked','video-error','resize-required'].includes(phase);
     byId('leave').hidden=['idle','ended'].includes(phase);
     byId('pause-notice').hidden=true;
+    byId('journey-status').hidden=!gazePhases.has(phase);
+    byId('boarding-veil').hidden=phase!=='boarding';
     this.updateMotionControl();
     this.updateGazeControl();
     if(!gazePhases.has(phase))this.gazeParticles.clear();
@@ -77,6 +81,13 @@ class Experience {
     button.textContent=this.gazeParticles.enabled?'시선 표시 끄기':'시선 표시 켜기';
     button.setAttribute('aria-pressed',String(this.gazeParticles.enabled));
   }
+  updateJourneyStatus(state) {
+    document.body.dataset.journeyStage=state.stage;document.body.dataset.carriage=state.carId||'';
+    const label=state.stage==='platform'?'PLATFORM':state.stage==='boarding'?'DEPARTURE':'00';
+    const title=state.stage==='platform'?'탑승 전':state.stage==='boarding'?'첫 번째 칸으로':'첫 숨이 되기 전';
+    if(byId('journey-number').textContent!==label)byId('journey-number').textContent=label;
+    if(byId('journey-title').textContent!==title)byId('journey-title').textContent=title;
+  }
   showMessage(phase,title,copy,label,action) {
     this.setPhase(phase);this.action=action;
     byId('message-title').textContent=title;byId('message-copy').textContent=copy;byId('message-action').textContent=label;
@@ -86,17 +97,20 @@ class Experience {
     this.serial++;this.playAttempt++;this.tracker.stop();this.film.pause();this.navigation.invalidate();this.latest=null;
     this.gazeParticles.clear();
     this.training=[];this.validation=[];this.currentPoint=null;this.anchor=null;
+    this.validationOrder=[];this.validationAttempt=0;
   }
   home() {
     this.release();this.model.clear();this.world.reset();this.navigation.reset();this.work=null;
     this.film.removeAttribute('src');this.film.load();this.setPhase('idle');byId('start').focus({preventScroll:true});
-    delete document.body.dataset.destination;delete document.body.dataset.validation;
+    this.updateJourneyStatus(this.navigation.snapshot());
+    delete document.body.dataset.destination;delete document.body.dataset.validation;delete document.body.dataset.validationAttempt;
   }
   async start() {
     this.release();const serial=this.serial;
     this.model.clear();this.navigation.reset();this.world.reset();this.work=null;this.anchor=null;
+    this.updateJourneyStatus(this.navigation.snapshot());
     this.viewport=[innerWidth,innerHeight];document.body.dataset.validation='pending';
-    delete document.body.dataset.destination;
+    delete document.body.dataset.destination;delete document.body.dataset.validationAttempt;
     if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
       this.showMessage('error','카메라를 사용할 수 없어요','HTTPS 주소 또는 localhost에서 데스크톱 Chrome으로 열어 주세요.','다시 확인',()=>this.start());return;
     }
@@ -110,7 +124,7 @@ class Experience {
     this.film.src=new URL('../assets/films/ready.mp4',import.meta.url).href;this.film.muted=false;this.film.volume=.65;
     const prime=this.film.play().then(()=>{if(serial===this.serial&&this.phase==='loading')this.film.pause();}).catch(()=>{});
     try {
-      await Promise.all([this.tracker.start(),prime]);
+      await Promise.all([this.tracker.start(),prime,this.world.ready]);
       if(serial!==this.serial)return;
       this.training=[];this.validation=[];this.pointIndex=0;this.beginCalibrationPhase('calibrating');
     } catch(error) {
@@ -122,18 +136,24 @@ class Experience {
   }
   beginCalibrationPhase(phase) {
     this.setPhase(phase);this.pointIndex=0;
+    if(phase==='validating'){
+      this.validationOrder=CALIBRATION.validation.map((_,index)=>index);this.validationAttempt=0;
+      document.body.dataset.validationAttempt='1';
+    }
     byId('step-label').textContent=phase==='calibrating'?'01 / EYE CALIBRATION':'02 / GAZE CHECK';
     byId('setup-title').textContent=phase==='calibrating'?'빛나는 점을 바라봐 주세요':'잘 맞는지 한 번 더';
     byId('setup-copy').textContent='고개는 편하게 고정하고, 눈으로 점을 따라가 주세요. 클릭하지 않아도 됩니다.';
     this.nextTarget();
   }
   nextTarget() {
-    const points=this.phase==='calibrating'?CALIBRATION.training:CALIBRATION.validation;
-    this.currentPoint={target:points[this.pointIndex],samples:[],predictions:[],started:performance.now()};
+    const training=this.phase==='calibrating';
+    const points=training?CALIBRATION.training:this.validationOrder.map(index=>CALIBRATION.validation[index]);
+    const settleMs=training&&this.pointIndex===0?CALIBRATION.firstSettleMs:!training&&this.validationAttempt>0?CALIBRATION.retrySettleMs:CALIBRATION.settleMs;
+    this.currentPoint={target:points[this.pointIndex],validationIndex:training?null:this.validationOrder[this.pointIndex],samples:[],predictions:[],started:performance.now(),settleMs};
     const [x,y]=this.currentPoint.target,target=byId('target');
     target.style.left=`${x*100}%`;target.style.top=`${y*100}%`;target.style.setProperty('--progress',0);
-    target.dataset.x=x;target.dataset.y=y;
-    byId('step-count').textContent=`${String(this.pointIndex+1).padStart(2,'0')} / ${String(points.length).padStart(2,'0')}`;
+    target.dataset.x=x;target.dataset.y=y;target.dataset.index=training?this.pointIndex:this.validationOrder[this.pointIndex];
+    byId('step-count').textContent=`${!training&&this.validationAttempt>0?'재확인 ':''}${String(this.pointIndex+1).padStart(2,'0')} / ${String(points.length).padStart(2,'0')}`;
     byId('tracking-status').textContent='점이 채워질 때까지 시선을 머물러 주세요.';
   }
   receive(sample) {
@@ -153,26 +173,42 @@ class Experience {
     byId('target').dataset.waiting=String(!valid);
     const copy=valid?'점이 채워질 때까지 시선을 머물러 주세요.':messages[reason]||messages.face;
     if(byId('tracking-status').textContent!==copy)byId('tracking-status').textContent=copy;
-    if(!valid||now-this.currentPoint.started<CALIBRATION.settleMs)return;
+    // A delayed inference result must have been CAPTURED after the target settled.
+    if(!valid||sample.time-this.currentPoint.started<this.currentPoint.settleMs)return;
     if(this.phase==='calibrating')this.currentPoint.samples.push({features:sample.features,pose:sample.pose});
     else this.currentPoint.predictions.push(prediction);
   }
   finishPoint() {
-    const training=this.phase==='calibrating',groups=training?this.training:this.validation;
-    groups.push(this.currentPoint);
+    const training=this.phase==='calibrating';
+    if(training)this.training.push(this.currentPoint);
+    else this.validation[this.currentPoint.validationIndex]=this.currentPoint;
     if(training&&!this.anchor)this.anchor=Array.from({length:5},(_,i)=>median(this.currentPoint.samples.map(s=>s.pose[i])));
     this.pointIndex++;
-    const points=training?CALIBRATION.training:CALIBRATION.validation;
-    if(this.pointIndex<points.length){this.nextTarget();return;}
+    const pointCount=training?CALIBRATION.training.length:this.validationOrder.length;
+    if(this.pointIndex<pointCount){this.nextTarget();return;}
     if(training){
-      try{this.model.fit(groups);this.beginCalibrationPhase('validating');}
+      try{this.model.fit(this.training);this.beginCalibrationPhase('validating');}
       catch(error){this.calibrationFailed(error.message);}
     }else{
-      const report=validateGaze(groups);
-      if(!report.passed){this.calibrationFailed(report.reason);return;}
+      const report=validateGaze(this.validation);
+      // Aggregate diagnostics only: no images, raw eye features or gaze history.
+      console.info('[gaze-check]',{attempt:this.validationAttempt+1,delegate:this.tracker.delegate||'unreported',model:this.model.modelType,trainingCvError:this.model.trainingCvError,passed:report.passed,
+        reason:report.code,medianError:report.medianError,maxPointError:report.maxPointError,
+        directionAccuracy:report.regionAccuracy,jitter:report.jitter,recheckPoints:report.retryIndices.map(index=>index+1)});
+      if(!report.passed){
+        if(this.validationAttempt<CALIBRATION.maxValidationRetries&&report.retryIndices.length){
+          this.validationAttempt++;this.validationOrder=report.retryIndices;this.pointIndex=0;this.latest=null;
+          document.body.dataset.validation='retrying';document.body.dataset.validationAttempt=String(this.validationAttempt+1);
+          byId('step-label').textContent='02 / GAZE RECHECK';
+          byId('setup-title').textContent=report.retryIndices.length===1?'이 점만 다시 확인할게요':'두 점만 다시 확인할게요';
+          byId('setup-copy').textContent='앞서 맞춘 내용은 유지됩니다. 표시된 점만 다시 바라봐 주세요.';
+          this.nextTarget();return;
+        }
+        this.calibrationFailed(report.reason);return;
+      }
       this.training=[];this.validation=[];this.currentPoint=null;this.anchor=null;
       document.body.dataset.validation='passed';this.navigation.reset();this.latest=null;this.walkStarted=performance.now();
-      this.setPhase('walking');this.world.walk(this.navigation.snapshot());
+      this.setPhase('walking');this.world.walk(this.navigation.snapshot());this.updateJourneyStatus(this.navigation.snapshot());
     }
   }
   calibrationFailed(reason) {
@@ -184,22 +220,37 @@ class Experience {
     if(['calibrating','validating'].includes(this.phase)){
       const elapsed=now-this.currentPoint.started;
       const samples=this.phase==='calibrating'?this.currentPoint.samples:this.currentPoint.predictions;
-      const progress=Math.min(clamp((elapsed-CALIBRATION.settleMs)/CALIBRATION.captureMs,0,1),samples.length/CALIBRATION.minSamples);
+      const progress=Math.min(clamp((elapsed-this.currentPoint.settleMs)/CALIBRATION.captureMs,0,1),samples.length/CALIBRATION.minSamples);
       byId('target').style.setProperty('--progress',progress);
-      if(elapsed>=CALIBRATION.settleMs+CALIBRATION.captureMs&&samples.length>=CALIBRATION.minSamples)this.finishPoint();
+      if(elapsed>=this.currentPoint.settleMs+CALIBRATION.captureMs&&samples.length>=CALIBRATION.minSamples)this.finishPoint();
       else if(elapsed>CALIBRATION.timeoutMs)this.calibrationFailed('눈을 안정적으로 읽지 못했어요. 얼굴을 밝게 비추고 화면을 정면으로 바라봐 주세요.');
     }else if(this.phase==='walking'){
       const state=this.navigation.step(dt,now,this.latest);
       this.world.walk(state,dt);
+      this.updateJourneyStatus(state);
       const canvas=byId('world');canvas.dataset.x=state.x.toFixed(3);canvas.dataset.z=state.z.toFixed(3);canvas.dataset.yaw=state.yaw.toFixed(3);
       const paused=!state.moving&&now-this.walkStarted>700;
       byId('pause-notice').hidden=!paused;
       if(paused)byId('pause-copy').textContent=messages[this.latest?.reason]||'눈을 다시 확인하면 이어서 걸어요.';
-      if(state.arrived)this.arrive(state.arrived);
+      if(state.arrived==='boarding')this.boardTrain();
+      else if(state.arrived)this.arrive(state.arrived);
+    }else if(this.phase==='boarding'){
+      this.boardElapsed+=dt;const progress=clamp(this.boardElapsed/this.boardDuration,0,1);
+      this.world.boardingProgress(progress);
+      byId('boarding-veil').style.opacity=this.world.motionPreference.matches?0:Math.sin(progress*Math.PI)*.92;
+      if(progress>=1){
+        this.navigation.enterCar('00');this.latest=null;this.walkStarted=now;
+        this.setPhase('walking');this.world.walk(this.navigation.snapshot());this.updateJourneyStatus(this.navigation.snapshot());
+      }
     }else if(this.phase==='aligning'){
       this.alignElapsed+=dt;const progress=clamp(this.alignElapsed/this.alignDuration,0,1);this.world.alignProgress(progress);
       if(progress>=1)this.playWork();
     }
+  }
+  boardTrain() {
+    if(!this.navigation.beginBoarding())return;
+    this.setPhase('boarding');this.world.startBoarding();this.updateJourneyStatus(this.navigation.snapshot());
+    this.boardElapsed=0;this.boardDuration=this.world.motionPreference.matches ? .01 : TRAIN.boardingSeconds;
   }
   arrive(id) {
     this.work=WORKS.find(work=>work.id===id);this.navigation.invalidate();
@@ -241,7 +292,7 @@ class Experience {
     this.gazeParticles.resize();this.gazeParticles.clear();
     if(innerWidth===this.viewport[0]&&innerHeight===this.viewport[1])return;
     this.viewport=[innerWidth,innerHeight];
-    if(['calibrating','validating','walking'].includes(this.phase)){
+    if(['calibrating','validating','walking','boarding'].includes(this.phase)){
       this.release();this.model.clear();this.showMessage('resize-required','화면 크기가 달라졌어요','새로운 화면에 맞춰 눈을 한 번 더 맞춰 주세요.','다시 맞추기',()=>this.start());
     }else if(gazePhases.has(this.phase)){
       // The film may continue, but a calibration for another viewport must not draw a false point.

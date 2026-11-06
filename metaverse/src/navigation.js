@@ -1,6 +1,6 @@
 import { WORLD, clamp } from './config.js';
 
-const steer = (position, deadZone) => {
+export const steeringAxis = (position, deadZone = WORLD.deadZone) => {
   const centered = clamp(position, 0, 1) * 2 - 1;
   const magnitude = Math.max(0, Math.abs(centered) - deadZone) / (1 - deadZone);
   return Math.sign(centered) * magnitude;
@@ -25,8 +25,8 @@ export class Navigation {
       const alpha = 1 - Math.exp(-dt / r.smoothingSeconds);
       this.filtered.x += (clamp(sample.x, 0, 1) - this.filtered.x) * alpha;
       this.filtered.y += (clamp(sample.y, 0, 1) - this.filtered.y) * alpha;
-      this.yaw = clamp(this.yaw + steer(this.filtered.x, r.deadZone) * r.yawSpeed * dt, -r.yawLimit, r.yawLimit);
-      this.pitch = clamp(this.pitch - steer(this.filtered.y, r.deadZone) * r.pitchSpeed * dt, -r.pitchLimit, r.pitchLimit);
+      this.yaw = clamp(this.yaw + steeringAxis(this.filtered.x, r.deadZone) * r.yawSpeed * dt, -r.yawLimit, r.yawLimit);
+      this.pitch = clamp(this.pitch - steeringAxis(this.filtered.y, r.deadZone) * r.pitchSpeed * dt, -r.pitchLimit, r.pitchLimit);
     }
     // Invalid input can only continue an already-valid direction for a brief blink.
     this.moving = now - this.lastValidAt <= r.inputGraceMs;
@@ -34,7 +34,7 @@ export class Navigation {
     this.x = clamp(this.x + Math.sin(this.yaw) * r.speed * dt, -r.halfWidth, r.halfWidth);
     this.z = Math.min(r.length, this.z + Math.cos(this.yaw) * r.speed * dt);
     this.trackedSeconds += dt;
-    if (this.z >= r.length) { this.arrived = this.x <= 0 ? 'left' : 'right'; this.moving = false; }
+    if (this.z >= r.length) { this.arrived = r.destination || (this.x <= 0 ? 'left' : 'right'); this.moving = false; }
     return this.snapshot();
   }
   snapshot() {

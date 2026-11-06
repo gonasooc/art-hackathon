@@ -17,7 +17,7 @@ export class EyeTracker {
       this.rejectReady=()=>{clearTimeout(timeout);reject(new DOMException('Canceled','AbortError'));};
       worker.onmessage=({data})=>{
         if (generation!==this.generation) return;
-        if (data.type==='ready') {clearTimeout(timeout);this.rejectReady=null;resolve();}
+        if (data.type==='ready') {clearTimeout(timeout);this.rejectReady=null;this.delegate=data.delegate;resolve();}
         else if (data.type==='error') {clearTimeout(timeout);this.rejectReady=null;reject(new Error(data.message));}
         else if (data.type==='sample') {
           this.busy=false; this.lastResult=performance.now();
