@@ -7,6 +7,7 @@
 | 폴더 | 프로젝트 | GitHub Pages |
 | --- | --- | --- |
 | [chatgpt/](chatgpt/) | [딸깍 — 그 사이의 시간](chatgpt/README.md) | [프로젝트 열기](https://gonasooc.github.io/art-hackathon/chatgpt/) |
+| [metaverse/](metaverse/) | [시선이 데려가는 곳](metaverse/README.md) | [프로젝트 열기](https://gonasooc.github.io/art-hackathon/metaverse/) |
 
 ```text
 art-hackathon/
@@ -15,14 +16,23 @@ art-hackathon/
 ├── package.json      # 공용 실행 명령
 ├── server.mjs        # 모든 프로젝트를 제공하는 로컬 서버
 ├── tests/            # 공용 서버 검증
-└── chatgpt/
-    ├── index.html    # /art-hackathon/chatgpt/ 진입점
-    ├── *.css
-    ├── src/
-    ├── public/
-    ├── scripts/
+├── chatgpt/
+│   ├── index.html    # /art-hackathon/chatgpt/ 진입점
+│   ├── *.css
+│   ├── src/
+│   ├── public/
+│   ├── scripts/
+│   ├── tests/
+│   ├── docs/
+│   ├── package.json
+│   └── README.md
+└── metaverse/
+    ├── index.html    # /art-hackathon/metaverse/ 진입점
+    ├── src/          # 시선 추적·보정·이동·영상
+    ├── assets/       # 모델과 두 임시 영상
+    ├── vendor/       # 버전을 고정한 정적 라이브러리
+    ├── docs/         # 최종 기획과 검증 기록
     ├── tests/
-    ├── docs/
     ├── package.json
     └── README.md
 ```
@@ -37,16 +47,19 @@ npm start
 
 - 프로젝트 목록: `http://127.0.0.1:5173/`
 - 현재 프로젝트: `http://127.0.0.1:5173/chatgpt/`
+- 시선 전시: `http://127.0.0.1:5173/metaverse/`
 - 배포 경로 확인: `http://127.0.0.1:5173/art-hackathon/chatgpt/`
 
 `npm run dev`도 같은 서버를 실행합니다. 파일 수정 후 새로고침하면 반영됩니다.
 
 ```sh
+npm --prefix metaverse ci
 npm run build
 npm test
+npm run test:metaverse
 ```
 
-루트의 `build`는 현재 프로젝트의 단독 전달용 파일 `chatgpt/dist/딸깍.html`을 생성합니다. `test`는 공용 서버와 현재 프로젝트를 검사하며, 단독 HTML 검사 때문에 빌드를 먼저 실행해야 합니다. `npm run refresh:portfolio`는 현재 프로젝트의 원본 자료를 갱신합니다. 프로젝트 내부에서 해당 명령을 실행할 수도 있습니다.
+루트의 `build`는 `chatgpt/dist/딸깍.html`과 메타버스의 정적 라이브러리·자산 목록을 준비합니다. `test`는 공용 서버와 두 프로젝트를 검사하며, 빌드를 먼저 실행해야 합니다. `test:metaverse`는 Playwright 브라우저 검사로, 최초에는 `cd metaverse` 후 `npx playwright install chromium`으로 테스트 브라우저를 설치합니다. 정적 파일을 관람하는 `npm start`에는 의존성 설치가 필요하지 않습니다. `npm run refresh:portfolio`는 ChatGPT 프로젝트의 원본 자료를 갱신합니다.
 
 ## GitHub Pages 배포
 
@@ -66,4 +79,4 @@ npm test
 
 그러면 `https://gonasooc.github.io/art-hackathon/example/`에서 열립니다. 공용 서버에서도 `http://127.0.0.1:5173/example/`로 바로 확인할 수 있으며, 프로젝트별 서버 라우트 설정은 필요하지 않습니다. `example`은 폴더 이름 예시이며 아직 프로젝트를 생성하지 않았습니다.
 
-새 프로젝트에 빌드 도구를 사용한다면 배포할 정적 결과물이 `example/index.html`을 진입점으로 갖도록 배치하고, 에셋의 기준 경로를 `/art-hackathon/example/` 또는 상대경로로 설정하세요. 각 프로젝트의 빌드·테스트 명령은 해당 프로젝트의 `package.json`에서 관리합니다. 루트의 빌드·테스트 명령은 현재 `chatgpt`를 대상으로 하므로 새 프로젝트도 함께 실행하려면 이 명령에 추가하세요.
+새 프로젝트에 빌드 도구를 사용한다면 배포할 정적 결과물이 `example/index.html`을 진입점으로 갖도록 배치하고, 에셋의 기준 경로를 `/art-hackathon/example/` 또는 상대경로로 설정하세요. 각 프로젝트의 빌드·테스트 명령은 해당 프로젝트의 `package.json`에서 관리합니다. 루트의 빌드·테스트 명령은 현재 `chatgpt`와 `metaverse`를 대상으로 하므로 새 프로젝트도 함께 실행하려면 이 명령에 추가하세요.

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171d1b">
+  <meta name="description" content="바라보는 사이, 어느새 도착한 곳. 웹캠 시선으로 걷고 영상을 만나는 1인칭 전시.">
+  <title>시선이 데려가는 곳</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23171d1b'/%3E%3Cellipse cx='32' cy='32' rx='21' ry='12' stroke='%23e5dfce' fill='none' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23e5dfce'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body data-phase="idle">
+  <canvas id="world" aria-label="두 작품으로 이어지는 전시 공간"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="masthead"><a href="../" aria-label="프로젝트 목록으로 돌아가기">ART HACKATHON</a><span>GAZE STUDY <i>001</i></span></header>
+  <main>
+    <section id="intro" class="intro" aria-labelledby="title">
+      <div class="edition"><span class="rule"></span> 시선으로 걷는 전시</div>
+      <h1 id="title">시선이<br>데려가는 곳<span class="period">.</span></h1>
+      <p class="intro-copy">어디로 갈지 정하지 않아도 괜찮습니다.<br>바라보는 사이, 어느새 도착한 곳에서<br>하나의 장면을 만납니다.</p>
+      <button id="start" class="primary" type="button">소리와 함께 시작 <span aria-hidden="true">↗</span></button>
+      <p class="entry-meta">노트북 Chrome · 카메라 사용 · 약 1–2분</p>
+      <p class="privacy">카메라는 눈의 움직임을 읽는 데 사용됩니다.<br>영상은 이 기기 안에서 처리하며 저장·전송하지 않습니다.</p>
+    </section>
+    <section id="setup" class="setup" hidden aria-labelledby="setup-title">
+      <div class="setup-heading"><span id="step-label" class="eyebrow">PREPARATION</span><h2 id="setup-title">눈을 맞추는 시간</h2><p id="setup-copy">편하게 앉아 화면을 정면으로 바라봐 주세요.</p></div>
+      <div id="target" class="target" hidden aria-hidden="true"><span></span></div>
+      <div class="setup-footer"><span id="step-count"></span><p id="tracking-status" role="status" aria-live="polite"></p></div>
+    </section>
+    <section id="message" class="message" hidden aria-labelledby="message-title" aria-describedby="message-copy">
+      <span id="message-label" class="eyebrow">A MOMENT</span><h2 id="message-title" tabindex="-1"></h2><p id="message-copy"></p><button id="message-action" class="primary" type="button"></button>
+      <button id="message-home" class="text-button" type="button">처음으로</button>
+    </section>
+    <section id="ending" class="ending" hidden aria-labelledby="ending-title"><span id="work-label" class="eyebrow"></span><h2 id="ending-title">당신의 시선이<br>머문 자리.</h2><p id="work-title"></p><p class="ending-copy">같은 길에서도, 다른 장면을 만날 수 있습니다.</p><button id="restart" class="primary" type="button">다시 걸어보기 <span aria-hidden="true">↗</span></button><button id="end-home" class="text-button" type="button">처음으로</button></section>
+    <div id="pause-notice" class="pause-notice" hidden role="status"><span class="status-dot"></span><span id="pause-copy"></span><button id="recalibrate" type="button">다시 맞추기</button></div>
+    <button id="leave" class="leave" type="button" hidden>체험 종료 <span aria-hidden="true">×</span></button>
+    <button id="motion-toggle" class="motion-toggle" type="button" aria-pressed="true" hidden>흔들림 끄기</button>
+  </main>
+  <footer class="colophon"><span>LOOK. WANDER. ARRIVE.</span><span>몸이 먼저 도착하는 순간</span></footer>
+  <video id="film" playsinline preload="auto" aria-hidden="true" hidden></video>
+  <noscript>이 전시는 카메라와 JavaScript가 필요합니다. 데스크톱 Chrome에서 JavaScript를 허용해 주세요.</noscript>
+</body>
+</html>

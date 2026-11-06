@@ -14,6 +14,8 @@ const mime = {
   '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.otf': 'font/otf',
   '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4',
   '.mp4': 'video/mp4', '.webm': 'video/webm', '.pdf': 'application/pdf',
+  '.wasm': 'application/wasm', '.task': 'application/octet-stream',
+  '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json',
 };
 const privateDirectories = new Set(['scripts', 'tests', 'node_modules', 'private']);
 
@@ -46,7 +48,8 @@ export function createStaticServer(root = repositoryRoot) {
         file = path.join(file, 'index.html');
       }
       const contentType = mime[path.extname(file).toLowerCase()];
-      if (!contentType || /^package(?:-lock)?\.json$/.test(path.basename(file)) || !(await stat(file)).isFile()) {
+      const fileInfo = await stat(file);
+      if (!contentType || /^package(?:-lock)?\.json$/.test(path.basename(file)) || !fileInfo.isFile()) {
         throw new Error('Not a public file');
       }
       const [realRoot, realFile] = await Promise.all([realpath(root), realpath(file)]);
@@ -57,8 +60,24 @@ export function createStaticServer(root = repositoryRoot) {
         res.end();
         return;
       }
-      const body = req.method === 'HEAD' ? undefined : await readFile(file);
-      res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff' });
+      const headers = { 'Content-Type': contentType, 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Accept-Ranges': 'bytes' };
+      let start = 0, end = fileInfo.size - 1, status = 200;
+      if (req.method === 'GET' && req.headers.range) {
+        const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range);
+        if (range && (range[1] || range[2])) {
+          start = range[1] ? Number(range[1]) : Math.max(0, fileInfo.size - Number(range[2]));
+          end = range[1] && range[2] ? Math.min(Number(range[2]), end) : end;
+        }
+        if (!range || (!range[1] && !range[2]) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= fileInfo.size) {
+          res.writeHead(416, { ...headers, 'Content-Range': `bytes */${fileInfo.size}`, 'Content-Length': 0 });
+          res.end(); return;
+        }
+        status = 206;
+        headers['Content-Range'] = `bytes ${start}-${end}/${fileInfo.size}`;
+      }
+      headers['Content-Length'] = Math.max(0, end - start + 1);
+      const body = req.method === 'HEAD' ? undefined : (await readFile(file)).subarray(start, end + 1);
+      res.writeHead(status, headers);
       res.end(body);
     } catch {
       res.writeHead(404);

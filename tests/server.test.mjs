@@ -21,6 +21,10 @@ test('static projects work at sibling paths and the GitHub Pages prefix', async 
     'example/app.js': 'export const project = "example";',
     'example/data.json': '{"ready":true}',
     'example/assets/font.woff2': 'font fixture',
+    'metaverse/index.html': '<script src="./src/app.js" type="module"></script>',
+    'metaverse/assets/model.task': 'model fixture',
+    'metaverse/vendor/vision.wasm': 'wasm fixture',
+    'metaverse/line.glb': 'glb fixture',
     'example/empty/readme.md': 'No index here',
     '.env': 'SECRET=hidden',
     '.git/config': 'private',
@@ -48,8 +52,8 @@ test('static projects work at sibling paths and the GitHub Pages prefix', async 
   await once(server, 'listening');
 
   // http.request preserves malicious path segments that fetch would normalize.
-  const request = (requestPath, method = 'GET') => new Promise((resolve, reject) => {
-    const req = http.request({ hostname: '127.0.0.1', port: server.address().port, path: requestPath, method }, res => {
+  const request = (requestPath, method = 'GET', headers = {}) => new Promise((resolve, reject) => {
+    const req = http.request({ hostname: '127.0.0.1', port: server.address().port, path: requestPath, method, headers }, res => {
       let body = '';
       res.setEncoding('utf8');
       res.on('data', chunk => { body += chunk; });
@@ -78,6 +82,21 @@ test('static projects work at sibling paths and the GitHub Pages prefix', async 
     const head = await request(`${prefix}/example/`, 'HEAD');
     assert.equal(head.status, 200);
     assert.equal(head.body, '');
+    assert.equal(Number(head.headers['content-length']), Buffer.byteLength(files['example/index.html']));
+    const range = await request(`${prefix}/example/app.js`, 'GET', { Range: 'bytes=7-11' });
+    assert.equal(range.status, 206);
+    assert.equal(range.body, files['example/app.js'].slice(7, 12));
+    assert.equal(range.headers['content-range'], `bytes 7-11/${Buffer.byteLength(files['example/app.js'])}`);
+    const suffix = await request(`${prefix}/example/app.js`, 'GET', { Range: 'bytes=-4' });
+    assert.equal(suffix.body, files['example/app.js'].slice(-4));
+    for (const invalid of ['bytes=99999-', 'bytes=9-2', 'bytes=-0', 'bytes=-', 'bytes=0-1,3-4']) {
+      assert.equal((await request(`${prefix}/example/app.js`, 'GET', { Range: invalid })).status, 416);
+    }
+    for (const [file, mime] of [['assets/model.task', 'application/octet-stream'], ['vendor/vision.wasm', 'application/wasm'], ['line.glb', 'model/gltf-binary']]) {
+      const asset = await request(`${prefix}/metaverse/${file}`);
+      assert.equal(asset.status, 200);
+      assert.equal(asset.headers['content-type'], mime);
+    }
 
     for (const blocked of ['.env', '.git/config', 'server.mjs', 'package.json', 'chatgpt/package.json', 'chatgpt/scripts/private.js', 'chatgpt/tests/private.js', 'example/private/secret.json', 'example/outside.html', 'example/empty/', 'missing/', 'chatgpt/missing.js', 'chatgpt/../package.json', 'chatgpt/%2e%2e/package.json', 'chatgpt/%5c../package.json', '%E0%A4%A']) {
       assert.equal((await request(`${prefix}/${blocked}`)).status, 404, `${prefix}/${blocked}`);

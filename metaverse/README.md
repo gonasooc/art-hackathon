@@ -1,0 +1,77 @@
+# 시선이 데려가는 곳
+
+웹캠 시선으로 걷고, 도착한 곳의 영상을 만나는 1인칭 전시 MVP입니다. [최종 기획서](docs/mvp-plan.md)에 인터뷰 Q1–Q23과 핸드헬드 추가 요청을 정리했습니다.
+
+## 실행
+
+Node.js 22 이상에서 저장소 루트의 공용 서버를 실행합니다. 실행용 라이브러리·얼굴 모델·영상은 정적 파일로 포함되어 있어 관람에 빌드나 외부 CDN 접속이 필요하지 않습니다.
+
+```sh
+npm start
+```
+
+- 로컬: `http://127.0.0.1:5173/metaverse/`
+- Pages 경로 확인: `http://127.0.0.1:5173/art-hackathon/metaverse/`
+- 배포 후: `https://gonasooc.github.io/art-hackathon/metaverse/`
+
+노트북 Chrome에서 **소리와 함께 시작**을 누르고 카메라를 허용합니다. 얼굴을 화면 정면에 두고 고개를 편하게 고정한 채 점을 눈으로 따라갑니다. 보정 9점과 별도 검증 6점을 통과하면 공간이 열립니다. 공간 안에서는 시선만으로 회전·보행하며, 화면 중앙을 보면 현재 방향을 유지합니다.
+
+보정이 통과하지 않으면 얼굴을 밝게 비추고 화면과 자세를 고정해 다시 시도합니다. 일부러 머리를 움직여 조종하거나 키보드로 대신 이동하는 기능은 없습니다. 미세한 핸드헬드는 이동 중 **흔들림 끄기**로 끌 수 있고, OS의 동작 줄이기 설정에서는 적용하지 않습니다.
+
+카메라 원본은 로컬 워커에서 분석합니다. 눈 이미지·시선 이력을 업로드하거나 영속 저장하지 않으며 카메라는 도착·종료·취소 시 해제합니다. 입장 시 클릭으로 소리 재생을 준비하지만, 브라우저 정책 때문에 이후 재생이 막히면 도착한 위치에서 재생 버튼을 제공합니다.
+
+## 개발과 검증
+
+이 폴더에서 실행합니다.
+
+```sh
+npm ci
+npm run build
+npm test
+npx playwright install chromium
+npm run test:e2e
+```
+
+`build`는 고정한 의존성에서 배포용 정적 파일을 `vendor/`에 복사하고, 모델·영상의 존재와 해시를 `assets/manifest.json`에 기록합니다. GitHub Pages의 `main` / `/(root)` 배포에는 `vendor/`, `assets/`, `src/`, HTML·CSS가 함께 포함되어야 합니다. 이 프로젝트에는 런타임 서버나 별도 백엔드가 없습니다.
+
+브라우저 검사는 실제 WebGL·MediaPipe 워커·카메라 실패 처리와, 추적기 경계에서 합성 눈 특징을 공급하는 전체 체험 검사를 구분합니다. Google 공개 얼굴 테스트 이미지가 없으면 최초 검사 시 `.cache/fixtures/`에 다운로드합니다. 검사 결과와 실제 사용자 확인은 [검증 기록](docs/verification.md)을 참고하세요. 자동 검사만으로 일반 웹캠의 사람별 정확도를 보장하지 않습니다.
+
+## 구성
+
+| 파일 | 역할 |
+| --- | --- |
+| `src/config.js` | 공간 크기·속도·회전 한계·보정 타깃·작품 경로 |
+| `src/vision-worker.js`, `src/tracker.js` | 로컬 MediaPipe 추론, 카메라 수명주기, 최신 프레임 처리 |
+| `src/eye-features.js` | 양쪽 눈의 홍채 위치 정규화, 눈 감음·얼굴 품질 처리 |
+| `src/gaze-model.js` | 2차 회귀 보정, 머리 자세 변화 검출, 독립 타깃 검증 |
+| `src/navigation.js` | 입력 유효성, 시선 기반 회전·이동, 경계·도착 판정 |
+| `src/handheld.js` | 이동 좌표와 분리된 작은 카메라 흔들림 |
+| `src/world.js` | Three.js 통로, 동일한 두 스크린, 도착 정렬, 영상 텍스처 |
+| `src/app.js` | 입장·보정·검증·이동·재생·종료와 복구 상태 전이 |
+| `assets/films/` | 두 편의 12초 임시 작품과 소리 재생 준비 파일 |
+| `assets/models/face_landmarker.task` | Google Face Landmarker float16 모델 버전 1 |
+| `docs/mvp-plan.md` | 구현 기준인 최종 기획과 세션 결정 |
+
+MediaPipe는 얼굴·홍채 랜드마크를 제공하고, 이 프로젝트의 회귀 보정이 화면의 시선 좌표를 추정합니다. 머리 각도를 이동 방향으로 직접 연결하지 않습니다. 정확도는 조명·안경·카메라 위치·자세에 영향을 받으며, 검증 실패·자세 변화에서는 진입을 막거나 이동을 멈춥니다. 검증의 오차 기준은 기기의 실측 결과를 바탕으로 조정할 수 있는 초기값입니다.
+
+## 영상 교체와 재생성
+
+H.264 영상과 AAC 소리가 포함된 MP4 파일을 `assets/films/`에 두고 `src/config.js`의 `WORKS` 경로와 제목을 바꿉니다. 임시 작품은 외부 원본을 가져온 것이 아니라 수학적 애니메이션과 합성음으로 생성했습니다. `ready.mp4`는 같은 비디오 요소의 소리 재생을 준비하는 짧은 무음 파일이며, 관람 작품 두 편에는 실제 오디오 트랙이 있습니다.
+
+FFmpeg가 설치된 환경에서 재생성할 수 있습니다.
+
+```sh
+npm run media
+npm run build
+```
+
+`line.glb`는 사용자가 제공한 조형물 파일로 그대로 보존했습니다. 통로 모델로 변환하거나 임의로 전시에 삽입하지 않았습니다.
+
+## 출처
+
+- Three.js 0.187.0 · MIT · `vendor/three/LICENSE.txt`
+- MediaPipe Tasks Vision 1.2.2 · Apache-2.0 · `vendor/vision/LICENSE.txt`
+- [Google Face Landmarker 모델과 가이드](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)
+- [Chrome의 자동재생 정책](https://developer.chrome.com/blog/autoplay/)
+
+SDK·WASM·모델은 함께 검증한 버전으로 고정합니다. `webcam-metaverse-tech-stack.md`는 초기 기술 검토 원문으로 보존하며, 실제 MVP의 범위와 구현은 이 README 및 최종 기획서를 따릅니다.

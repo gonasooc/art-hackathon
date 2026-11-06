@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "build": "npm --prefix chatgpt run build",
-    "test": "node --test tests/*.test.mjs && npm --prefix chatgpt test",
+    "build": "npm --prefix chatgpt run build && npm --prefix metaverse run build",
+    "test": "node --test tests/*.test.mjs && npm --prefix chatgpt test && npm --prefix metaverse test",
+    "test:metaverse": "npm --prefix metaverse run test:e2e",
     "refresh:portfolio": "npm --prefix chatgpt run refresh:portfolio --"
   }
 }

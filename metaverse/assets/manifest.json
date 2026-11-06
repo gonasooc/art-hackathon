@@ -1,0 +1,46 @@
+{
+  "three": "0.187.0",
+  "mediapipe": "1.2.2",
+  "files": {
+    "vendor/three/three.module.js": {
+      "bytes": 658900,
+      "sha256": "104f56145899722094556490d787aae0617cc2fc3382f31df02d724ea1aee341"
+    },
+    "vendor/three/three.core.js": {
+      "bytes": 1474799,
+      "sha256": "613e370f76638fdef83926642bf256dc9615684922de1ce1f63a8583e5d78578"
+    },
+    "vendor/three/LICENSE.txt": {
+      "bytes": 1081,
+      "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
+    },
+    "vendor/vision/vision_bundle.js": {
+      "bytes": 156088,
+      "sha256": "a8c95ebecb9efca4ef79ce32f7b77fa5cb61b809e7e21a2f3d792d181ca0b822"
+    },
+    "vendor/vision/wasm/vision_wasm_internal.js": {
+      "bytes": 334128,
+      "sha256": "f2b9c17131ea79716ec6bf07b117a087b2749a6f8a1e2f1f2e77a9382092db5b"
+    },
+    "vendor/vision/wasm/vision_wasm_internal.wasm": {
+      "bytes": 14603354,
+      "sha256": "f5bd25147ac89d506074293ce2675969b10e827180db95a0d9689c2ed80764ab"
+    },
+    "assets/models/face_landmarker.task": {
+      "bytes": 3758596,
+      "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+    },
+    "assets/films/resonance.mp4": {
+      "bytes": 508415,
+      "sha256": "a504ed5bc9510b54f28930982eacc32e66ce5e46d00e3e8a673a272158d0decb"
+    },
+    "assets/films/afterimage.mp4": {
+      "bytes": 517653,
+      "sha256": "ff5aecc00711298c9015fcf3672385f9a55f8abcdd9919b6cbabfdcdacaec9d4"
+    },
+    "assets/films/ready.mp4": {
+      "bytes": 2475,
+      "sha256": "8956a78a900c073cef760c307b7dc28662559839b836e064a783815a91544ee7"
+    }
+  }
+}
