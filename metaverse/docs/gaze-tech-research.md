@@ -1,6 +1,9 @@
 # 웹캠 시선 추적 기술 조사 — MediaPipe 대안 검토
 
-2026-11-06 · 현재 MediaPipe Face Landmarker 기반 시선 추적보다 최근 더 많이 쓰이거나 더 정확한 기술이 있는지 조사한 기록. [최종 기획](mvp-plan.md)과 현재 코드(`src/eye-features.js`, `src/gaze-model.js`, `src/vision-worker.js`)를 기준으로 했다.
+> 이 문서는 2026-11-06 조사 당시의 대안 검토 기록이다. 외부 논문·SDK 비교는 이번에 재검증하지 않았다. 현재 제품은 MediaPipe 랜드마크와 학습점 내부 교차 검사로 선택한 선형·2차 회귀를 사용하며 [현재 README](../README.md)의 보정·검증 항목을 따른다.
+
+
+2026-11-06 · 현재 MediaPipe Face Landmarker 기반 시선 추적보다 최근 더 많이 쓰이거나 더 정확한 기술이 있는지 조사한 기록. [당시 MVP 기획](mvp-plan.md)과 현재 코드(`src/eye-features.js`, `src/gaze-model.js`, `src/vision-worker.js`)를 기준으로 했다.
 
 ## 결론
 

@@ -24,7 +24,7 @@
 
 ## 객차 작업
 
-- 모듈: `src/carriages/<이름>.js`의 `build…Carriage()`가 `{group, targets, lighting, update(dt, reducedMotion)}`를 반환한다. 예시는 `forest.js`.
+- 모듈: `src/carriages/<이름>.js`의 `build…Carriage()`가 `{group, targets, lighting, update(dt, reducedMotion)}`를 반환한다. `group`·`targets`가 기본이며 나머지는 칸에 따라 선택적으로 반환한다. 예시는 `forest.js`.
 - 등록 지점: `src/config.js`의 `CARRIAGES` 구현 목록과 `JOURNEY_ORDER`, `src/train-world.js`의 빌더 목록, `src/visual-inspector.js`의 `names`, `tests/browser/objects.spec.mjs`의 `rooms`(응시점), `docs/<이름>-reference.md`
 - 제약:
   - 소멸 대상 메시는 `MeshStandardMaterial`(소멸 셰이더 호환)
@@ -43,11 +43,13 @@
 
 - Figma 보드(AKL Team 1, `FszUcDRVifUMnx9x15K1Z6`)는 읽기만 한다. Figma MCP는 호출 제한이 있으니 이미지는 한 번 받아 `.cache/<이름>-references/`에 둔다.
 - `.cache/`(레퍼런스 프레임, 검증 렌더)는 커밋하지 않는다. 외부 CDN이나 런타임 다운로드는 없다.
-- 레퍼런스 영상은 시각 참고용이다. 페이지에서 재생하거나 배포하지 않는다.
+- 객차 레퍼런스 영상은 시각 참고용이며 페이지에서 재생하거나 배포하지 않는다. 사용자가 재생을 허용한 행성 도입 영상 `assets/films/planet-womb.mp4`는 예외이며 첫 프레임·별도 오디오와 함께 배포한다.
+- `assets/audio/`는 런타임에서 사용하지만 현재 `scripts/build.mjs`의 해시 매니페스트 대상에는 포함되지 않는다. 소리 자산 배포 여부는 별도로 확인한다.
 
 ## 문서
 
 - 문서는 한국어로 쓴다. 변경하면 README와 관련 `docs/`를 함께 고친다.
 - `docs/verification.md`에는 실제로 확인한 것과 확인하지 않은 것을 구분해 적는다.
 - 현재 흐름의 기준은 `docs/hospital-object-plan.md`(응시·깜빡임 소멸)와 `docs/train-00-plan.md`(기차·00칸)이다. 칸별 레퍼런스는 `docs/*-reference.md`에 있다.
-- `.impeccable.md`는 UI 디자인 스킬용 맥락이다. 영상 관람·"00칸만 구현" 같은 지난 결정이 섞여 있어 기준으로 쓰지 않는다.
+- `.impeccable.md`는 현재 UI 디자인 맥락이다. `docs/mvp-plan.md`와 기술 조사 문서는 초기 기록이며 현행 구현 범위로 해석하지 않는다.
+- 현재 값: 보행 2.7m/s, 소멸 일반 1.3초·동작 줄이기 0.35초. 도입 건너뛰기는 없고 시연 조작은 마우스 호버·키보드 포커스에서 표시한다.
