@@ -38,3 +38,10 @@
 - `audio/footsteps.wav`: 사용자가 제공한 `~/Downloads/footstep_2.wav`를 변환 없이 복사했다. 48kHz·24bit·스테레오, 약 13.67초. 이동 시 반복 재생하며 초기 볼륨은 18%다. 원본 파일의 볼륨·속도는 가공하지 않았다.
 
 - `audio/playground-second.mp3`: 사용자 제공 `SFX11_B_놀이터_아이웃음2.mp3` 원본을 변환 없이 복사했다. MP3·48kHz·스테레오, 약 8.09초. 놀이터 두 번째 대상 소멸 시작 시 기존 놀이터 소리를 대체해 반복 재생한다.
+
+
+## Blender 숲 모델
+
+`models/forest.glb`는 사용자가 제공한 `숲.glb`의 웹용 사본이다. Blender 객차·주요 대상 메시·씬 구조를 보존하며 반복된 먼 소나무만 원본 메시 기반 저해상도 인덱스로 줄였다. 내장 텍스처를 4096→2048px로 축소하고 잘못된 texCoord=-1을 기본 UV 세트로 정리했다. 단순화 후 사용하지 않는 정점과 버퍼를 추가로 제거하며, 렌더되는 삼각형은 그대로 유지한다. 원본 해시·준비 명령·런타임 배치 및 재질 차이는 [숲 문서](../docs/forest-reference.md)에 기록한다.
+
+`vendor/three/addons/`의 GLTFLoader·BufferGeometryUtils·SkeletonUtils는 Three.js 0.187.0 배포 파일이며 MIT 라이선스를 따른다. 정적 서비스 호환을 위해 `from 'three'`만 상대경로로 변경했다.

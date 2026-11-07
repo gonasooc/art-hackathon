@@ -255,3 +255,10 @@ export function buildForestCarriage() {
     },
   };
 }
+
+// The Blender scene has no snow mesh; preserve the existing interactive snow memory.
+export function buildForestSnow(){
+ const base=new THREE.Group(),position=[-8.7,F,Z-1.36];
+ rock(base,[-8.7,F+.24,Z-1.36],[.87,.42,.49],mat(0x8d9892),72);
+ return {base,target:{id:'05-snow',group:snowObject(),position,aim:[-8.7,F+.57,Z-1.36]}};
+}

@@ -14,6 +14,18 @@
       "bytes": 1081,
       "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
     },
+    "vendor/three/addons/loaders/GLTFLoader.js": {
+      "bytes": 119877,
+      "sha256": "eedeafc3e90a360570045e72005333a2abde65f96bc332be1b05a19d0241460d"
+    },
+    "vendor/three/addons/utils/BufferGeometryUtils.js": {
+      "bytes": 39169,
+      "sha256": "dba1b5dccc418f494eae6f1e731ec82734b2eaf3321b1db04c4321b16c1ea549"
+    },
+    "vendor/three/addons/utils/SkeletonUtils.js": {
+      "bytes": 11551,
+      "sha256": "28017bf37d0ecb0c4be6048db759ff14df729a562464830b064d4cc239c5af17"
+    },
     "vendor/vision/vision_bundle.js": {
       "bytes": 156088,
       "sha256": "a8c95ebecb9efca4ef79ce32f7b77fa5cb61b809e7e21a2f3d792d181ca0b822"
@@ -25,6 +37,10 @@
     "vendor/vision/wasm/vision_wasm_internal.wasm": {
       "bytes": 14603354,
       "sha256": "f5bd25147ac89d506074293ce2675969b10e827180db95a0d9689c2ed80764ab"
+    },
+    "assets/models/forest.glb": {
+      "bytes": 21276696,
+      "sha256": "c934f799b6e65154033b124065cc6f0b3efe110c6b1bc9e086f37220bebe0861"
     },
     "assets/models/face_landmarker.task": {
       "bytes": 3758596,

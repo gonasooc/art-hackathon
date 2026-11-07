@@ -52,6 +52,8 @@ npm start
 
 01 병원·06 임종의 표범은 제공된 두 방향별 이미지에 맞춰 공통 모델로 보완했습니다. 몸통·목·다리는 연속 표면으로 연결하고 얼굴·발·털 무늬 디테일을 추가했습니다. [표범 형상과 남은 차이](docs/leopard-reference.md).
 
+05 숲은 Blender에서 제작한 `숲.glb`를 **GLTFLoader로 직접 로드**합니다. 메시·재질·텍스처를 사용하며 이끼·분재에 기존 소멸 동작을 연결합니다. 텍스처·미사용 정점을 정리한 웹 사본은 약 21.3MB입니다. 첫 화면에서는 읽지 않고 04 카페에서 미리 준비하거나 05 진입 시 읽습니다. 반복 식생은 인스턴싱으로 버퍼를 공유합니다. [GLB 통합과 재질·배치 차이](docs/forest-reference.md).
+
 ## 도입부와 소리
 
 보정·검증 뒤 `assets/films/planet-womb.mp4`를 재생합니다. 10.4초부터 3.2초 동안 3D 공간과 겹쳐 기차 앞으로 연결하며, 그동안 이동·오브젝트 진행은 멈춥니다. **도입 건너뛰기 버튼은 없습니다.** 영상 로드에 실패하면 오류 화면의 ‘기차 앞에서 계속’으로 복구할 수 있습니다.
@@ -142,7 +144,7 @@ npm run test:e2e -- tests/browser/incense-finale.spec.mjs
 | `src/navigation.js`, `train-journey.js` | 시선 이동과 기차 앞·탑승·객차·출구 진행 |
 | `src/handheld.js`, `gaze-particles.js` | 작은 카메라 흔들림과 시선 시각화 |
 | `src/train-world.js`, `train-geometry.js`, `world.js` | 3D 공간, 기차, 렌더링과 객차 통합 |
-| `src/carriages/` | 집·놀이터·카페·숲·임종·향과 공통 공간 구성 |
+| `src/carriages/` | 집·놀이터·카페·임종·향, 숲 GLB 로딩 어댑터와 공통 공간 구성 |
 | `src/blink-interaction.js`, `memory-objects.js` | 깜빡임 판정, 01 병원, 공통 응시·소멸·복원 |
 | `src/prologue.js`, `journey-audio.js` | 도입 재생·전환, 별도 오디오 수명주기 |
 | `src/visual-demo.js`, `visual-inspector.js` | 자동 시연과 개발용 수동 점검 |

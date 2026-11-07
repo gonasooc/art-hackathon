@@ -53,7 +53,7 @@ export class VisualInspector {
   }
   stop(){
     if(!this.active)return;
-    this.active=false;this.clearInput();this.world.renderer.toneMappingExposure=this.savedExposure;
+    this.active=false;this.selectionSerial=(this.selectionSerial||0)+1;this.clearInput();this.world.renderer.toneMappingExposure=this.savedExposure;
     this.world.objects.focusedId=null;this.world.needsRender=true;
     for(const id of ['visual-badge','visual-panel','visual-tools-toggle'])byId(id).hidden=true;
     delete this.canvas.dataset.visualPose;delete this.canvas.dataset.visualExposure;
@@ -72,8 +72,14 @@ export class VisualInspector {
     this.world.renderer.toneMappingExposure=this.savedExposure*value;this.world.needsRender=true;
     byId('visual-exposure').value=value;byId('visual-exposure-value').textContent=`${value.toFixed(1)}×`;this.canvas.dataset.visualExposure=String(value);
   }
-  selectRoom(id){
+  async selectRoom(id){
     if(!this.active)return;
+    const selection=this.selectionSerial=(this.selectionSerial||0)+1;
+    if(!this.world.isCarReady(id)){
+      byId('visual-status').textContent='숲 모델을 불러오는 중…';
+      try{await this.world.ensureCar(id);}catch{if(this.active&&selection===this.selectionSerial)byId('visual-status').textContent='숲 모델을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.';return;}
+      if(!this.active||selection!==this.selectionSerial)return;
+    }
     this.clearInput();this.room=id;this.world.reset();
     if(id!=='platform'){
       this.world.setCar(id);this.world.boarded=true;

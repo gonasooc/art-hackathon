@@ -106,6 +106,7 @@ class Experience {
     this.phase=phase;document.body.dataset.phase=phase;document.body.dataset.mode=this.mode;
     byId('mobile-controls-toggle').hidden=this.mode!=='demo'||['idle','error'].includes(phase);
     if(phase==='idle'||this.demo?.preparing){document.body.dataset.controlsOpen='false';byId('mobile-controls-toggle').setAttribute('aria-expanded','false');byId('mobile-controls-toggle').textContent='조작';}
+    byId('car-loading').hidden=phase!=='car-loading';
     byId('intro').hidden=phase!=='idle';
     byId('setup').hidden=!['loading','calibrating','validating'].includes(phase);
     byId('target').hidden=!['calibrating','validating'].includes(phase);
@@ -179,8 +180,7 @@ class Experience {
     this.model.clear();this.navigation.reset();this.latest=null;
     delete document.body.dataset.validation;delete document.body.dataset.destination;
     this.setPhase('visual');this.visual.start();
-    if(CARRIAGES.some(item=>item.id===car&&item.implemented))this.visual.selectRoom(car);
-    try{await this.world.ready;}
+    try{await this.world.ready;if(serial===this.serial&&this.visual.active)await this.visual.selectRoom(CARRIAGES.some(item=>item.id===car&&item.implemented)?car:'platform');}
     catch{
       if(serial!==this.serial)return;
       this.release();this.showMessage('error','공간을 준비하지 못했어요','이미지 파일을 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.','다시 열기',()=>this.startInspector(car));
@@ -210,18 +210,35 @@ class Experience {
       this.release();this.showMessage('error','공간을 준비하지 못했어요','이미지 파일을 불러오지 못했어요. 연결을 확인한 뒤 다시 열어 주세요.','다시 열기',()=>this.startVisual());
     }
   }
+  async waitForCar(id){
+    if(this.world.isCarReady(id))return true;
+    const serial=this.serial,phase=this.phase;
+    if(this.mode==='demo')this.demo.preparing=true;
+    this.navigation.invalidate();this.latest=null;this.blink.reset();this.setPhase('car-loading');
+    try{
+      await this.world.ensureCar(id);
+      if(serial!==this.serial)return false;
+      if(this.mode==='demo')this.demo.preparing=false;
+      this.setPhase(phase);return true;
+    }catch{
+      if(serial!==this.serial)return false;
+      this.release();this.showMessage('error','숲을 불러오지 못했어요','연결을 확인한 뒤 다시 열어 주세요.','새로고침',()=>location.reload());return false;
+    }
+  }
   updateDemoNavigation(){
     const index=JOURNEY_ORDER.indexOf(this.navigation.carId);
     const ready=this.mode==='demo'&&this.demo?.active&&!this.demo.preparing&&index>=0;
     byId('demo-prev').disabled=!ready||index===0;
     byId('demo-next').disabled=!ready||index===JOURNEY_ORDER.length-1;
   }
-  moveDemoCar(direction){
+  async moveDemoCar(direction){
     if(this.mode!=='demo'||![-1,1].includes(direction))return;
     const previous=this.navigation.carId,index=JOURNEY_ORDER.indexOf(previous);
     if(index<0)return;
     const next=JOURNEY_ORDER[index+direction];
-    if(!next||!this.demo.seekCar(this.navigation,next))return;
+    if(!next||this.demo.preparing)return;
+    if(!await this.waitForCar(next))return;
+    if(!this.demo.seekCar(this.navigation,next))return;
     this.audio.stop();this.world.resetFinale();
     this.world.boarded=true;byId('world').dataset.trainMoving='true';
     this.world.objects.reset(previous);this.world.objects.reset(next);
@@ -440,10 +457,11 @@ class Experience {
     this.setPhase('boarding');this.world.startBoarding();this.updateJourneyStatus(this.navigation.snapshot());
     this.boardElapsed=0;this.boardDuration=this.world.motionPreference.matches ? .01 : TRAIN.boardingSeconds;
   }
-  arrive(id) {
+  async arrive(id) {
     this.navigation.invalidate();this.blink.reset();
     if(this.exitOpen){
       if(this.navigation.nextCarId){
+        if(!await this.waitForCar(this.navigation.nextCarId))return;
         this.setPhase('car-transition');this.audio.play('door');this.changeElapsed=0;this.changedCar=false;
       }else this.finish();
       return;

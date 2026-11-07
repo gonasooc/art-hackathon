@@ -24,7 +24,7 @@
 
 ## 객차 작업
 
-- 모듈: `src/carriages/<이름>.js`의 `build…Carriage()`가 `{group, targets, lighting, update(dt, reducedMotion)}`를 반환한다. `group`·`targets`가 기본이며 나머지는 칸에 따라 선택적으로 반환한다. 예시는 `forest.js`.
+- 모듈: `src/carriages/<이름>.js`의 `build…Carriage()`가 `{group, targets, lighting, update(dt, reducedMotion)}`를 반환한다. `group`·`targets`가 기본이며 나머지는 칸에 따라 선택적으로 반환한다. 숲은 `forest-gltf.js`가 지연 `load()`를 제공하며 `world.ensureCar('05')` 완료 뒤 실제 메시를 등록한다. 05 선택·전환은 준비 완료를 기다리고 초기 world.ready에 숲 다운로드를 포함하지 않는다.
 - 등록 지점: `src/config.js`의 `CARRIAGES` 구현 목록과 `JOURNEY_ORDER`, `src/train-world.js`의 빌더 목록, `src/visual-inspector.js`의 `names`, `tests/browser/objects.spec.mjs`의 `rooms`(응시점), `docs/<이름>-reference.md`
 - 제약:
   - 소멸 대상 메시는 `MeshStandardMaterial`(소멸 셰이더 호환)
@@ -36,7 +36,7 @@
 
 ## three.js
 
-- 0.187.0. `vendor/three/three.module.js`를 상대 경로로 import한다. import map과 애드온(GLTFLoader 등)은 아직 없다.
+- 0.187.0. `vendor/three/three.module.js`를 상대 경로로 import한다. 숲 GLB는 `vendor/three/addons/loaders/GLTFLoader.js`로 직접 로드한다. 빌드에서 동일 버전 애드온과 유틸리티를 복사하고 bare import만 상대경로로 바꾼다.
 - API는 기억에 의존하지 말고 `vendor/three/three.core.js`에서 grep으로 확인한다.
 
 ## 레퍼런스와 자산

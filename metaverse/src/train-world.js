@@ -4,7 +4,7 @@ import { MemoryObjects, buildHospital } from './memory-objects.js';
 import { buildChildhoodHomeCarriage } from './carriages/childhood-home.js';
 import { buildPlaygroundCarriage } from './carriages/playground.js';
 import { buildCafeCarriage } from './carriages/cafe.js';
-import { buildForestCarriage } from './carriages/forest.js';
+import { buildForestGLTFCarriage } from './carriages/forest-gltf.js';
 import { buildDeathHospitalCarriage } from './carriages/death-hospital.js';
 import { buildIncenseCarriage } from './carriages/incense.js';
 import { sunlitRoom } from './carriages/memory-room-kit.js';
@@ -71,9 +71,10 @@ export class TrainWorld {
     this.hospital=buildHospital();this.hospital.visible=false;this.scene.add(this.hospital);
     this.objects=new MemoryObjects(this.scene);
     this.extraCarriages=new Map();
-    for(const [id,build] of [['02',buildChildhoodHomeCarriage],['03',buildPlaygroundCarriage],['04',buildCafeCarriage],['05',buildForestCarriage],['06',buildDeathHospitalCarriage],['07',buildIncenseCarriage]]){
+    for(const [id,build] of [['02',buildChildhoodHomeCarriage],['03',buildPlaygroundCarriage],['04',buildCafeCarriage],['05',buildForestGLTFCarriage],['06',buildDeathHospitalCarriage],['07',buildIncenseCarriage]]){
       const spec=build();if(['02','03','04'].includes(id))spec.sunlight=sunlitRoom(spec.group,spec.targets,id==='04'?0xe9eff5:0xffe5be);spec.group.visible=false;this.scene.add(spec.group);this.extraCarriages.set(id,spec);
-      for(const target of spec.targets){this.objects.add(target.id,id,target.group,target.position,target.aim);}
+      const register=()=>{for(const target of spec.targets)this.objects.add(target.id,id,target.group,target.position,target.aim);this.objects.setCar(this.activeCar||'00');};
+      if(spec.load){spec.register=register;}else register();
     }
     this.finale=this.extraCarriages.get('07').finale;
     this.ready=Promise.all(loads).then(()=>{
@@ -155,6 +156,13 @@ export class TrainWorld {
     this.dust=new THREE.Points(particleGeometry,new THREE.PointsMaterial({color:0xffe4c0,size:.045,transparent:true,opacity:.45,depthWrite:false}));this.scene.add(this.dust);
   }
 
+  ensureCar(id){
+    const spec=this.extraCarriages.get(id);
+    if(!spec?.load||spec.registered)return Promise.resolve();
+    if(!spec.preparing)spec.preparing=spec.load().then(()=>{spec.register();spec.registered=true;this.needsRender=true;});
+    return spec.preparing;
+  }
+  isCarReady(id){const spec=this.extraCarriages.get(id);return !spec?.load||Boolean(spec.registered);}
   setCar(id) {
     this.camera.fov=48;this.camera.updateProjectionMatrix();
     if(this.activeCar!==id)this.resetFinale();
@@ -169,6 +177,7 @@ export class TrainWorld {
       '07':{background:0x000000,hemi:.09,sun:0,rim:0,env:.015,sky:0xbab4a9,ground:0x030303,near:12,far:30},
     };
     const p=palettes[id];if(!p)throw new Error(`Unknown carriage ${id}`);
+    if(id==='04')this.ensureCar('05').catch(()=>{});
     this.activeCar=id;this.hemi.intensity=p.hemi;this.hemi.color.setHex(p.sky);this.hemi.groundColor.setHex(p.ground);
     this.sun.intensity=p.sun;this.rim.intensity=p.rim;this.scene.environmentIntensity=p.env;
     this.scene.background.setHex(p.background);this.scene.fog=new THREE.Fog(p.background,p.near,p.far);

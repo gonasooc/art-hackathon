@@ -8,6 +8,7 @@ test('portrait observation fits main objects and keeps gaze targets reachable',a
  await page.goto('./?mode=inspect&car=01');await expect(page.locator('#world')).toHaveAttribute('data-assets','ready');
  for(const car of ['01','02','03','04','05','06']){
   await page.locator('#visual-room').selectOption(car);
+  await expect(page.locator('body')).toHaveAttribute('data-carriage',car,{timeout:45000});
   const result=await page.evaluate(async car=>{
    const T=await import('./vendor/three/three.module.js');const w=window.__portrait.world;
    w.scene.updateMatrixWorld(true);w.camera.updateMatrixWorld();const results=[];
