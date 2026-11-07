@@ -73,3 +73,22 @@ test('the ending film never requests playback with its embedded audio',async({pa
  await expect(page.locator('#incense-film')).toHaveJSProperty('muted',true);
  await expect(page.locator('#incense-film-layer')).toHaveAttribute('data-stage','held',{timeout:15000});
 });
+
+test('the opening frame stays still through the fade and transition pause',async({page})=>{
+ await page.goto('./?mode=inspect&car=07');
+ const video=page.locator('#incense-film'),layer=page.locator('#incense-film-layer');
+ await expect.poll(()=>video.evaluate(v=>v.readyState)).toBeGreaterThanOrEqual(2);
+ await page.locator('#visual-dissolve').click();
+ await expect(layer).toHaveAttribute('data-stage','transition');
+ await expect.poll(()=>layer.evaluate(el=>Number(el.style.opacity))).toBeGreaterThan(.1);
+ await page.locator('#visual-animation').click();
+ await expect(video).toHaveJSProperty('paused',true);
+ expect(await video.evaluate(v=>v.currentTime)).toBe(0);
+ const opacity=await layer.evaluate(el=>Number(el.style.opacity));
+ expect(opacity).toBeGreaterThan(0);expect(opacity).toBeLessThan(1);
+ await page.waitForTimeout(250);expect(await layer.evaluate(el=>Number(el.style.opacity))).toBe(opacity);
+ await page.locator('#visual-animation').click();
+ await expect.poll(()=>video.evaluate(v=>v.currentTime)).toBeGreaterThan(.1);
+ await expect(layer).toHaveCSS('opacity','1');
+ await expect(video).toHaveJSProperty('muted',true);
+});

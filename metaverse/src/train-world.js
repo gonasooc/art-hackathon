@@ -176,6 +176,7 @@ export class TrainWorld {
     this.train.visible=id==='00'||id==='01';this.exteriorEnvironment.visible=id==='00'||id==='01';
     for(const [key,spec] of this.extraCarriages)spec.group.visible=key===id;
     this.objects?.setCar(id);this.needsRender=true;this.canvas.dataset.carriage=id;
+    if(id==='07')this.finale?.prepare(this.motionPreference.matches);
   }
   resize() {this.renderer.setSize(innerWidth,innerHeight,false);this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();this.needsRender=true;}
 
@@ -265,8 +266,8 @@ export class TrainWorld {
         if(dt>0)this.needsRender=true;
       }
       if(this.finalCamera){
-        const c=this.finalCamera;c.elapsed+=dt;
-        const p=this.motionPreference.matches?1:smooth(Math.min(1,c.elapsed/1.3));
+        const c=this.finalCamera;
+        const p=this.motionPreference.matches?1:this.finale.mix;
         this.camera.position.lerpVectors(c.from,c.to,p);this.camera.quaternion.slerpQuaternions(c.rotation,c.toRotation,p);this.needsRender=true;
         if(p>=1)this.finalCamera=null;
       }

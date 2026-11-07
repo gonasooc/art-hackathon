@@ -127,6 +127,9 @@ class SmokeFinale {
 }
 
 
+const filmBlendSeconds=2.2;
+const smootherstep=p=>p*p*p*(p*(p*6-15)+10);
+
 // Keep the procedural scene as an offline fallback if the ending film cannot play.
 export class IncenseFinale {
  constructor(){
@@ -137,17 +140,20 @@ export class IncenseFinale {
   document.addEventListener('visibilitychange',()=>{if(document.hidden)this.pause();});
  }
  reset(){
-  this.pause();this.active=false;this.complete=false;this.failed=false;this.elapsed=0;this.stalled=0;this.lastTime=0;
+  this.pause();this.active=false;this.complete=false;this.failed=false;this.elapsed=0;this.mix=0;this.stalled=0;this.loadingTime=0;this.lastTime=0;
   this.fallback.reset();this.layer.hidden=true;this.layer.style.opacity='0';this.layer.dataset.stage='idle';
   if(this.video.readyState)this.video.currentTime=0;
+ }
+ prepare(reduced=false){
+  if(reduced)return;
+  this.video.preload='auto';
+  if(!this.video.getAttribute('src'))this.video.src=new URL('../../assets/films/incense-ending.mp4',import.meta.url).href;
+  else if(this.video.error)this.video.load();
  }
  start(reduced=false){
   if(this.active)return;this.reset();this.active=true;this.reduced=reduced;
   this.video.hidden=reduced;this.video.muted=true;this.still.hidden=!reduced;this.layer.hidden=false;this.layer.dataset.stage='loading';
-  if(!reduced){
-   if(!this.video.getAttribute('src'))this.video.src=new URL('../../assets/films/incense-ending.mp4',import.meta.url).href;
-   else if(this.video.error)this.video.load();
-  }
+  this.prepare(reduced);
  }
  pause(){
   if(!this.paused){this.token++;this.pending=false;}
@@ -170,16 +176,21 @@ export class IncenseFinale {
   if(this.complete)return;
   this.paused=false;
   if(reduced&&!this.reduced){this.reduced=true;this.video.pause();this.video.hidden=true;this.still.hidden=false;}
-  if(this.failed){this.fallback.update(dt,reduced);this.elapsed+=dt;this.complete=this.fallback.complete;return;}
-  if(!this.reduced){
+  if(this.failed){this.fallback.update(dt,reduced);this.elapsed+=dt;this.mix=smootherstep(clamp(this.elapsed/filmBlendSeconds,0,1));this.complete=this.fallback.complete;return;}
+  if(!this.reduced&&(this.video.readyState<2||this.video.seeking)){
+   this.loadingTime+=dt;if(this.loadingTime>10)this.fail();return;
+  }
+  this.elapsed+=dt;
+  const p=clamp(this.elapsed/(this.reduced?.6:filmBlendSeconds),0,1);
+  this.mix=smootherstep(p);
+  this.layer.style.opacity=String(this.mix);this.layer.dataset.stage=p<1?'transition':'playing';
+  // Hold the decoded opening frame while the two compositions overlap.
+  if(!this.reduced&&p>=1){
    this.play();
    this.stalled=this.video.currentTime>this.lastTime+.001?0:this.stalled+dt;this.lastTime=this.video.currentTime;
    if(this.stalled>10){this.fail();return;}
-   if(this.video.readyState<2)return;
   }
-  this.elapsed+=dt;
-  const p=clamp(this.elapsed/(this.reduced?.6:1.3),0,1),mix=p*p*(3-2*p);
-  this.layer.style.opacity=String(mix);this.layer.dataset.stage=p<1?'transition':'playing';
+
   if(p>=1&&(this.reduced||this.video.ended)){
    this.complete=true;this.video.pause();this.layer.dataset.stage='held';
   }
