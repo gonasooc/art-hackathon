@@ -1,17 +1,18 @@
 import {TRAIN} from './config.js';
 export const FOOTSTEP_VOLUME=.18;
+export const HORN_LEAD_SECONDS=.8;
 
 // Keep media playback tied to the experience clock and its pause controls.
 export class JourneyAudio {
  constructor(video){
   this.video=video;
-  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.mp3',deathHospital:'death-hospital.mp3',home:'home.wav',playground:'playground.wav',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav',footsteps:'footsteps.wav'}).map(([key,file])=>{
+  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.mp3',deathHospital:'death-hospital.mp3',home:'home.wav',playground:'playground.wav',playgroundSecond:'playground-second.mp3',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav',footsteps:'footsteps.wav'}).map(([key,file])=>{
    const audio=new Audio(new URL(`../assets/audio/${file}`,import.meta.url).href);audio.preload='auto';
    return [key,audio];
   }));
   this.clips.footsteps.loop=true;this.clips.footsteps.volume=0;
-  this.pending=new Set();this.ambience=null;this.room=null;this.hornStarted=false;
-  for(const key of ['hospital','deathHospital','home','playground','cafe','forest','incense'])this.clips[key].loop=true;
+  this.pending=new Set();this.ambience=null;this.room=null;this.hornStarted=false;this.hornLeadElapsed=0;
+  for(const key of ['hospital','deathHospital','home','playground','playgroundSecond','cafe','forest','incense'])this.clips[key].loop=true;
   const unlock=()=>{
    for(const audio of Object.values(this.clips)){
     if(this.pending.has(audio))continue;
@@ -26,13 +27,15 @@ export class JourneyAudio {
  }
  play(key){const audio=this.clips[key];audio.currentTime=0;this.pending.add(audio);this.tryPlay(audio);}
  tryPlay(audio){if(audio.paused)audio.play()?.catch(()=>{});}
- stop(){for(const audio of Object.values(this.clips)){audio.pause();audio.currentTime=0;}this.pending.clear();this.ambience=null;this.room=null;this.hornStarted=false;this.clips.horn.volume=1;this.clips.footsteps.volume=0;}
- updateHorn({phase,paused,carId,journeyStage,travelDistance}){
+ stop(){for(const audio of Object.values(this.clips)){audio.pause();audio.currentTime=0;}this.pending.clear();this.ambience=null;this.room=null;this.hornStarted=false;this.hornLeadElapsed=0;this.clips.horn.volume=1;this.clips.footsteps.volume=0;}
+ get awaitingHornLead(){return !this.hornStarted||this.hornLeadElapsed<HORN_LEAD_SECONDS;}
+ updateHorn({phase,paused,carId,journeyStage,travelDistance,dt}){
   if(paused)return;
   const horn=this.clips.horn;
-  if(!this.hornStarted&&phase==='walking'&&journeyStage==='platform'&&travelDistance>=TRAIN.stairStart){
+  if(!this.hornStarted&&phase==='walking'&&journeyStage==='platform'){
    this.hornStarted=true;horn.volume=1;this.play('horn');
   }
+  if(this.hornStarted&&journeyStage==='platform')this.hornLeadElapsed+=Math.min(Math.max(dt,0),.08);
   if(!this.hornStarted||!this.pending.has(horn))return;
   if(carId&&carId!=='00'){
    horn.pause();horn.currentTime=0;this.pending.delete(horn);return;
@@ -56,9 +59,9 @@ export class JourneyAudio {
   if(moving)this.tryPlay(audio);
   else if(audio.volume===0){audio.pause();audio.currentTime=0;}
  }
- update({phase,paused,carId,moving=false,footstepsPaused=paused,dt=.016,journeyStage,travelDistance=0,playgroundGone=false}){
+ update({phase,paused,carId,moving=false,footstepsPaused=paused,dt=.016,journeyStage,travelDistance=0,playgroundStartedCount=0}){
   this.updateFootsteps(moving,footstepsPaused,dt);
-  this.updateHorn({phase,paused,carId,journeyStage,travelDistance});
+  this.updateHorn({phase,paused,carId,journeyStage,travelDistance,dt});
   if(!paused){
    const room=carId||null;
    if(room!==this.room){
@@ -68,7 +71,14 @@ export class JourneyAudio {
     this.ambience=key?this.clips[key]:null;
     if(key)this.play(key);
    }
-   if(room==='03'&&playgroundGone&&!this.ambience){this.ambience=this.clips.playground;this.play('playground');}
+   if(room==='03'){
+    const key=playgroundStartedCount>=2?'playgroundSecond':playgroundStartedCount>=1?'playground':null;
+    const next=key?this.clips[key]:null;
+    if(next!==this.ambience){
+     if(this.ambience){this.ambience.pause();this.ambience.currentTime=0;this.pending.delete(this.ambience);}
+     this.ambience=next;if(key)this.play(key);
+    }
+   }
   }
   const intro=this.clips.prologue;
   if(phase==='prologue'&&!this.video.hidden&&!this.video.paused&&!this.video.ended){

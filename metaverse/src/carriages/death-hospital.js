@@ -1,4 +1,5 @@
 import * as THREE from '../../vendor/three/three.module.js';
+import {buildBlackLeopard} from './black-leopard.js';
 import {TRAIN} from '../config.js';
 import {box, boxes, tube} from '../train-geometry.js';
 
@@ -6,47 +7,6 @@ const mat = (color, roughness = .55, metalness = 0) => new THREE.MeshStandardMat
 function oval(group, position, scale, material) {
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), material);
   mesh.position.set(...position);mesh.scale.set(...scale);group.add(mesh);return mesh;
-}
-
-// Black-on-black rosettes remain quiet until the cyan light grazes the coat.
-function coatTexture() {
-  const size = 128, data = new Uint8Array(size * size * 4);
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const row = Math.floor(y / 24), px = (x + (row % 2) * 13) % 26 - 13, py = y % 24 - 12;
-    const ring = Math.hypot(px * .9, py * 1.15), spot = ring > 5 && ring < 8 && Math.sin(x * .7 + y) > -.7;
-    const value = (spot ? 30 : 51) + Math.sin(x * 15.7 + y * 31.1) * 4;
-    const index = (y * size + x) * 4;
-    data.set([value, value + 3, value + 2, 255], index);
-  }
-  const texture = new THREE.DataTexture(data, size, size);texture.colorSpace = THREE.SRGBColorSpace;
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;texture.needsUpdate = true;return texture;
-}
-
-function blackLeopard() {
-  const group = new THREE.Group(), coat = mat(0xbac3be, .78), muzzle = mat(0x272e2b, .86);
-  coat.map = coatTexture();
-  const black = mat(0x080c0b, .45), eye = mat(0xa8a574, .28);
-  eye.emissive.setHex(0x655d29);eye.emissiveIntensity = .12;
-  oval(group, [0, .7, 0], [.67, .24, .25], coat);
-  oval(group, [-.43, .76, 0], [.28, .29, .27], coat);
-  oval(group, [.46, .69, 0], [.27, .27, .26], coat);
-  for (const [x, z] of [[-.47,-.19],[-.36,.2],[.43,-.19],[.55,.18]]) {
-    oval(group, [x,.39,z], [.085,.32,.085], coat);
-    oval(group, [x-.045,.09,z], [.135,.075,.095], coat);
-    for (const offset of [-.045,0,.045]) oval(group,[x-.13,.09,z+offset],[.023,.022,.013],black);
-  }
-  oval(group,[-.62,.89,0],[.19,.26,.21],coat);
-  oval(group,[-.79,1.04,0],[.24,.2,.21],coat);
-  oval(group,[-.97,.99,0],[.16,.1,.16],muzzle);
-  oval(group,[-1.09,1.025,0],[.05,.036,.07],black);
-  for (const side of [-1,1]) {
-    oval(group,[-.7,1.21,side*.155],[.085,.095,.054],coat);
-    oval(group,[-.727,1.22,side*.178],[.049,.061,.019],muzzle);
-    oval(group,[-.91,1.09,side*.178],[.035,.025,.019],eye);
-    oval(group,[-.93,1.09,side*.19],[.012,.022,.01],black);
-  }
-  tube(group,[[.6,.75,0],[.85,.53,.02],[1.01,.2,.05],[1.2,.15,.05],[1.28,.38,.08]],.044,coat);
-  group.rotation.y = -Math.PI / 2;group.scale.setScalar(.82);return group;
 }
 
 function shroudedBody() {
@@ -159,7 +119,7 @@ export function buildDeathHospitalCarriage() {
   const wood=mat(0x382317,.4,.08);
   box(group,[1.45,.17,2.65],[-9.3,floor+.085,z+.55],wood);
   for(let zz=-.75;zz<1.85;zz+=.23)box(group,[1.4,.005,.008],[-9.3,floor+.173,z+zz],mat(0x6c4930,.6));
-  const leopard=blackLeopard(), shroud=shroudedBody(), halo=angelHalo();
+  const leopard=buildBlackLeopard({raisedHead:true,scale:.82}), shroud=shroudedBody(), halo=angelHalo();
   const targets=[
     {id:'06-leopard',group:leopard,position:[-8.6,floor,z-1.05],aim:[-8.6,floor+.62,z-1.05]},
     {id:'06-shroud',group:shroud,position:[-9.3,floor+.18,z+.55],aim:[-9.27,floor+.53,z+.55]},

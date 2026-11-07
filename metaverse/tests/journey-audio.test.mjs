@@ -17,10 +17,10 @@ test('room loops stop at the next room; finale continues incense without restart
   assert.notEqual(audio.clips.hospital,audio.clips.deathHospital);
   const update=(carId,extra={})=>audio.update({phase:'walking',paused:false,carId,...extra});
   for(const [id,key] of [['01','hospital'],['02','home'],['03','playground'],['04','cafe'],['05','forest'],['06','deathHospital'],['07','incense']]){
-   const previous=audio.ambience;update(id,{playgroundGone:id==='03'});
+   const previous=audio.ambience;update(id,{playgroundStartedCount:id==='03'?1:0});
    if(previous)assert.equal(previous.paused,true);
    assert.equal(audio.ambience,audio.clips[key]);assert.equal(audio.ambience.loop,true);
-   const plays=audio.ambience.plays;update(id,{playgroundGone:id==='03'});assert.equal(audio.ambience.plays,plays);
+   const plays=audio.ambience.plays;update(id,{playgroundStartedCount:id==='03'?1:0});assert.equal(audio.ambience.plays,plays);
   }
   update('06');update('06',{paused:true});assert.equal(audio.clips.deathHospital.paused,true);
   update('06');assert.equal(audio.clips.deathHospital.paused,false);
@@ -36,13 +36,22 @@ test('room loops stop at the next room; finale continues incense without restart
   update('07',{phase:'finale',paused:true});assert.equal(audio.clips.incense.paused,true);
   update('07',{phase:'finale'});assert.equal(audio.clips.incense.paused,false);assert.equal(audio.clips.incense.currentTime,2.5);
   update('03');assert.equal(audio.ambience,null);assert.equal(audio.clips.playground.paused,true);
-  update('03',{playgroundGone:true});assert.equal(audio.ambience,audio.clips.playground);
+  update('03',{playgroundStartedCount:1});assert.equal(audio.ambience,audio.clips.playground);
   const playgroundPlays=audio.clips.playground.plays;audio.clips.playground.currentTime=1.2;
-  update('03',{playgroundGone:true});assert.equal(audio.clips.playground.plays,playgroundPlays);assert.equal(audio.clips.playground.currentTime,1.2);
-  update('04');assert.equal(audio.clips.playground.paused,true);
+  update('03',{playgroundStartedCount:1});assert.equal(audio.clips.playground.plays,playgroundPlays);assert.equal(audio.clips.playground.currentTime,1.2);
+  update('03',{playgroundStartedCount:2});assert.equal(audio.ambience,audio.clips.playgroundSecond);assert.equal(audio.clips.playground.paused,true);
+  assert.equal(audio.clips.playgroundSecond.loop,true);assert.match(audio.clips.playgroundSecond.src,/playground-second\.mp3$/);
+  const secondPlays=audio.clips.playgroundSecond.plays;audio.clips.playgroundSecond.currentTime=1;
+  update('03',{playgroundStartedCount:2});assert.equal(audio.clips.playgroundSecond.plays,secondPlays);assert.equal(audio.clips.playgroundSecond.currentTime,1);
+  update('03',{playgroundStartedCount:2,paused:true});assert.equal(audio.clips.playgroundSecond.paused,true);
+  update('03',{playgroundStartedCount:2});assert.equal(audio.clips.playgroundSecond.paused,false);assert.equal(audio.clips.playgroundSecond.currentTime,1);
+  update('04');assert.equal(audio.clips.playground.paused,true);assert.equal(audio.clips.playgroundSecond.paused,true);
+  update('03');assert.equal(audio.ambience,null);assert.equal(audio.clips.playgroundSecond.paused,true);
   const horn=audio.clips.horn;
-  update(null,{journeyStage:'platform',travelDistance:9});assert.equal(horn.paused,true);
-  update(null,{journeyStage:'platform',travelDistance:10});assert.equal(horn.paused,false);assert.equal(horn.volume,1);
+  update(null,{phase:'prologue',journeyStage:'platform',travelDistance:0});assert.equal(horn.paused,true);
+  update(null,{journeyStage:'platform',travelDistance:0});assert.equal(horn.paused,false);assert.equal(horn.volume,1);assert.equal(audio.awaitingHornLead,true);
+  const lead=audio.hornLeadElapsed;update(null,{paused:true,journeyStage:'platform',dt:.08});assert.equal(audio.hornLeadElapsed,lead);
+  for(let i=0;i<11;i++)update(null,{journeyStage:'platform',dt:.08});assert.equal(audio.awaitingHornLead,false);
   const hornPlays=horn.plays;update(null,{phase:'boarding',journeyStage:'boarding'});assert.equal(horn.plays,hornPlays);
   update('00',{journeyStage:'carriage',travelDistance:7.5});assert.ok(horn.volume>0&&horn.volume<1);
   const faded=horn.volume;update('00',{paused:true,journeyStage:'carriage',travelDistance:8});assert.equal(horn.volume,faded);assert.equal(horn.paused,true);

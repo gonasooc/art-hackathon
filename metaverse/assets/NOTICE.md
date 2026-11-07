@@ -14,7 +14,7 @@
 
 ## 현재 오디오
 
-`src/journey-audio.js`가 `audio/`의 11개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
+`src/journey-audio.js`가 `audio/`의 12개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
 
 - `prologue.mp3`: 도입 영상 동기화.
 - `train-horn.mp3`, `carriage-door.wav`: 탑승과 칸 전환 효과음.
@@ -36,3 +36,5 @@
 
 
 - `audio/footsteps.wav`: 사용자가 제공한 `~/Downloads/footstep_2.wav`를 변환 없이 복사했다. 48kHz·24bit·스테레오, 약 13.67초. 이동 시 반복 재생하며 초기 볼륨은 18%다. 원본 파일의 볼륨·속도는 가공하지 않았다.
+
+- `audio/playground-second.mp3`: 사용자 제공 `SFX11_B_놀이터_아이웃음2.mp3` 원본을 변환 없이 복사했다. MP3·48kHz·스테레오, 약 8.09초. 놀이터 두 번째 대상 소멸 시작 시 기존 놀이터 소리를 대체해 반복 재생한다.

@@ -44,6 +44,8 @@ npm start
 - 01–06은 모든 대상이 사라지면 출구로 이동합니다. 07은 향 소멸 시작과 함께 제공된 `향.mp4`의 준비된 첫 프레임으로 2.2초 동안 부드럽게 전환한 뒤 영상을 재생하고, “No click, / one blink.”가 나타나는 영상의 마지막 프레임을 유지합니다. [향 공간·영상 피날레](docs/incense-reference.md).
 - 상호작용 설명 문장 대신 낮은 밝기의 윤곽빛으로 대상을 표시합니다. 자세한 판정은 [오브젝트·병원 기획](docs/hospital-object-plan.md)을 참고하세요.
 
+01 병원·06 임종의 표범은 제공된 두 방향별 이미지에 맞춰 공통 모델로 보완했습니다. [표범 형상과 남은 차이](docs/leopard-reference.md).
+
 ## 도입부와 소리
 
 보정·검증 뒤 `assets/films/planet-womb.mp4`를 재생합니다. 10.4초부터 3.2초 동안 3D 공간과 겹쳐 기차 앞으로 연결하며, 그동안 이동·오브젝트 진행은 멈춥니다. **도입 건너뛰기 버튼은 없습니다.** 영상 로드에 실패하면 오류 화면의 ‘기차 앞에서 계속’으로 복구할 수 있습니다.
@@ -55,12 +57,12 @@ npm start
 | 구간 | 오디오 |
 | --- | --- |
 | 도입 영상 | `prologue.mp3`, 영상 시간에 동기화 |
-| 탑승 직전 → 00 자궁 후반 | `train-horn.mp3`: 계단 접근(9.8m)에서 1회 시작, 00 이동 50–90% 구간에서 페이드아웃 |
+| 첫걸음 전 → 00 자궁 후반 | `train-horn.mp3`: 도입 종료 후 기차 앞에서 1회 시작, 0.8초 후 이동 허용. 00 이동 50–90% 구간에서 페이드아웃 |
 | 칸 전환 | `carriage-door.wav` |
 | 01 병원 | `hospital.mp3` 반복 |
 | 06 병원 · 임종 | `death-hospital.mp3` 반복 |
 | 02 집 / 04 카페 / 05 숲 / 07 향 | `home.wav`, `cafe.wav`, `forest.wav`, `incense.wav` 반복 |
-| 03 놀이터 | 입장 시 무음, 첫 메인 오브젝트 소멸 완료부터 `playground.wav` 반복. 두 번째 소멸에서는 재시작하지 않음 |
+| 03 놀이터 | 입장 시 무음, 첫 메인 오브젝트 소멸 시작부터 `playground.wav` 반복. 두 번째 소멸 시작 시 기존 소리를 멈추고 `playground-second.mp3`로 교체 |
 | 보행 / 수동 점검의 수평 이동 | `footsteps.wav`, 초기 볼륨 18%, 시작 90ms·정지 120ms 페이드 |
 | 향 영상 피날레·동작 줄이기·영상 실패 복구 | `incense.wav` (`SFX30_B_향.wav`)를 07부터 끊김 없이 계속 반복. 영상 자체는 항상 음소거 |
 
@@ -139,7 +141,7 @@ npm run test:e2e -- tests/browser/incense-finale.spec.mjs
 | `src/prologue.js`, `journey-audio.js` | 도입 재생·전환, 별도 오디오 수명주기 |
 | `src/visual-demo.js`, `visual-inspector.js` | 자동 시연과 개발용 수동 점검 |
 | `src/app.js`, `index.html`, `styles.css` | 상태 전이, 버튼과 화면 구성 |
-| `assets/audio/` | 현재 사용 음원 11개와 교체 전 보존 음원 |
+| `assets/audio/` | 현재 사용 음원 12개와 교체 전 보존 음원 |
 | `assets/films/` | 현재 도입·향 피날레 영상과 정지 프레임, 과거 시제품 영상 |
 | `assets/train/`, `assets/models/` | 기차 텍스처와 얼굴 모델 |
 

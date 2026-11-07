@@ -88,7 +88,7 @@ class Experience {
         this.gazeParticles.render(performance.now(),this.latest,{active:!frozen&&gazePhases.has(this.phase),reducedMotion:this.world.motionPreference.matches});
       }
       const footstepPaused=document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['walking','visual'].includes(this.phase);
-      this.audio.update({phase:this.phase,carId:this.navigation.carId,journeyStage:this.navigation.stage,travelDistance:this.navigation.walker.z,playgroundGone:this.world.objects.targets.some(t=>t.car==='03'&&t.gone),dt,moving:this.phase==='visual'?this.visual.moving:this.phase==='walking'&&this.navigation.walker.moving,footstepsPaused:footstepPaused,paused:document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['prologue','walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase)});
+      this.audio.update({phase:this.phase,carId:this.navigation.carId,journeyStage:this.navigation.stage,travelDistance:this.navigation.walker.z,playgroundStartedCount:this.world.objects.targets.filter(t=>t.car==='03'&&(t.gone||t.progress!==null)).length,dt,moving:this.phase==='visual'?this.visual.moving:this.phase==='walking'&&this.navigation.walker.moving,footstepsPaused:footstepPaused,paused:document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['prologue','walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase)});
       this.raf=requestAnimationFrame(frame);
     };
     this.raf=requestAnimationFrame(frame);
@@ -401,6 +401,10 @@ class Experience {
       if(elapsed>=this.currentPoint.settleMs+CALIBRATION.captureMs&&samples.length>=CALIBRATION.minSamples)this.finishPoint();
       else if(elapsed>CALIBRATION.timeoutMs)this.calibrationFailed('눈을 안정적으로 읽지 못했어요. 얼굴을 밝게 비추고 화면을 정면으로 바라봐 주세요.');
     }else if(this.phase==='walking'){
+      if(this.navigation.stage==='platform'&&this.audio.awaitingHornLead){
+        this.navigation.invalidate();this.world.walk(this.navigation.snapshot());
+        this.walkStarted=now;byId('pause-notice').hidden=true;return;
+      }
       const state=this.navigation.step(dt,now,this.latest);
       this.world.walk(state,dt);
       this.updateJourneyStatus(state);

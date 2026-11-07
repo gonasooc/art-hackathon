@@ -1,29 +1,10 @@
 import * as THREE from '../vendor/three/three.module.js';
+import {buildBlackLeopard} from './carriages/black-leopard.js';
 import {TRAIN} from './config.js';
 import {box,tube,plaque} from './train-geometry.js';
 
 const material=(color,roughness=.5,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 function ellipsoid(parent,pos,scale,mat){const m=new THREE.Mesh(new THREE.SphereGeometry(1,28,18),mat);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m;}
-function leopard(){
- const g=new THREE.Group(),skin=material(0x171a19,.92),soft=material(0x30322d,.7),eye=material(0xb3a362,.25);
- const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#292c29';ctx.fillRect(0,0,256,256);
- for(let i=0;i<100;i++){const x=(i*73)%256,y=(i*131)%256;ctx.strokeStyle='#141714';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y,5+(i%4),4, i,0,Math.PI*1.6);ctx.stroke();}
- const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;skin.map=texture;
- ellipsoid(g,[0,.75,0],[.82,.24,.26],skin);ellipsoid(g,[-.49,.78,0],[.24,.29,.27],skin);
- ellipsoid(g,[.55,.72,0],[.29,.27,.27],skin);
- for(const [x,z] of [[-.45,-.2],[-.4,.2],[.48,-.2],[.57,.2]]){
-  ellipsoid(g,[x,.4,z],[.072,.32,.08],skin);ellipsoid(g,[x-.06,.1,z],[.14,.07,.1],skin);
- }
- ellipsoid(g,[-.66,.92,0],[.18,.24,.19],skin);ellipsoid(g,[-.88,1.04,0],[.23,.18,.2],skin);
- ellipsoid(g,[-1.06,.99,0],[.12,.085,.145],soft);ellipsoid(g,[-1.18,1.02,0],[.045,.035,.065],skin);
- for(const z of [-.16,.16]){
-  ellipsoid(g,[-.78,1.2,z],[.075,.09,.05],skin);
-  ellipsoid(g,[-1.01,1.09,z*1.12],[.034,.022,.014],eye);
-  ellipsoid(g,[-1.03,1.09,z*1.16],[.012,.022,.009],material(0x070a08));
- }
- tube(g,[[.65,.83,0],[.96,.65,.04],[1.22,.3,.08],[1.45,.25,.1],[1.53,.5,.1]],.045,skin);
- g.rotation.y=-Math.PI/2;g.scale.setScalar(.8);return g;
-}
 function chair(){
  const g=new THREE.Group(),chrome=material(0x8b9490,.25,.8),seat=material(0x3c5048,.72);
  box(g,[.68,.13,.64],[0,.58,0],seat);box(g,[.68,.65,.12],[0,.99,-.27],seat,[.12,0,0]);
@@ -37,7 +18,7 @@ function smokeTexture(){const c=document.createElement('canvas');c.width=c.heigh
 export class MemoryObjects {
  constructor(scene){
   this.scene=scene;this.targets=[];this.ray=new THREE.Raycaster();this.sprite=smokeTexture();this.car='00';
-  this.add('01-leopard','01',leopard(),[-9,TRAIN.floorY,TRAIN.centerZ+.55],[-9,1.65,-7.35]);
+  this.add('01-leopard','01',buildBlackLeopard(),[-9,TRAIN.floorY,TRAIN.centerZ+.55],[-9,1.65,-7.35]);
   const seat=chair();seat.rotation.y=Math.PI/2;seat.scale.setScalar(.85);
   this.add('01-chair','01',seat,[-8.25,TRAIN.floorY,TRAIN.centerZ-.85],[-8.48,1.89,-8.75]);
   this.setCar('00');
