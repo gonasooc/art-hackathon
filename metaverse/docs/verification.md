@@ -206,3 +206,9 @@ Figma 16개 노드와 로컬 숲·임종 병원 영상의 샘플 프레임을 �
 - 일반 소멸 2.6초 → 1.3초, 동작 줄이기 0.7초 → 0.35초. 응시·깜빡임 인식 조건은 변경하지 않았다.
 - `npm --prefix metaverse test`: 25개 통과.
 - `npm --prefix metaverse run test:e2e -- tests/browser/incense-finale.spec.mjs`: 2개 통과. 향 소멸 후 피날레, 일시정지·복원·재생, 동작 줄이기 흐름을 확인했다.
+
+## 2026-11-07 시연 전체화면 버튼
+
+- 시연 조작 영역에 전체화면 / 전체화면 해제 버튼을 추가했다. 페이지 루트를 확장해 도입 영상·3D 화면·조작 영역을 함께 표시하며 `fullscreenchange`에서 상태를 동기화한다. 미지원 환경은 버튼을 숨기고 요청 실패는 재시도 안내로 처리한다.
+- `npm --prefix metaverse run test:e2e -- tests/browser/demo-controls.spec.mjs`: 4개 통과. 기존 호버·키보드·터치, 실제 Chromium 전체화면 진입·버튼 해제, 외부 `exitFullscreen()` 이후 상태 동기화, 요청 거절 후 일시정지 가능 여부를 확인했다.
+- 브라우저 Esc 키 자체와 모바일 실기기의 전체화면 지원 여부는 이번 자동 검사에서 확인하지 않았다.

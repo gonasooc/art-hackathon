@@ -37,6 +37,27 @@ class Experience {
     byId('demo-switch').addEventListener('click',()=>this.startVisual());
     byId('demo-restart').addEventListener('click',()=>this.startVisual({restart:true}));
     byId('demo-pause').addEventListener('click',()=>this.toggleDemo());
+    const fullscreenButton=byId('demo-fullscreen'),fullscreenStatus=byId('fullscreen-status');
+    const syncFullscreen=()=>{
+      const active=Boolean(document.fullscreenElement);
+      fullscreenButton.textContent=active?'전체화면 해제':'전체화면';
+      fullscreenButton.setAttribute('aria-pressed',String(active));
+      fullscreenStatus.hidden=true;
+    };
+    fullscreenButton.hidden=!document.fullscreenEnabled;
+    document.addEventListener('fullscreenchange',syncFullscreen);
+    fullscreenButton.addEventListener('click',async()=>{
+      fullscreenButton.disabled=true;fullscreenStatus.hidden=true;
+      try{
+        if(document.fullscreenElement)await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen();
+        syncFullscreen();
+      }catch{
+        fullscreenStatus.textContent='전체화면을 전환하지 못했습니다. 다시 시도해 주세요.';
+        fullscreenStatus.hidden=false;
+      }finally{fullscreenButton.disabled=false;}
+    });
+    syncFullscreen();
     byId('start').addEventListener('click',()=>this.start());
     byId('restart').addEventListener('click',()=>this.start());
     byId('finale-restart').addEventListener('click',()=>this.mode==='demo'?this.startVisual({restart:true}):this.start());

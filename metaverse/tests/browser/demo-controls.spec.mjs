@@ -31,3 +31,32 @@ test.describe('touch controls',()=>{
     await expect(page.locator('#demo-pause')).toHaveAttribute('aria-pressed','true');
   });
 });
+
+test('fullscreen toggles the entire presentation and follows browser exit',async({page})=>{
+  await page.goto('./?mode=visual');
+  const button=page.locator('#demo-fullscreen');
+  await button.click();
+  await expect.poll(()=>page.evaluate(()=>document.fullscreenElement===document.documentElement)).toBe(true);
+  await expect(button).toHaveText('전체화면 해제');
+  await expect(button).toHaveAttribute('aria-pressed','true');
+  await button.click();
+  await expect.poll(()=>page.evaluate(()=>document.fullscreenElement===null)).toBe(true);
+  await expect(button).toHaveText('전체화면');
+  await button.click();
+  await expect(button).toHaveAttribute('aria-pressed','true');
+  await page.evaluate(()=>document.exitFullscreen());
+  await expect(button).toHaveText('전체화면');
+  await expect(button).toHaveAttribute('aria-pressed','false');
+  await expect(page.locator('body')).toHaveAttribute('data-mode','demo');
+});
+
+test('a rejected fullscreen request leaves playback controls usable',async({page})=>{
+  await page.addInitScript(()=>{Element.prototype.requestFullscreen=()=>Promise.reject(new DOMException('Denied','NotAllowedError'));});
+  await page.goto('./?mode=visual');
+  await page.locator('#demo-fullscreen').click();
+  await expect(page.locator('#fullscreen-status')).toContainText('다시 시도');
+  await expect(page.locator('#demo-fullscreen')).toBeEnabled();
+  await expect(page.locator('#demo-fullscreen')).toHaveAttribute('aria-pressed','false');
+  await page.locator('#demo-pause').click();
+  await expect(page.locator('#demo-pause')).toHaveAttribute('aria-pressed','true');
+});
