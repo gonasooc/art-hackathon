@@ -40,13 +40,74 @@ body[data-phase="finale"] .vignette{opacity:0}
 .screen-reader-text{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 
 #demo-switch{position:fixed;right:4.5vw;bottom:28px;z-index:10;display:flex;align-items:center;gap:18px;padding:13px 16px;background:#142431ed;border:1px solid #c1a46e66;color:#ead8b5;font-size:12px}#demo-switch span{font-size:10px;color:#b6b5a5}#demo-switch:hover{border-color:#d1b47e}
-#demo-controls{position:fixed;right:calc(4.5vw + 118px);top:30px;z-index:8;display:flex;align-items:center;gap:8px}#demo-controls>span{font:11px var(--sans);color:#d1b47e;margin-right:10px}#demo-controls button{min-height:40px;padding:10px 12px;background:#1b241dbb;border:1px solid #a8b39b33;color:#d9ceb3;font-size:11px}#demo-controls button:hover{border-color:#c1a46e}
+
 #demo-blink{position:fixed;inset:0;z-index:3;background:#050505;opacity:0;pointer-events:none}
 body[data-mode="demo"] #world{cursor:default}
-@media(max-width:700px){#demo-controls{left:20px;right:auto;top:82px;flex-wrap:wrap}body[data-mode="demo"] .journey-status{top:140px}#demo-switch{left:20px;right:20px;bottom:18px;justify-content:space-between}}
+@media(max-width:700px){body[data-mode="demo"] .journey-status{top:140px}#demo-switch{left:20px;right:20px;bottom:18px;justify-content:space-between}}
 
 #prologue-layer{position:fixed;inset:0;z-index:2;overflow:hidden;background:#030a12;pointer-events:none;will-change:opacity}
 #prologue-video,#prologue-still{display:block;width:100%;height:100%;object-fit:cover;transform-origin:50% 72%}
 #prologue-light{position:fixed;inset:0;z-index:3;background:#f0cbb7;opacity:0;pointer-events:none}
 #prologue-skip{position:fixed;bottom:28px;left:4.5vw;z-index:10;padding:9px 0;color:#f0e4cc;border:0;border-bottom:1px solid #f0e4cc66;background:none;font-size:11px;text-shadow:0 1px 6px #0008}
 body[data-phase="prologue"] .vignette{opacity:0}
+
+/* Shared controls keep exit, playback and gaze actions on the same baseline. */
+.experience-controls {
+  --control-surface: #15202aeb;
+  --control-hover: #293844;
+  --control-border: #d1b47e55;
+  position: fixed;
+  top: max(24px, env(safe-area-inset-top));
+  right: max(4.5vw, env(safe-area-inset-right));
+  left: 20px;
+  z-index: 8;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+.experience-controls > button,
+#demo-controls button {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--control-surface);
+  color: var(--paper);
+  font: 500 13px/1 var(--sans);
+  white-space: nowrap;
+  pointer-events: auto;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.experience-controls > button:hover,
+#demo-controls button:hover {
+  background: var(--control-hover);
+  border-color: var(--accent);
+}
+.experience-controls > button:active,
+#demo-controls button:active {
+  background: var(--ink);
+  border-color: var(--paper);
+}
+.experience-controls button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.experience-controls .leave span { margin: 0; font-size: 18px; line-height: 1; color: var(--accent); }
+#demo-controls { display: flex; align-items: center; gap: 8px; }
+#demo-label { margin-right: 8px; color: var(--accent); font: 12px/1 var(--sans); }
+#demo-pause[aria-pressed="true"] { background: var(--paper); border-color: var(--paper); color: var(--ink); }
+@media (max-width: 700px) {
+  .experience-controls { top: max(16px, env(safe-area-inset-top)); right: 16px; left: 16px; gap: 6px; }
+  .experience-controls > button, #demo-controls button { padding: 0 12px; font-size: 14px; }
+  #demo-controls { gap: 6px; }
+  #demo-label { display: none; }
+}
