@@ -61,7 +61,7 @@ float memoryNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mi
   this.scene.add(group);this.targets.push(target);
  }
  setCar(car){this.car=car;this.focusedId=null;for(const t of this.targets)t.group.visible=t.car===car&&!t.gone;}
- reset(){for(const t of this.targets){t.gone=false;t.progress=null;t.group.traverse(m=>{if(m.isMesh){m.material.opacity=1;m.material.depthWrite=true;m.castShadow=m.userData.memoryCastsShadow;}});t.uniforms.forEach(u=>u.value=0);if(t.smoke){this.scene.remove(t.smoke);t.smoke.geometry.dispose();t.smoke.material.dispose();t.smoke=null;}}this.setCar('00');}
+ reset(car=null){for(const t of this.targets){if(car!==null&&t.car!==car)continue;t.gone=false;t.progress=null;t.group.traverse(m=>{if(m.isMesh){m.material.opacity=1;m.material.depthWrite=true;m.castShadow=m.userData.memoryCastsShadow;}});t.uniforms.forEach(u=>u.value=0);if(t.smoke){this.scene.remove(t.smoke);t.smoke.geometry.dispose();t.smoke.material.dispose();t.smoke=null;}}this.setCar(car===null?'00':this.car);}
  pick(gaze,camera){
   if(!gaze?.valid){this.focusedId=null;return null;}
   camera.updateMatrixWorld();this.ray.setFromCamera(new THREE.Vector2(gaze.x*2-1,1-gaze.y*2),camera);

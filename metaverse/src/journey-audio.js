@@ -2,12 +2,12 @@
 export class JourneyAudio {
  constructor(video){
   this.video=video;
-  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.wav',home:'home.wav',playground:'playground.wav',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav',ash:'ash.wav'}).map(([key,file])=>{
+  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.wav',deathHospital:'death-hospital.mp3',home:'home.wav',playground:'playground.wav',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav',ash:'ash.wav'}).map(([key,file])=>{
    const audio=new Audio(new URL(`../assets/audio/${file}`,import.meta.url).href);audio.preload='auto';
    return [key,audio];
   }));
   this.pending=new Set();this.ambience=null;this.room=null;
-  for(const key of ['hospital','home','playground','cafe','forest','incense'])this.clips[key].loop=true;
+  for(const key of ['hospital','deathHospital','home','playground','cafe','forest','incense'])this.clips[key].loop=true;
   const unlock=()=>{
    for(const audio of Object.values(this.clips)){
     if(this.pending.has(audio))continue;
@@ -29,7 +29,7 @@ export class JourneyAudio {
    if(room!==this.room){
     if(this.ambience){this.ambience.pause();this.ambience.currentTime=0;this.pending.delete(this.ambience);}
     this.room=room;
-    const key=finale?'ash':({'01':'hospital','02':'home','03':'playground','04':'cafe','05':'forest','06':'hospital','07':'incense'})[carId];
+    const key=finale?'ash':({'01':'hospital','02':'home','03':'playground','04':'cafe','05':'forest','06':'deathHospital','07':'incense'})[carId];
     this.ambience=key?this.clips[key]:null;
     if(key)this.play(key);
    }

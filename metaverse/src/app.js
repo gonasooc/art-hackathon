@@ -1,4 +1,4 @@
-import { CALIBRATION, WORLD, TRAIN, CARRIAGES, clamp } from './config.js';
+import { CALIBRATION, WORLD, TRAIN, CARRIAGES, JOURNEY_ORDER, clamp } from './config.js';
 import { GazeModel, median, validateGaze } from './gaze-model.js';
 import { BlinkInteraction } from './blink-interaction.js';
 import { TrainJourney } from './train-journey.js';
@@ -37,6 +37,8 @@ class Experience {
     byId('demo-switch').addEventListener('click',()=>this.startVisual());
     byId('demo-restart').addEventListener('click',()=>this.startVisual({restart:true}));
     byId('demo-pause').addEventListener('click',()=>this.toggleDemo());
+    byId('demo-prev').addEventListener('click',()=>this.moveDemoCar(-1));
+    byId('demo-next').addEventListener('click',()=>this.moveDemoCar(1));
     const fullscreenButton=byId('demo-fullscreen'),fullscreenStatus=byId('fullscreen-status');
     const syncFullscreen=()=>{
       const active=Boolean(document.fullscreenElement);
@@ -112,6 +114,7 @@ class Experience {
     byId('boarding-veil').hidden=!['boarding','car-transition'].includes(phase);
     this.updateMotionControl();
     this.updateGazeControl();
+    this.updateDemoNavigation();
     if(!gazePhases.has(phase))this.gazeParticles.clear();
   }
   updateMotionControl() {
@@ -127,6 +130,7 @@ class Experience {
     button.setAttribute('aria-pressed',String(this.gazeParticles.enabled));
   }
   updateJourneyStatus(state) {
+    this.updateDemoNavigation();
     document.body.dataset.journeyStage=state.stage;document.body.dataset.carriage=state.carId||'';
     const label=state.stage==='platform'?'PLATFORM':state.stage==='boarding'?'DEPARTURE':state.carId||'00';
     const title=state.stage==='platform'?'탑승 전':state.stage==='boarding'?'첫 번째 칸으로':CARRIAGES.find(car=>car.id===state.carId)?.title||'';
@@ -195,6 +199,32 @@ class Experience {
       if(serial!==this.serial)return;
       this.release();this.showMessage('error','공간을 준비하지 못했어요','이미지 파일을 불러오지 못했어요. 연결을 확인한 뒤 다시 열어 주세요.','다시 열기',()=>this.startVisual());
     }
+  }
+  updateDemoNavigation(){
+    const index=JOURNEY_ORDER.indexOf(this.navigation.carId);
+    const ready=this.mode==='demo'&&this.demo?.active&&!this.demo.preparing&&index>=0;
+    byId('demo-prev').disabled=!ready||index===0;
+    byId('demo-next').disabled=!ready||index===JOURNEY_ORDER.length-1;
+  }
+  moveDemoCar(direction){
+    if(this.mode!=='demo'||![-1,1].includes(direction))return;
+    const previous=this.navigation.carId,index=JOURNEY_ORDER.indexOf(previous);
+    if(index<0)return;
+    const next=JOURNEY_ORDER[index+direction];
+    if(!next||!this.demo.seekCar(this.navigation,next))return;
+    this.audio.stop();this.world.resetFinale();
+    this.world.boarded=true;byId('world').dataset.trainMoving='true';
+    this.world.objects.reset(previous);this.world.objects.reset(next);
+    this.world.transition=null;this.world.alignment=null;this.world.handheld.reset();
+    this.latest=null;this.blink.reset();this.gazeParticles.clear();
+    this.exitOpen=next==='00';this.changeElapsed=0;this.changedCar=false;this.resumePhase=null;
+    this.navigation.invalidate();this.walkStarted=performance.now();
+    byId('boarding-veil').style.opacity=0;byId('demo-blink').style.opacity=0;
+    delete document.body.dataset.demoTarget;delete document.body.dataset.demoStage;
+    delete document.body.dataset.blinkActivated;delete document.body.dataset.destination;
+    this.world.setCar(next);this.world.walk(this.navigation.snapshot());
+    this.setPhase('walking');this.updateJourneyStatus(this.navigation.snapshot());
+    const canvas=byId('world');canvas.dataset.x='0';canvas.dataset.z='0';canvas.dataset.yaw='0';
   }
   toggleDemo(){
     if(this.mode!=='demo'||this.demo.preparing)return;

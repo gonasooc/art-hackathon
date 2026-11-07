@@ -14,11 +14,12 @@
 
 ## 현재 오디오
 
-`src/journey-audio.js`가 `audio/`의 10개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
+`src/journey-audio.js`가 `audio/`의 11개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
 
 - `prologue.mp3`: 도입 영상 동기화.
 - `train-horn.mp3`, `carriage-door.wav`: 탑승과 칸 전환 효과음.
 - `hospital.wav`, `home.wav`, `playground.wav`, `cafe.wav`, `forest.wav`, `incense.wav`: 해당 객차의 반복 소리.
 - `ash.wav`: 마지막 연기 글씨 구간.
+- `death-hospital.mp3`: 06 임종 칸 전용 반복음. 사용자가 교체용으로 제공한 `SFX27_B_병원_mix_2.mp3`를 변환 없이 복사했다. 01 병원의 `hospital.wav`는 유지한다.
 
 이 목록은 코드의 사용처를 설명한다. 저장소에 원저작자·라이선스·외부 원본 URL의 개별 메타데이터는 기록되어 있지 않으므로 이를 추정해 기재하지 않는다. 배포 시 `audio/`도 포함해야 하며 `npm run media`는 이 파일들을 생성하지 않는다.

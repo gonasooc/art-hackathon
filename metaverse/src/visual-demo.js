@@ -1,4 +1,4 @@
-import {clamp} from './config.js';
+import {clamp,JOURNEY_ORDER} from './config.js';
 
 export const DEMO_TIMING=Object.freeze({turn:1.2,dwell:1.1,blink:.16,after:.65});
 const axisInput=value=>Math.abs(value)<.015?.5:.5+Math.sign(value)*(.16+.84*Math.min(1,Math.abs(value)))/2;
@@ -9,6 +9,13 @@ export class VisualDemo {
  start(){this.active=true;this.paused=false;this.time=0;this.gaze={x:.5,y:.5};this.resetFocus();}
  stop(){this.active=false;this.paused=false;this.preparing=false;this.resetFocus();}
  resetFocus(){this.target=null;this.elapsed=0;this.dwell=0;this.closed=null;this.rest=0;this.blinkAmount=0;this.stage='walking';}
+ seekCar(navigation,id){
+  if(!this.active||this.preparing||!navigation.boarded||!navigation.carId||!JOURNEY_ORDER.includes(id))return false;
+  // Presentation-only navigation; normal eye-driven exit guards stay unchanged.
+  navigation.stage='boarding';
+  if(!navigation.enterCar(id))return false;
+  this.gaze={x:.5,y:.5};this.resetFocus();return true;
+ }
  sample(phase,dt,navigation){
   this.time+=dt*1000;this.blinkAmount=0;
   if(phase!=='objects'){
