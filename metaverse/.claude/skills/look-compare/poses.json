@@ -15,7 +15,10 @@
   "01-video-1s": {
     "car": "01",
     "ref": ".cache/hospital-references/video-1s.png",
-    "source": { "video": "~/Desktop/예술해커톤_영상/출산병원.mp4", "t": 1 },
+    "source": {
+      "video": "~/Desktop/예술해커톤_영상/출산병원.mp4",
+      "t": 1
+    },
     "preset": "entrance",
     "ignoreBottom": 0.12,
     "note": "레퍼런스의 사람은 의도적으로 뺐다(병원칸에는 사람을 넣지 않는다). 왼쪽 아래 자막은 비교 대상이 아니다."
@@ -23,7 +26,10 @@
   "02-video-1s": {
     "car": "02",
     "ref": ".cache/childhood-references/video-1s.png",
-    "source": { "video": "~/Desktop/예술해커톤_영상/옛날집.mp4", "t": 1 },
+    "source": {
+      "video": "~/Desktop/예술해커톤_영상/옛날집.mp4",
+      "t": 1
+    },
     "preset": "entrance",
     "ignoreBottom": 0.12,
     "note": "왼쪽 아래 자막은 구현하지 않는다."
@@ -31,7 +37,10 @@
   "03-video-1s": {
     "car": "03",
     "ref": ".cache/playground-references/video-1s.png",
-    "source": { "video": "~/Desktop/예술해커톤_영상/놀이터.mp4", "t": 1 },
+    "source": {
+      "video": "~/Desktop/예술해커톤_영상/놀이터.mp4",
+      "t": 1
+    },
     "preset": "entrance",
     "ignoreBottom": 0.12,
     "note": "자막은 장면 구성에 포함하지 않는다. 같은 폴더에 정사각 이미지 놀이터01–05.png도 있다."
@@ -46,15 +55,27 @@
   "05-frame-1": {
     "car": "05",
     "ref": ".cache/forest-references/frame-1.png",
-    "source": { "video": "~/Desktop/예술해커톤_영상/숲.mp4", "t": 1 },
-    "pose": [-1.0, 2.67, -8.3, -0.19, 1.65],
+    "source": {
+      "video": "~/Desktop/예술해커톤_영상/숲.mp4",
+      "t": 1
+    },
+    "pose": [
+      -1.0,
+      2.67,
+      -8.3,
+      -0.19,
+      1.65
+    ],
     "ignoreBottom": 0.12,
     "note": "포즈는 소실점 위치로 추정한 대략값이다."
   },
   "06-video-1s": {
     "car": "06",
     "ref": ".cache/death-references/video-1s.png",
-    "source": { "video": "~/Desktop/예술해커톤_영상/임종병원.mp4", "t": 1 },
+    "source": {
+      "video": "~/Desktop/예술해커톤_영상/임종병원.mp4",
+      "t": 1
+    },
     "preset": "entrance",
     "ignoreBottom": 0.12,
     "note": "레퍼런스의 사람은 의도적으로 뺐다. 같은 폴더의 frame-*.png는 영상이 바뀌기 전에 뽑은 것이라 쓰지 않는다."
@@ -65,5 +86,41 @@
     "figma": "85:627",
     "preset": "inspection",
     "note": "중앙 향 사진. 위·왼쪽·오른쪽·아래(66:73·66:65·66:69·66:80)와 연기 글씨(91:746)는 docs/incense-reference.md."
+  },
+  "04-local-01": {
+    "car": "04",
+    "ref": ".cache/cafe-references/local-01.png",
+    "pose": [
+      -6.15,
+      2.67,
+      -7.9,
+      -0.2,
+      1.5708
+    ],
+    "note": "2026-11-07 제공 카페01.png. 통로·출구 위치를 유지한 근사 구도; 원본 카메라 파라미터는 없음."
+  },
+  "04-local-04": {
+    "car": "04",
+    "ref": ".cache/cafe-references/local-04.png",
+    "pose": [
+      -2.3,
+      2.67,
+      -7.9,
+      0.02,
+      1.5708
+    ],
+    "note": "2026-11-07 제공 카페04.png. 통로·출구 위치를 유지한 근사 구도; 원본 카메라 파라미터는 없음."
+  },
+  "04-local-06": {
+    "car": "04",
+    "ref": ".cache/cafe-references/local-06.png",
+    "pose": [
+      -6.8,
+      2.67,
+      -6.8,
+      -0.08,
+      0.85
+    ],
+    "note": "2026-11-07 제공 카페06.png. 통로·출구 위치를 유지한 근사 구도; 원본 카메라 파라미터는 없음."
   }
 }

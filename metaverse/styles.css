@@ -110,3 +110,25 @@ body[data-phase="prologue"] .vignette{opacity:0}
   #demo-controls { gap: 6px; }
   #demo-label { display: none; }
 }
+
+/* Keep the film clear; the padded hover area makes playback controls easy to find. */
+@media (hover: hover) and (pointer: fine) {
+  body[data-mode="demo"] .experience-controls {
+    left: auto;
+    width: max-content;
+    max-width: calc(100% - 40px);
+    opacity: 0;
+    pointer-events: auto;
+    transition: opacity .2s ease;
+  }
+  body[data-mode="demo"] .experience-controls::before {
+    content: "";
+    position: absolute;
+    inset: -24px -20px;
+    z-index: -1;
+  }
+  body[data-mode="demo"] .experience-controls:hover,
+  body[data-mode="demo"] .experience-controls:has(:focus-visible) {
+    opacity: 1;
+  }
+}
