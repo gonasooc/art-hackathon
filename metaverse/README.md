@@ -56,7 +56,7 @@ npm start
 | --- | --- |
 | 도입 영상 | `prologue.mp3`, 영상 시간에 동기화 |
 | 탑승 / 칸 전환 | `train-horn.mp3` / `carriage-door.wav` |
-| 01 병원 | `hospital.wav` 반복 |
+| 01 병원 | `hospital.mp3` 반복 |
 | 06 병원 · 임종 | `death-hospital.mp3` 반복 |
 | 02 집 / 03 놀이터 / 04 카페 / 05 숲 / 07 향 | `home.wav`, `playground.wav`, `cafe.wav`, `forest.wav`, `incense.wav` 반복 |
 | 피날레 | `ash.wav` |
@@ -134,7 +134,7 @@ npm run test:e2e -- tests/browser/incense-finale.spec.mjs
 | `src/prologue.js`, `journey-audio.js` | 도입 재생·전환, 별도 오디오 수명주기 |
 | `src/visual-demo.js`, `visual-inspector.js` | 자동 시연과 개발용 수동 점검 |
 | `src/app.js`, `index.html`, `styles.css` | 상태 전이, 버튼과 화면 구성 |
-| `assets/audio/` | 도입·환경·효과음 11개 |
+| `assets/audio/` | 현재 사용 음원 11개와 교체 전 보존 음원 |
 | `assets/films/` | 현재 도입 영상·첫 프레임, 과거 시제품 영상 |
 | `assets/train/`, `assets/models/` | 기차 텍스처와 얼굴 모델 |
 

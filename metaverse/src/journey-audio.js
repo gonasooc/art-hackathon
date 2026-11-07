@@ -2,7 +2,7 @@
 export class JourneyAudio {
  constructor(video){
   this.video=video;
-  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.wav',deathHospital:'death-hospital.mp3',home:'home.wav',playground:'playground.wav',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav',ash:'ash.wav'}).map(([key,file])=>{
+  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.mp3',deathHospital:'death-hospital.mp3',home:'home.wav',playground:'playground.wav',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav',ash:'ash.wav'}).map(([key,file])=>{
    const audio=new Audio(new URL(`../assets/audio/${file}`,import.meta.url).href);audio.preload='auto';
    return [key,audio];
   }));

@@ -12,7 +12,7 @@ test('room loops stop at the next room; finale replaces incense once; pause and 
  globalThis.document={addEventListener(){},removeEventListener(){}};
  try{
   const audio=new JourneyAudio({hidden:true});
-  assert.match(audio.clips.hospital.src,/\/hospital\.wav$/);
+  assert.match(audio.clips.hospital.src,/\/hospital\.mp3$/);
   assert.match(audio.clips.deathHospital.src,/\/death-hospital\.mp3$/);
   assert.notEqual(audio.clips.hospital,audio.clips.deathHospital);
   const update=(carId,extra={})=>audio.update({phase:'walking',paused:false,carId,...extra});
