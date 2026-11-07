@@ -14,14 +14,22 @@
 
 ## 현재 오디오
 
-`src/journey-audio.js`가 `audio/`의 11개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
+`src/journey-audio.js`가 `audio/`의 10개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
 
 - `prologue.mp3`: 도입 영상 동기화.
 - `train-horn.mp3`, `carriage-door.wav`: 탑승과 칸 전환 효과음.
 - `hospital.mp3`, `home.wav`, `playground.wav`, `cafe.wav`, `forest.wav`, `incense.wav`: 해당 객차의 반복 소리.
-- `ash.wav`: 마지막 연기 글씨 구간.
+- `ash.wav`: 이전 피날레 효과음으로 보존하며 현재는 재생하지 않는다.
 - `death-hospital.mp3`: 06 임종 칸 전용 반복음. 사용자가 교체용으로 제공한 `SFX27_B_병원_mix_2.mp3`를 변환 없이 복사했다. 01 병원과 별도의 클립으로 재생한다.
 
 이 목록은 코드의 사용처를 설명한다. 저장소에 원저작자·라이선스·외부 원본 URL의 개별 메타데이터는 기록되어 있지 않으므로 이를 추정해 기재하지 않는다. 배포 시 `audio/`도 포함해야 하며 `npm run media`는 이 파일들을 생성하지 않는다.
 
 - `hospital.mp3`: 01 병원 칸 전용 반복음. 사용자가 제공한 `~/Downloads/SFX27_B_병원_mix.mp3`를 변환 없이 복사했다. 기존 `hospital.wav`는 보존하지만 현재 재생하지 않는다.
+
+
+## 향 피날레 영상
+
+- `films/incense-ending.mp4`: 사용자가 07 마지막 전환·색·구도의 기준으로 제공하고 재생을 요청한 `향.mp4` 원본. 약 5.06초, 1280×720, 24fps, 오디오 포함. 변환 없이 복사했다.
+- `films/incense-ending-first.png`: 첫 프레임. 포스터와 3D 비교 기준.
+- `films/incense-ending-last.png`: 4.8초 프레임. 동작 줄이기의 정지 장면.
+- 세 자산은 `manifest.json`에 포함한다. 영상은 항상 음소거하며 `incense.wav`를 별도로 유지한다. `incense.wav`는 사용자가 지정한 `SFX30_B_향.wav`와 바이트가 동일하다. 영상 전환·동작 줄이기·실패 복구에서 음원을 교체하거나 재시작하지 않는다.

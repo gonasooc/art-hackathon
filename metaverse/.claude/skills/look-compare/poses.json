@@ -122,5 +122,21 @@
       0.85
     ],
     "note": "2026-11-07 제공 카페06.png. 통로·출구 위치를 유지한 근사 구도; 원본 카메라 파라미터는 없음."
+  },
+  "07-film-opening": {
+    "car": "07",
+    "ref": "assets/films/incense-ending-first.png",
+    "source": {
+      "video": "assets/films/incense-ending.mp4",
+      "t": 0
+    },
+    "pose": [
+      -6.08,
+      2.19,
+      -7.9,
+      -0.027,
+      1.5708
+    ],
+    "note": "사용자 제공 향.mp4 첫 프레임. 석재 방향·비례·색·조명 비교. 원본 렌즈 정보는 없어 추정한 카메라다."
   }
 }

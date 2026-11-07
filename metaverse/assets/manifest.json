@@ -50,6 +50,18 @@
       "bytes": 53690,
       "sha256": "2c9ef9060b16513356968dd5813bdd1e730a2d21546503559b3c7defd19de346"
     },
+    "assets/films/incense-ending.mp4": {
+      "bytes": 1237798,
+      "sha256": "2b927b983a92b4c0dff4b7249726c2949c808435a7a5563b7487f082064aea5a"
+    },
+    "assets/films/incense-ending-first.png": {
+      "bytes": 108940,
+      "sha256": "516a7662d0c65a9b32b880eb1b43d00d9cbcec075b726d5aff18e631bc296180"
+    },
+    "assets/films/incense-ending-last.png": {
+      "bytes": 242975,
+      "sha256": "d2fa41c0daf4286d701079aa8b1dfd3570f5ea45b776a93f529f049cbdf5afab"
+    },
     "assets/train/membrane.png": {
       "bytes": 2399175,
       "sha256": "cedfd0a626b20e746fa63a0ca540235c399ae026e94e8ed0e715d12add64d952"

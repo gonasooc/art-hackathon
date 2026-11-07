@@ -41,7 +41,7 @@ npm start
 - 보행 속도는 **2.7m/s**입니다. 기차의 배경 주행과 관객의 실제 이동 좌표는 별개입니다.
 - 접근 중에도 상호작용할 수 있으며, 관찰 구간에서는 보행을 멈춥니다. 실제 메시를 6m 이내에서 응시하고 양안을 깜빡여 대상을 소멸시킵니다.
 - 소멸 연출은 **1.3초**, 동작 줄이기에서는 **0.35초**입니다. 응시·깜빡임 인식 기준은 그대로 유지합니다. 같은 효과를 자동 시연·수동 점검에서도 사용합니다.
-- 01–06은 모든 대상이 사라지면 출구로 이동합니다. 07은 향 소멸 후 “No click, / one blink.” 연기 글씨를 만들고 마지막 화면에 머뭅니다.
+- 01–06은 모든 대상이 사라지면 출구로 이동합니다. 07은 향 소멸 시작과 함께 제공된 `향.mp4`로 1.3초 동안 전환하고, “No click, / one blink.”가 나타나는 영상의 마지막 프레임을 유지합니다. [향 공간·영상 피날레](docs/incense-reference.md).
 - 상호작용 설명 문장 대신 낮은 밝기의 윤곽빛으로 대상을 표시합니다. 자세한 판정은 [오브젝트·병원 기획](docs/hospital-object-plan.md)을 참고하세요.
 
 ## 도입부와 소리
@@ -59,9 +59,11 @@ npm start
 | 01 병원 | `hospital.mp3` 반복 |
 | 06 병원 · 임종 | `death-hospital.mp3` 반복 |
 | 02 집 / 03 놀이터 / 04 카페 / 05 숲 / 07 향 | `home.wav`, `playground.wav`, `cafe.wav`, `forest.wav`, `incense.wav` 반복 |
-| 피날레 | `ash.wav` |
+| 향 영상 피날레·동작 줄이기·영상 실패 복구 | `incense.wav` (`SFX30_B_향.wav`)를 07부터 끊김 없이 계속 반복. 영상 자체는 항상 음소거 |
 
 시연 일시정지·탭 숨김에서 소리도 멈추고 종료·재시작에서 초기화합니다. URL로 자동 시연을 바로 열면 브라우저 정책에 따라 첫 클릭·키 입력 전 소리가 차단될 수 있습니다. 수동 점검은 공간 확인용이며 일반 체험의 오디오 진행을 재현하지 않습니다.
+
+향 영상은 비율을 유지하며 한 번 재생합니다. 동작 줄이기에서는 최종 정지 프레임을 표시하고, 영상 실패 시 기존 3D 연기 글씨로 복구합니다. 영상에 포함된 소리는 사용하지 않으며 기존 향 음원을 별도로 유지합니다.
 
 ## 시작 화면과 조작 영역
 
@@ -107,7 +109,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-`build`는 고정 의존성의 배포 파일을 `vendor/`로 복사하고 지정한 모델·영상·기차 텍스처의 크기와 해시를 `assets/manifest.json`에 기록합니다. **현재 매니페스트에는 `assets/audio/`가 포함되지 않습니다.** 소리 파일은 별도로 배포에 포함해야 합니다. 정적 배포에는 HTML·CSS·`src/`·`vendor/`·`assets/`가 필요하며 백엔드는 없습니다.
+`build`는 고정 의존성의 배포 파일을 `vendor/`로 복사하고 지정한 모델·영상·기차 텍스처의 크기와 해시를 `assets/manifest.json`에 기록합니다. **현재 매니페스트에는 `assets/audio/`가 포함되지 않습니다.** 별도 소리 파일은 배포에 포함해야 합니다. 향 피날레 MP4와 첫·마지막 정지 프레임은 매니페스트에 포함합니다. 정적 배포에는 HTML·CSS·`src/`·`vendor/`·`assets/`가 필요하며 백엔드는 없습니다.
 
 변경 범위에 맞춘 브라우저 검사는 다음처럼 실행합니다.
 
@@ -134,8 +136,8 @@ npm run test:e2e -- tests/browser/incense-finale.spec.mjs
 | `src/prologue.js`, `journey-audio.js` | 도입 재생·전환, 별도 오디오 수명주기 |
 | `src/visual-demo.js`, `visual-inspector.js` | 자동 시연과 개발용 수동 점검 |
 | `src/app.js`, `index.html`, `styles.css` | 상태 전이, 버튼과 화면 구성 |
-| `assets/audio/` | 현재 사용 음원 11개와 교체 전 보존 음원 |
-| `assets/films/` | 현재 도입 영상·첫 프레임, 과거 시제품 영상 |
+| `assets/audio/` | 현재 사용 음원 10개와 교체 전 보존 음원 |
+| `assets/films/` | 현재 도입·향 피날레 영상과 정지 프레임, 과거 시제품 영상 |
 | `assets/train/`, `assets/models/` | 기차 텍스처와 얼굴 모델 |
 
 Three.js 0.187.0과 MediaPipe Tasks Vision 1.2.2를 저장소에 고정합니다. 모델은 Google Face Landmarker float16 버전 1입니다. 출처는 [정적 자산 안내](assets/NOTICE.md), [기차 재질 안내](assets/train/NOTICE.md)를 참고하세요.

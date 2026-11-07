@@ -32,7 +32,7 @@ function ribbonTexture(){
  ctx.putImageData(data,0,0);return new THREE.CanvasTexture(canvas);
 }
 
-export class IncenseFinale {
+class SmokeFinale {
  constructor(){
   this.group=new THREE.Group();this.group.name='incense-final-smoke-lettering';
   this.group.position.set(-8.98,TRAIN.floorY+.75,TRAIN.centerZ);this.group.rotation.y=Math.PI/2;
@@ -123,5 +123,65 @@ export class IncenseFinale {
    points.needsUpdate=true;mesh.material.opacity=presence*(time<6?.16:.1);
   });
   this.complete=time>=(reduced?1:6.5);
+ }
+}
+
+
+// Keep the procedural scene as an offline fallback if the ending film cannot play.
+export class IncenseFinale {
+ constructor(){
+  this.fallback=new SmokeFinale();this.group=this.fallback.group;
+  this.layer=document.getElementById('incense-film-layer');this.video=document.getElementById('incense-film');this.still=document.getElementById('incense-film-still');
+  this.token=0;this.reset();
+  this.video.addEventListener('error',()=>{if(this.active&&!this.reduced)this.fail();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)this.pause();});
+ }
+ reset(){
+  this.pause();this.active=false;this.complete=false;this.failed=false;this.elapsed=0;this.stalled=0;this.lastTime=0;
+  this.fallback.reset();this.layer.hidden=true;this.layer.style.opacity='0';this.layer.dataset.stage='idle';
+  if(this.video.readyState)this.video.currentTime=0;
+ }
+ start(reduced=false){
+  if(this.active)return;this.reset();this.active=true;this.reduced=reduced;
+  this.video.hidden=reduced;this.video.muted=true;this.still.hidden=!reduced;this.layer.hidden=false;this.layer.dataset.stage='loading';
+  if(!reduced){
+   if(!this.video.getAttribute('src'))this.video.src=new URL('../../assets/films/incense-ending.mp4',import.meta.url).href;
+   else if(this.video.error)this.video.load();
+  }
+ }
+ pause(){
+  if(!this.paused){this.token++;this.pending=false;}
+  this.paused=true;this.video.pause();
+ }
+ play(){
+  if(this.pending||!this.video.paused||this.video.ended||this.failed||this.complete)return;
+  const token=++this.token;this.pending=true;
+  this.video.play().catch(()=>{
+   if(token!==this.token||!this.active||this.paused)return;
+   this.fail();
+  }).finally(()=>{if(token===this.token)this.pending=false;});
+ }
+ fail(){
+  if(!this.active||this.failed)return;this.pause();this.failed=true;this.layer.hidden=true;this.layer.dataset.stage='fallback';this.fallback.start();
+ }
+ update(dt,reduced){
+  if(!this.active)return;
+  if(document.hidden||dt<=0){this.pause();return;}
+  if(this.complete)return;
+  this.paused=false;
+  if(reduced&&!this.reduced){this.reduced=true;this.video.pause();this.video.hidden=true;this.still.hidden=false;}
+  if(this.failed){this.fallback.update(dt,reduced);this.elapsed+=dt;this.complete=this.fallback.complete;return;}
+  if(!this.reduced){
+   this.play();
+   this.stalled=this.video.currentTime>this.lastTime+.001?0:this.stalled+dt;this.lastTime=this.video.currentTime;
+   if(this.stalled>10){this.fail();return;}
+   if(this.video.readyState<2)return;
+  }
+  this.elapsed+=dt;
+  const p=clamp(this.elapsed/(this.reduced?.6:1.3),0,1),mix=p*p*(3-2*p);
+  this.layer.style.opacity=String(mix);this.layer.dataset.stage=p<1?'transition':'playing';
+  if(p>=1&&(this.reduced||this.video.ended)){
+   this.complete=true;this.video.pause();this.layer.dataset.stage='held';
+  }
  }
 }

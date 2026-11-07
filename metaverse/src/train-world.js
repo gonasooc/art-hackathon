@@ -165,7 +165,7 @@ export class TrainWorld {
       '04':{background:0xbcc8ca,hemi:.85,sun:.2,rim:.3,env:.16,sky:0xe4e7e7,ground:0x64645e,near:35,far:90},
       '05':{background:0x899a8c,hemi:1.25,sun:1.15,rim:.25,env:.4,sky:0xe0e7d8,ground:0x566750,near:10,far:34},
       '06':{background:0x101a18,hemi:1.2,sun:.65,rim:.12,env:.18,sky:0xc8e2d8,ground:0x232824,near:25,far:55},
-      '07':{background:0x030303,hemi:.09,sun:0,rim:0,env:.015,sky:0xbab4a9,ground:0x030303,near:12,far:30},
+      '07':{background:0x000000,hemi:.09,sun:0,rim:0,env:.015,sky:0xbab4a9,ground:0x030303,near:12,far:30},
     };
     const p=palettes[id];if(!p)throw new Error(`Unknown carriage ${id}`);
     this.activeCar=id;this.hemi.intensity=p.hemi;this.hemi.color.setHex(p.sky);this.hemi.groundColor.setHex(p.ground);
@@ -236,7 +236,8 @@ export class TrainWorld {
 
   align(id) {
     const position=new THREE.Vector3(TRAIN.interiorStartX-TRAIN.interiorLength,WORLD.eyeHeight+TRAIN.floorY,TRAIN.centerZ);
-    const target=this.camera.clone();target.position.copy(position);target.lookAt(new THREE.Vector3(-9,2,TRAIN.centerZ));
+    if(id==='07')position.set(-6.08,2.19,TRAIN.centerZ);
+    const target=this.camera.clone();target.position.copy(position);target.lookAt(new THREE.Vector3(-9,id==='07'?2.111:2,TRAIN.centerZ));
     this.alignment={fromPosition:this.camera.position.clone(),fromQuaternion:this.camera.quaternion.clone(),position,quaternion:target.quaternion.clone()};this.handheld.reset();
   }
   alignProgress(t) {
@@ -248,16 +249,16 @@ export class TrainWorld {
     this.finale?.reset();this.finalCamera=null;this.canvas.dataset.finale='hidden';this.canvas.dataset.finaleTime='0';
   }
   startFinale(){
-    if(this.activeCar!=='07'||!this.objects.complete()||this.finale.active)return false;
-    this.finale.start();
-    const target=this.camera.clone();target.position.set(-2,3.1,TRAIN.centerZ);target.lookAt(new THREE.Vector3(-9,3.05,TRAIN.centerZ));
+    if(this.activeCar!=='07'||this.finale.active||!this.objects.targets.some(t=>t.car==='07'&&(t.progress!==null||t.gone)))return false;
+    this.finale.start(this.motionPreference.matches);
+    const target=this.camera.clone();target.position.set(-6.08,2.19,TRAIN.centerZ);target.lookAt(new THREE.Vector3(-9,2.111,TRAIN.centerZ));
     this.finalCamera={elapsed:0,from:this.camera.position.clone(),rotation:this.camera.quaternion.clone(),to:target.position.clone(),toRotation:target.quaternion.clone()};
     this.boarded=false;this.canvas.dataset.trainMoving='false';this.needsRender=true;return true;
   }
   render(dt=0) {
     this.objects?.update(dt,this.motionPreference.matches);
     if(this.activeCar==='07'){
-      if(dt>0&&this.objects.complete())this.startFinale();
+      if(dt>0)this.startFinale();
       this.finale.update(dt,this.motionPreference.matches);
       if(this.finale.active){
         this.canvas.dataset.finale=this.finale.complete?'held':'blooming';this.canvas.dataset.finaleTime=this.finale.elapsed.toFixed(3);
@@ -265,7 +266,7 @@ export class TrainWorld {
       }
       if(this.finalCamera){
         const c=this.finalCamera;c.elapsed+=dt;
-        const p=this.motionPreference.matches?1:smooth(Math.min(1,c.elapsed/4.5));
+        const p=this.motionPreference.matches?1:smooth(Math.min(1,c.elapsed/1.3));
         this.camera.position.lerpVectors(c.from,c.to,p);this.camera.quaternion.slerpQuaternions(c.rotation,c.toRotation,p);this.needsRender=true;
         if(p>=1)this.finalCamera=null;
       }

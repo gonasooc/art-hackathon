@@ -43,7 +43,7 @@
 
 - Figma 보드(AKL Team 1, `FszUcDRVifUMnx9x15K1Z6`)는 읽기만 한다. Figma MCP는 호출 제한이 있으니 이미지는 한 번 받아 `.cache/<이름>-references/`에 둔다.
 - `.cache/`(레퍼런스 프레임, 검증 렌더)는 커밋하지 않는다. 외부 CDN이나 런타임 다운로드는 없다.
-- 객차 레퍼런스 영상은 시각 참고용이며 페이지에서 재생하거나 배포하지 않는다. 사용자가 재생을 허용한 행성 도입 영상 `assets/films/planet-womb.mp4`는 예외이며 첫 프레임·별도 오디오와 함께 배포한다.
+- 객차 레퍼런스 영상은 시각 참고용이며 페이지에서 재생하거나 배포하지 않는다. 사용자가 재생을 요청한 행성 도입 `assets/films/planet-womb.mp4`와 향 피날레 `assets/films/incense-ending.mp4`는 예외이며 정지 프레임과 함께 배포한다. 향 영상은 항상 음소거하고 기존 향 음원 `incense.wav`를 별도로 유지한다.
 - `assets/audio/`는 런타임에서 사용하지만 현재 `scripts/build.mjs`의 해시 매니페스트 대상에는 포함되지 않는다. 소리 자산 배포 여부는 별도로 확인한다.
 
 ## 문서

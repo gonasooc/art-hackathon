@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JourneyAudio } from '../src/journey-audio.js';
 
-test('room loops stop at the next room; finale replaces incense once; pause and restart are respected',()=>{
+test('room loops stop at the next room; finale continues incense without restarting; pause and restart are respected',()=>{
  const originalAudio=globalThis.Audio,originalDocument=globalThis.document;
  globalThis.Audio=class {
   constructor(src){this.src=src;this.paused=true;this.ended=false;this.currentTime=0;this.plays=0;}
@@ -27,10 +27,14 @@ test('room loops stop at the next room; finale replaces incense once; pause and 
   update('07');assert.equal(audio.clips.deathHospital.paused,true);
   update('07',{paused:true});assert.equal(audio.clips.incense.paused,true);
   update('07');assert.equal(audio.clips.incense.paused,false);
-  update('07',{finale:true});assert.equal(audio.clips.incense.paused,true);
-  assert.equal(audio.ambience,audio.clips.ash);assert.ok(!audio.clips.ash.loop);
-  const plays=audio.clips.ash.plays;audio.clips.ash.ended=true;audio.clips.ash.paused=true;
-  update('07',{finale:true});update('07',{finale:true});assert.equal(audio.clips.ash.plays,plays);
+  audio.clips.incense.currentTime=2.5;
+  const plays=audio.clips.incense.plays;
+  update('07',{phase:'finale'});update('07',{phase:'finale'});
+  assert.equal(audio.ambience,audio.clips.incense);assert.equal(audio.clips.incense.plays,plays);
+  assert.equal(audio.clips.incense.currentTime,2.5);assert.equal(audio.clips.incense.loop,true);
+  assert.deepEqual(Object.entries(audio.clips).filter(([,clip])=>!clip.paused).map(([key])=>key),['incense']);
+  update('07',{phase:'finale',paused:true});assert.equal(audio.clips.incense.paused,true);
+  update('07',{phase:'finale'});assert.equal(audio.clips.incense.paused,false);assert.equal(audio.clips.incense.currentTime,2.5);
   audio.stop();assert.equal(audio.pending.size,0);assert.equal(audio.room,null);
   update('01');assert.equal(audio.clips.hospital.currentTime,0);assert.equal(audio.clips.hospital.paused,false);
  }finally{globalThis.Audio=originalAudio;globalThis.document=originalDocument;}

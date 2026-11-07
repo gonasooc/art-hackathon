@@ -14,7 +14,7 @@ test('womb passes without objects; all seven subsequent carriages respond to gaz
   ['04',[['04-teacups',[-8.6,2.15,-7.42]],['04-chairs',[-8.6,1.95,-6.45]],['04-table',[-8.6,1.99,-7.9]]]],
   ['05',[['05-moss',[-8.08,1.77,-6.54]],['05-snow',[-8.7,1.62,-9.26]],['05-tree',[-10.6,2.47,-6.5]]]],
   ['06',[['06-leopard',[-8.6,1.67,-8.95]],['06-shroud',[-9.27,1.58,-7.35]],['06-halo',[-8.837,3.159,-7.25]]]],
-  ['07',[['07-incense',[-8.704,1.91,-7.9]]]],
+  ['07',[['07-incense',[-8.85,1.70,-7.86755]]]],
  ];
  for(const [car,targets] of rooms){
   await expect(page.locator('body')).toHaveAttribute('data-carriage',car,{timeout:40000});
