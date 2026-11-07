@@ -87,7 +87,8 @@ class Experience {
         if(!['loading','calibrating','validating'].includes(this.phase))this.world.render(!frozen&&(this.phase==='visual'?!this.visual.paused:['walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase))?dt:0);
         this.gazeParticles.render(performance.now(),this.latest,{active:!frozen&&gazePhases.has(this.phase),reducedMotion:this.world.motionPreference.matches});
       }
-      this.audio.update({phase:this.phase,carId:this.navigation.carId,paused:document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['prologue','walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase)});
+      const footstepPaused=document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['walking','visual'].includes(this.phase);
+      this.audio.update({phase:this.phase,carId:this.navigation.carId,dt,moving:this.phase==='visual'?this.visual.moving:this.phase==='walking'&&this.navigation.walker.moving,footstepsPaused:footstepPaused,paused:document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['prologue','walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase)});
       this.raf=requestAnimationFrame(frame);
     };
     this.raf=requestAnimationFrame(frame);

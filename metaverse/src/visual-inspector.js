@@ -8,7 +8,7 @@ const editing=target=>target?.closest('input,select,textarea,button,[contentedit
 // A separate input controller: never supplies fake samples to the eye tracker.
 export class VisualInspector {
   constructor(world){
-    this.world=world;this.canvas=world.canvas;this.active=false;this.keys=new Set();
+    this.world=world;this.canvas=world.canvas;this.moving=false;this.active=false;this.keys=new Set();
     this.canvas.tabIndex=0;
     for(const car of CARRIAGES.filter(car=>car.implemented))byId('visual-room').add(new Option(`${car.id} · ${car.title}`,car.id));
     byId('visual-room').addEventListener('change',event=>this.selectRoom(event.target.value));
@@ -59,7 +59,7 @@ export class VisualInspector {
     delete this.canvas.dataset.visualPose;delete this.canvas.dataset.visualExposure;
   }
   clearInput(){
-    this.keys.clear();this.endDrag();
+    this.keys.clear();this.moving=false;this.endDrag();
   }
   endDrag(){
     const id=this.drag?.id;this.drag=null;
@@ -122,6 +122,7 @@ export class VisualInspector {
   takeCamera(){this.world.finalCamera=null;this.yaw=this.world.camera.rotation.y;this.pitch=this.world.camera.rotation.x;}
   recordPose(){this.canvas.dataset.visualPose=JSON.stringify([...this.world.camera.position.toArray(),this.pitch,this.yaw].map(n=>Number(n.toFixed(4))));}
   update(dt){
+    this.moving=false;
     if(!this.active)return;
     // The finale briefly reframes the scene; manual input can always take over.
     if(this.world.finale.active){this.yaw=this.world.camera.rotation.y;this.pitch=this.world.camera.rotation.x;this.recordPose();}
@@ -131,9 +132,9 @@ export class VisualInspector {
     if(!forward&&!side&&!up)return;
     this.takeCamera();
     const step=Math.min(dt,.08)*(keys.has('ShiftLeft')||keys.has('ShiftRight')?5.5:2.2)/Math.max(1,Math.hypot(forward,side,up));
-    const p=this.world.camera.position;
+    const p=this.world.camera.position,beforeX=p.x,beforeZ=p.z;
     p.x=clamp(p.x+(-Math.sin(this.yaw)*forward+Math.cos(this.yaw)*side)*step,-35,35);
     p.z=clamp(p.z+(-Math.cos(this.yaw)*forward-Math.sin(this.yaw)*side)*step,-40,30);
-    p.y=clamp(p.y+up*step,.2,15);this.world.needsRender=true;this.recordPose();
+    p.y=clamp(p.y+up*step,.2,15);this.moving=Math.hypot(p.x-beforeX,p.z-beforeZ)>1e-6;this.world.needsRender=true;this.recordPose();
   }
 }

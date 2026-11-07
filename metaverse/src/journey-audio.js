@@ -1,11 +1,14 @@
+export const FOOTSTEP_VOLUME=.18;
+
 // Keep media playback tied to the experience clock and its pause controls.
 export class JourneyAudio {
  constructor(video){
   this.video=video;
-  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.mp3',deathHospital:'death-hospital.mp3',home:'home.wav',playground:'playground.wav',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav'}).map(([key,file])=>{
+  this.clips=Object.fromEntries(Object.entries({prologue:'prologue.mp3',horn:'train-horn.mp3',door:'carriage-door.wav',hospital:'hospital.mp3',deathHospital:'death-hospital.mp3',home:'home.wav',playground:'playground.wav',cafe:'cafe.wav',forest:'forest.wav',incense:'incense.wav',footsteps:'footsteps.wav'}).map(([key,file])=>{
    const audio=new Audio(new URL(`../assets/audio/${file}`,import.meta.url).href);audio.preload='auto';
    return [key,audio];
   }));
+  this.clips.footsteps.loop=true;this.clips.footsteps.volume=0;
   this.pending=new Set();this.ambience=null;this.room=null;
   for(const key of ['hospital','deathHospital','home','playground','cafe','forest','incense'])this.clips[key].loop=true;
   const unlock=()=>{
@@ -22,8 +25,17 @@ export class JourneyAudio {
  }
  play(key){const audio=this.clips[key];audio.currentTime=0;this.pending.add(audio);this.tryPlay(audio);}
  tryPlay(audio){if(audio.paused)audio.play()?.catch(()=>{});}
- stop(){for(const audio of Object.values(this.clips)){audio.pause();audio.currentTime=0;}this.pending.clear();this.ambience=null;this.room=null;}
- update({phase,paused,carId}){
+ stop(){for(const audio of Object.values(this.clips)){audio.pause();audio.currentTime=0;}this.pending.clear();this.ambience=null;this.room=null;this.clips.footsteps.volume=0;}
+ updateFootsteps(moving,paused,dt){
+  const audio=this.clips.footsteps;
+  if(paused){audio.pause();audio.currentTime=0;audio.volume=0;return;}
+  const step=Math.min(Math.max(dt,0),.08)*FOOTSTEP_VOLUME/(moving?.09:.12);
+  audio.volume=moving?Math.min(FOOTSTEP_VOLUME,audio.volume+step):Math.max(0,audio.volume-step);
+  if(moving)this.tryPlay(audio);
+  else if(audio.volume===0){audio.pause();audio.currentTime=0;}
+ }
+ update({phase,paused,carId,moving=false,footstepsPaused=paused,dt=.016}){
+  this.updateFootsteps(moving,footstepsPaused,dt);
   if(!paused){
    const room=carId||null;
    if(room!==this.room){

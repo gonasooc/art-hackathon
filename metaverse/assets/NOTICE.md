@@ -14,7 +14,7 @@
 
 ## 현재 오디오
 
-`src/journey-audio.js`가 `audio/`의 10개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
+`src/journey-audio.js`가 `audio/`의 11개 로컬 파일을 사용한다. 도입 영상 자체는 무음이며 도입 소리를 별도 동기화한다.
 
 - `prologue.mp3`: 도입 영상 동기화.
 - `train-horn.mp3`, `carriage-door.wav`: 탑승과 칸 전환 효과음.
@@ -33,3 +33,6 @@
 - `films/incense-ending-first.png`: 첫 프레임. 포스터와 3D 비교 기준.
 - `films/incense-ending-last.png`: 4.8초 프레임. 동작 줄이기의 정지 장면.
 - 세 자산은 `manifest.json`에 포함한다. 영상은 항상 음소거하며 `incense.wav`를 별도로 유지한다. `incense.wav`는 사용자가 지정한 `SFX30_B_향.wav`와 바이트가 동일하다. 영상 전환·동작 줄이기·실패 복구에서 음원을 교체하거나 재시작하지 않는다.
+
+
+- `audio/footsteps.wav`: 사용자가 제공한 `~/Downloads/footstep_2.wav`를 변환 없이 복사했다. 48kHz·24bit·스테레오, 약 13.67초. 이동 시 반복 재생하며 초기 볼륨은 18%다. 원본 파일의 볼륨·속도는 가공하지 않았다.
