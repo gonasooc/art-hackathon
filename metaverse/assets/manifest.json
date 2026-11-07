@@ -51,16 +51,16 @@
       "sha256": "2c9ef9060b16513356968dd5813bdd1e730a2d21546503559b3c7defd19de346"
     },
     "assets/films/incense-ending.mp4": {
-      "bytes": 1237798,
-      "sha256": "2b927b983a92b4c0dff4b7249726c2949c808435a7a5563b7487f082064aea5a"
+      "bytes": 505536,
+      "sha256": "80d2377e2dcf1c16b035b785058fbef03e371a1e658fd5c0591880f275f01ea5"
     },
     "assets/films/incense-ending-first.png": {
-      "bytes": 108940,
-      "sha256": "516a7662d0c65a9b32b880eb1b43d00d9cbcec075b726d5aff18e631bc296180"
+      "bytes": 83604,
+      "sha256": "01b071365abee070b8f22990c1e817ed4279123dc1fe9572ded6e75273285d38"
     },
     "assets/films/incense-ending-last.png": {
-      "bytes": 242975,
-      "sha256": "d2fa41c0daf4286d701079aa8b1dfd3570f5ea45b776a93f529f049cbdf5afab"
+      "bytes": 224679,
+      "sha256": "f5d4726f90ad69f13c2113ba5d8fd787969f570dab1b9dbe585f261ba173d225"
     },
     "assets/train/membrane.png": {
       "bytes": 2399175,

@@ -86,6 +86,8 @@ test('the opening frame stays still through the fade and transition pause',async
  expect(await video.evaluate(v=>v.currentTime)).toBe(0);
  const opacity=await layer.evaluate(el=>Number(el.style.opacity));
  expect(opacity).toBeGreaterThan(0);expect(opacity).toBeLessThan(1);
+ await mkdir(new URL('../../.cache/verification/',import.meta.url),{recursive:true});
+ await page.screenshot({path:new URL('../../.cache/verification/incense-transition.png',import.meta.url).pathname});
  await page.waitForTimeout(250);expect(await layer.evaluate(el=>Number(el.style.opacity))).toBe(opacity);
  await page.locator('#visual-animation').click();
  await expect.poll(()=>video.evaluate(v=>v.currentTime)).toBeGreaterThan(.1);

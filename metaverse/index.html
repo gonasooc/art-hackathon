@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#171d1b">
   <meta name="description" content="눈길을 따라 기차에 올라, 첫 숨이 되기 전의 기억을 만나는 1인칭 전시. 00 — 탄생.">
   <title>시선이 데려가는 곳</title>
@@ -14,7 +14,7 @@
   <canvas id="world" aria-label="기차 앞에서 시작해 탄생의 00칸으로 이어지는 전시 공간"></canvas>
   <canvas id="gaze-particles" hidden aria-hidden="true"></canvas>
   <div id="prologue-layer" hidden aria-label="자궁빛 행성에서 기차가 있는 공간으로 들어가는 도입 장면"><video id="prologue-video" muted playsinline preload="none" poster="./assets/films/planet-womb.jpg" aria-hidden="true"></video><img id="prologue-still" src="./assets/films/planet-womb.jpg" alt="" hidden></div>
-  <div id="incense-film-layer" hidden aria-label="향의 연기가 No click, one blink 문구로 피어나는 마지막 장면"><video id="incense-film" muted playsinline preload="none" poster="./assets/films/incense-ending-first.png" aria-hidden="true"></video><img id="incense-film-still" src="./assets/films/incense-ending-last.png" alt="" hidden></div>
+  <div id="incense-film-layer" hidden aria-label="향의 연기가 No Click, Just Blink 문구로 피어나는 마지막 장면"><video id="incense-film" muted playsinline preload="none" poster="./assets/films/incense-ending-first.png" aria-hidden="true"></video><img id="incense-film-still" src="./assets/films/incense-ending-last.png" alt="" hidden></div>
   <div id="prologue-light" aria-hidden="true"></div>
   <div class="vignette" aria-hidden="true"></div>
   <div id="boarding-veil" hidden aria-hidden="true"></div>
@@ -24,6 +24,7 @@
       <h1 id="title">시선이<br>데려가는 곳<span class="period">.</span></h1>
       <button id="start" class="primary" type="button">시선으로 시작 <span aria-hidden="true">↗</span></button>
       <button id="visual-start" class="visual-entry" type="button">비주얼 테스트 <span>카메라 없이 처음부터 자동 시연 →</span></button>
+      <p class="mobile-view-note">휴대폰에서는 가로 화면의 자동 시연을 권장합니다.</p>
       <p class="privacy">카메라는 눈의 움직임을 읽는 데 사용됩니다.<br>영상은 이 기기 안에서 처리하며 저장·전송하지 않습니다.</p>
     </section>
     <section id="setup" class="setup" hidden aria-labelledby="setup-title">
@@ -36,7 +37,7 @@
       <button id="message-home" class="text-button" type="button">처음으로</button>
     </section>
     <section id="ending" class="ending" hidden aria-labelledby="ending-title"><span id="work-label" class="eyebrow"></span><h2 id="ending-title">사라진 자리에도<br>기억은 남습니다.</h2><p id="work-title"></p><p class="ending-copy">다시, 다른 시선으로 이 칸을 만날 수 있습니다.</p><button id="restart" class="primary" type="button">다시 탑승하기 <span aria-hidden="true">↗</span></button><button id="end-home" class="text-button" type="button">처음으로</button></section>
-    <div id="finale-controls" class="finale-controls" hidden><p class="screen-reader-text" role="status">No click, one blink.</p><button id="finale-restart" type="button">다시 탑승하기</button><button id="finale-home" type="button">처음으로</button></div>
+    <div id="finale-controls" class="finale-controls" hidden><p class="screen-reader-text" role="status">No Click, Just Blink.</p><button id="finale-restart" type="button">다시 탑승하기</button><button id="finale-home" type="button">처음으로</button></div>
     <div id="journey-status" class="journey-status" hidden role="status"><span id="journey-number">PLATFORM</span><span id="journey-title">탑승 전</span></div>
     <div id="pause-notice" class="pause-notice" hidden role="status"><span class="status-dot"></span><span id="pause-copy"></span><button id="recalibrate" type="button">다시 맞추기</button></div>
     <div class="experience-controls" role="group" aria-label="체험 조작">

@@ -1,7 +1,7 @@
 import * as THREE from '../../vendor/three/three.module.js';
 import {TRAIN,clamp} from '../config.js';
 
-export const FINALE_TEXT='No click,\none blink.';
+export const FINALE_TEXT='No Click,\nJust Blink.';
 const circle=(x,y,rx,ry,from=0,to=Math.PI*2)=>Array.from({length:25},(_,i)=>{const a=from+(to-from)*i/24;return[x+Math.cos(a)*rx,y+Math.sin(a)*ry];});
 // Single-stroke letterforms rather than a solid font: each stroke is made of smoke.
 const glyphs={
@@ -16,8 +16,15 @@ const glyphs={
  b:{w:.68,s:[[[.08,.03],[.24,.68],[.36,1.05],[.25,1.1],[.09,.68],[.05,.18],[.21,0],[.47,.09],[.6,.37],[.53,.61],[.34,.66],[.15,.47]]]},
  ',':{w:.25,s:[[[.14,.04],[.13,-.08],[.03,-.2]]]},
  '.':{w:.2,s:[circle(.08,.02,.025,.026)]},
+ J:{w:.7,s:[[[.12,1.04],[.65,1.04],[.54,.2],[.42,.02],[.15,.01],[.03,.18]]]},
+ u:{w:.67,s:[[[.10,.65],[.05,.18],[.13,.02],[.31,.02],[.49,.28],[.57,.65],[.48,.06],[.64,.02]]]},
+ s:{w:.58,s:[[[.54,.59],[.36,.68],[.13,.58],[.10,.42],[.39,.29],[.46,.12],[.28,.01],[.04,.09]]]},
+ t:{w:.45,s:[[[.27,.96],[.12,.15],[.19,.02],[.4,.08]],[[.02,.59],[.43,.59]]]},
  ' ':{w:.34,s:[]},
 };
+
+glyphs.C={w:.78,s:[circle(.39,.52,.34,.51,.65,Math.PI*2-.65)]};
+glyphs.B={w:.76,s:[[[.08,0],[.18,1.04],[.48,1.04],[.66,.89],[.58,.64],[.15,.52],[.52,.52],[.69,.32],[.57,.05],[.08,0]]]};
 
 function cloudTexture(){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=64;
