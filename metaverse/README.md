@@ -55,10 +55,12 @@ npm start
 | 구간 | 오디오 |
 | --- | --- |
 | 도입 영상 | `prologue.mp3`, 영상 시간에 동기화 |
-| 탑승 / 칸 전환 | `train-horn.mp3` / `carriage-door.wav` |
+| 탑승 직전 → 00 자궁 후반 | `train-horn.mp3`: 계단 접근(9.8m)에서 1회 시작, 00 이동 50–90% 구간에서 페이드아웃 |
+| 칸 전환 | `carriage-door.wav` |
 | 01 병원 | `hospital.mp3` 반복 |
 | 06 병원 · 임종 | `death-hospital.mp3` 반복 |
-| 02 집 / 03 놀이터 / 04 카페 / 05 숲 / 07 향 | `home.wav`, `playground.wav`, `cafe.wav`, `forest.wav`, `incense.wav` 반복 |
+| 02 집 / 04 카페 / 05 숲 / 07 향 | `home.wav`, `cafe.wav`, `forest.wav`, `incense.wav` 반복 |
+| 03 놀이터 | 입장 시 무음, 첫 메인 오브젝트 소멸 완료부터 `playground.wav` 반복. 두 번째 소멸에서는 재시작하지 않음 |
 | 보행 / 수동 점검의 수평 이동 | `footsteps.wav`, 초기 볼륨 18%, 시작 90ms·정지 120ms 페이드 |
 | 향 영상 피날레·동작 줄이기·영상 실패 복구 | `incense.wav` (`SFX30_B_향.wav`)를 07부터 끊김 없이 계속 반복. 영상 자체는 항상 음소거 |
 

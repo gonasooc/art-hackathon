@@ -88,7 +88,7 @@ class Experience {
         this.gazeParticles.render(performance.now(),this.latest,{active:!frozen&&gazePhases.has(this.phase),reducedMotion:this.world.motionPreference.matches});
       }
       const footstepPaused=document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['walking','visual'].includes(this.phase);
-      this.audio.update({phase:this.phase,carId:this.navigation.carId,dt,moving:this.phase==='visual'?this.visual.moving:this.phase==='walking'&&this.navigation.walker.moving,footstepsPaused:footstepPaused,paused:document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['prologue','walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase)});
+      this.audio.update({phase:this.phase,carId:this.navigation.carId,journeyStage:this.navigation.stage,travelDistance:this.navigation.walker.z,playgroundGone:this.world.objects.targets.some(t=>t.car==='03'&&t.gone),dt,moving:this.phase==='visual'?this.visual.moving:this.phase==='walking'&&this.navigation.walker.moving,footstepsPaused:footstepPaused,paused:document.hidden||(this.mode==='demo'&&(this.demo.paused||this.demo.preparing))||!['prologue','walking','boarding','aligning','objects','car-transition','finale'].includes(this.phase)});
       this.raf=requestAnimationFrame(frame);
     };
     this.raf=requestAnimationFrame(frame);
@@ -425,7 +425,7 @@ class Experience {
   }
   boardTrain() {
     if(!this.navigation.beginBoarding())return;
-    this.setPhase('boarding');this.world.startBoarding();this.audio.play('horn');this.updateJourneyStatus(this.navigation.snapshot());
+    this.setPhase('boarding');this.world.startBoarding();this.updateJourneyStatus(this.navigation.snapshot());
     this.boardElapsed=0;this.boardDuration=this.world.motionPreference.matches ? .01 : TRAIN.boardingSeconds;
   }
   arrive(id) {
