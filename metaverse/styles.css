@@ -48,7 +48,6 @@ body[data-mode="demo"] #world{cursor:default}
 #prologue-layer{position:fixed;inset:0;z-index:2;overflow:hidden;background:#030a12;pointer-events:none;will-change:opacity}
 #prologue-video,#prologue-still{display:block;width:100%;height:100%;object-fit:cover;transform-origin:50% 72%}
 #prologue-light{position:fixed;inset:0;z-index:3;background:#f0cbb7;opacity:0;pointer-events:none}
-#prologue-skip{position:fixed;bottom:28px;left:4.5vw;z-index:10;padding:9px 0;color:#f0e4cc;border:0;border-bottom:1px solid #f0e4cc66;background:none;font-size:11px;text-shadow:0 1px 6px #0008}
 body[data-phase="prologue"] .vignette{opacity:0}
 
 /* Shared controls keep exit, playback and gaze actions on the same baseline. */

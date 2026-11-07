@@ -30,7 +30,6 @@ class Experience {
     this.prologue=new PlanetPrologue({video:byId('prologue-video'),still:byId('prologue-still'),layer:byId('prologue-layer'),light:byId('prologue-light'),
       onProgress:(progress,reduced)=>this.world.prologueProgress(progress,reduced),onDone:()=>this.finishPrologue(),
       onError:()=>this.showMessage('prologue-error','도입 영상을 불러오지 못했어요','기차 앞에서 체험을 계속할 수 있습니다.','기차 앞에서 계속',()=>this.prologue.finish())});
-    byId('prologue-skip').addEventListener('click',()=>this.prologue.finish());
     this.audio=new JourneyAudio(byId('prologue-video'));
     this.visual=new VisualInspector(this.world);
     this.demo=new VisualDemo(this.world);
@@ -78,7 +77,7 @@ class Experience {
     byId('intro').hidden=phase!=='idle';
     byId('setup').hidden=!['loading','calibrating','validating'].includes(phase);
     byId('target').hidden=!['calibrating','validating'].includes(phase);
-    byId('prologue-layer').hidden=phase!=='prologue';byId('prologue-skip').hidden=phase!=='prologue';
+    byId('prologue-layer').hidden=phase!=='prologue';
     byId('ending').hidden=phase!=='ended';
     byId('finale-controls').hidden=true;
     byId('finale-restart').textContent=this.mode==='demo'?'다시 시연':'다시 탑승하기';

@@ -33,7 +33,7 @@ test('camera failure can switch to a complete hands-off demonstration with all s
  expect(await page.evaluate(()=>window.__cars)).toEqual(['00','01','02','03','04','05','06','07']);
  expect(await page.evaluate(()=>window.__blinks)).toEqual(['01-leopard','01-chair','02-mural','02-ceiling-light','02-shelf','03-slide','03-swing','04-teacups','04-chairs','04-table','05-moss','05-snow','05-tree','06-leopard','06-shroud','06-halo','07-incense']);
  expect((await states(page)).every(target=>target.gone)).toBe(true);expect(await page.evaluate(()=>window.__cameraRequests)).toBe(1);expect(errors).toEqual([]);
- await page.locator('#finale-restart').click();await expect(page.locator('body')).toHaveAttribute('data-phase','prologue');await page.locator('#prologue-skip').click();await expect(page.locator('body')).toHaveAttribute('data-phase','walking');
+ await page.locator('#finale-restart').click();await expect(page.locator('body')).toHaveAttribute('data-phase','prologue');await expect(page.locator('body')).toHaveAttribute('data-phase','walking',{timeout:30000});
  await expect(page.locator('body')).toHaveAttribute('data-carriage','');expect((await states(page)).every(target=>!target.gone)).toBe(true);
  expect(await page.evaluate(()=>window.__cameraRequests)).toBe(1);
 });

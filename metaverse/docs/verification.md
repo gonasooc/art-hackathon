@@ -161,3 +161,9 @@ Figma 16개 노드와 로컬 숲·임종 병원 영상의 샘플 프레임을 �
 - `npm --prefix metaverse test`: 25개 통과.
 - `npm --prefix metaverse run test:e2e -- tests/browser/prologue.spec.mjs -g 'switching to demo inside'`: 1개 통과. 도입 중 시연 전환, 일시정지, 시연 종료와 초기 화면 복귀를 확인했다.
 - 모바일 실기기 화면은 확인하지 않았다.
+
+## 2026-11-07 도입 건너뛰기 제거
+
+- 도입 건너뛰기 버튼, 클릭 이벤트, 표시 제어와 전용 스타일을 제거했다. 정상 재생 후 자동 전환과 영상 로드 실패 시 계속하기는 유지한다.
+- `npm --prefix metaverse run test:e2e -- tests/browser/prologue.spec.mjs`: 4개 통과. 자동 전환, 시연 전환·일시정지·종료, 동작 줄이기 및 영상 로드 실패 복구를 확인했다.
+- 전체 여정 시연 테스트는 이번에 재실행하지 않았다. 해당 테스트의 재시작 단계는 도입 건너뛰기 대신 자동 전환을 기다리도록 수정했다.

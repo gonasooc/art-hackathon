@@ -4,7 +4,7 @@ import {simulatedEyes} from './support.mjs';
 
 const cache=new URL('../../.cache/planet-reference/',import.meta.url);
 async function cleanShot(page,name){
- const style=await page.addStyleTag({content:'#demo-controls,#demo-switch,#leave,#prologue-skip{visibility:hidden!important}'});
+ const style=await page.addStyleTag({content:'#demo-controls,#demo-switch,#leave{visibility:hidden!important}'});
  await page.screenshot({path:new URL(name,cache).pathname});await style.evaluate(node=>node.remove());
 }
 
