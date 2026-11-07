@@ -37,6 +37,12 @@ class Experience {
     byId('demo-switch').addEventListener('click',()=>this.startVisual());
     byId('demo-restart').addEventListener('click',()=>this.startVisual({restart:true}));
     byId('demo-pause').addEventListener('click',()=>this.toggleDemo());
+    byId('mobile-controls-toggle').addEventListener('click',()=>{
+      const open=document.body.dataset.controlsOpen!=='true';
+      document.body.dataset.controlsOpen=String(open);
+      byId('mobile-controls-toggle').setAttribute('aria-expanded',String(open));
+      byId('mobile-controls-toggle').textContent=open?'조작 닫기':'조작';
+    });
     byId('demo-prev').addEventListener('click',()=>this.moveDemoCar(-1));
     byId('demo-next').addEventListener('click',()=>this.moveDemoCar(1));
     const fullscreenButton=byId('demo-fullscreen'),fullscreenStatus=byId('fullscreen-status');
@@ -98,6 +104,8 @@ class Experience {
   }
   setPhase(phase) {
     this.phase=phase;document.body.dataset.phase=phase;document.body.dataset.mode=this.mode;
+    byId('mobile-controls-toggle').hidden=this.mode!=='demo'||['idle','error'].includes(phase);
+    if(phase==='idle'||this.demo?.preparing){document.body.dataset.controlsOpen='false';byId('mobile-controls-toggle').setAttribute('aria-expanded','false');byId('mobile-controls-toggle').textContent='조작';}
     byId('intro').hidden=phase!=='idle';
     byId('setup').hidden=!['loading','calibrating','validating'].includes(phase);
     byId('target').hidden=!['calibrating','validating'].includes(phase);
@@ -441,7 +449,7 @@ class Experience {
       return;
     }
     this.setPhase('aligning');document.body.dataset.destination=id;
-    this.world.align(id);this.alignElapsed=0;this.alignDuration=this.world.motionPreference.matches?.01:WORLD.alignmentSeconds;
+    this.world.align(id,this.mode==='demo');this.alignElapsed=0;this.alignDuration=this.world.motionPreference.matches?.01:WORLD.alignmentSeconds;
   }
   finish() {
     this.release();this.model.clear();this.setPhase('ended');
@@ -463,7 +471,9 @@ class Experience {
     this.gazeParticles.resize();this.gazeParticles.clear();
     if(innerWidth===this.viewport[0]&&innerHeight===this.viewport[1])return;
     this.viewport=[innerWidth,innerHeight];
+    if(this.mode==='inspect'){this.visual.resizeView();return;}
     if(this.mode==='demo'){
+      if(['objects','aligning'].includes(this.phase)){this.world.align(this.navigation.carId,true);this.world.alignProgress(1);}
       this.demo.resetFocus();this.blink.reset();this.latest=null;this.navigation.invalidate();byId('demo-blink').style.opacity=0;return;
     }
     if(['calibrating','validating','walking','boarding','objects','aligning','car-transition','prologue'].includes(this.phase)){

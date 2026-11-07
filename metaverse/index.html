@@ -40,7 +40,8 @@
     <div id="finale-controls" class="finale-controls" hidden><p class="screen-reader-text" role="status">No Click, Just Blink.</p><button id="finale-restart" type="button">다시 탑승하기</button><button id="finale-home" type="button">처음으로</button></div>
     <div id="journey-status" class="journey-status" hidden role="status"><span id="journey-number">PLATFORM</span><span id="journey-title">탑승 전</span></div>
     <div id="pause-notice" class="pause-notice" hidden role="status"><span class="status-dot"></span><span id="pause-copy"></span><button id="recalibrate" type="button">다시 맞추기</button></div>
-    <div class="experience-controls" role="group" aria-label="체험 조작">
+    <button id="mobile-controls-toggle" type="button" aria-expanded="false" aria-controls="presentation-controls" hidden>조작</button>
+    <div id="presentation-controls" class="experience-controls" role="group" aria-label="체험 조작">
       <button id="motion-toggle" class="motion-toggle" type="button" aria-pressed="true" hidden>흔들림 끄기</button>
       <button id="gaze-toggle" class="gaze-toggle" type="button" aria-pressed="true" title="중심의 작은 빛이 현재 추정된 시선 위치입니다" hidden>시선 표시 끄기</button>
       <div id="demo-controls" hidden><span id="demo-label" role="status">자동 시연</span><button id="demo-pause" type="button" aria-pressed="false">일시정지</button><button id="demo-prev" type="button" disabled>이전 칸</button><button id="demo-next" type="button" disabled>다음 칸</button><button id="demo-restart" type="button">처음부터 시연</button><button id="demo-fullscreen" type="button" aria-pressed="false" hidden>전체화면</button><span id="fullscreen-status" class="fullscreen-status" role="status" hidden></span></div>

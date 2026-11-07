@@ -106,7 +106,7 @@ export class VisualInspector {
   }
   view(preset){
     if(!this.active)return;
-    this.world.finalCamera=null;
+    this.preset=preset;this.world.finalCamera=null;
     this.clearInput();const camera=this.world.camera;camera.rotation.set(0,0,0,'YXZ');
     if(this.room==='platform'){
       const poses={entrance:[[0,WORLD.eyeHeight,6],[0,2,-6]],inspection:[[5.5,2.6,16],[-1,2,-7.1]],exit:[[4,3,-3],[0,2,-7.9]]};
@@ -116,10 +116,13 @@ export class VisualInspector {
       camera.position.set(x,WORLD.eyeHeight+TRAIN.floorY,TRAIN.centerZ);
       camera.lookAt(camera.position.clone().set(preset==='exit'?x+5:-9,2,TRAIN.centerZ));
     }
+    camera.fov=48;camera.updateProjectionMatrix();
+    if(preset==='inspection'&&this.room!=='platform')this.world.fitVisualObservation(this.room);
     this.yaw=camera.rotation.y;this.pitch=camera.rotation.x;this.orient();this.canvas.focus({preventScroll:true});
   }
   orient(){this.world.camera.rotation.set(this.pitch,this.yaw,0,'YXZ');this.world.needsRender=true;this.recordPose();}
-  takeCamera(){this.world.finalCamera=null;this.yaw=this.world.camera.rotation.y;this.pitch=this.world.camera.rotation.x;}
+  resizeView(){if(this.active&&this.preset&&!this.world.finale.active)this.view(this.preset);}
+  takeCamera(){this.preset=null;this.world.finalCamera=null;this.yaw=this.world.camera.rotation.y;this.pitch=this.world.camera.rotation.x;}
   recordPose(){this.canvas.dataset.visualPose=JSON.stringify([...this.world.camera.position.toArray(),this.pitch,this.yaw].map(n=>Number(n.toFixed(4))));}
   update(dt){
     this.moving=false;

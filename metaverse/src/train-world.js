@@ -156,6 +156,7 @@ export class TrainWorld {
   }
 
   setCar(id) {
+    this.camera.fov=48;this.camera.updateProjectionMatrix();
     if(this.activeCar!==id)this.resetFinale();
     const palettes={
       '00':{background:0xe2b4a4,hemi:2,sun:2.6,rim:1.6,env:.65,sky:0xffead5,ground:0x5f3c35,near:35,far:115},
@@ -182,7 +183,7 @@ export class TrainWorld {
 
   reset() {
     this.resetFinale();
-    this.handheld.reset();
+    this.handheld.reset();this.camera.fov=48;this.camera.updateProjectionMatrix();
     this.objects?.reset();this.setCar('00');
 
     this.boarded=false;this.rideTime=0;this.transition=null;this.alignment=null;
@@ -235,11 +236,35 @@ export class TrainWorld {
     if(progress>=1){this.canvas.dataset.carriage='00';this.canvas.dataset.journeyStage='carriage';}
   }
 
-  align(id) {
+  fitVisualObservation(id){
+    this.camera.fov=48;this.camera.updateProjectionMatrix();
+    if(this.camera.aspect>=1||id==='00'||id==='07')return;
+    const targets=this.objects.targets.filter(t=>t.car===id);
+    if(!targets.length)return;
+    const bounds=new THREE.Box3();
+    for(const target of targets){target.group.updateMatrixWorld(true);bounds.union(new THREE.Box3().setFromObject(target.group));}
+    const center=bounds.getCenter(new THREE.Vector3());
+    this.camera.position.set(center.x+4.4,center.y+.55,center.z);
+    this.camera.lookAt(center);this.camera.updateMatrixWorld(true);
+    let tangent=0;
+    for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){
+      const p=new THREE.Vector3(x,y,z).applyMatrix4(this.camera.matrixWorldInverse);
+      if(p.z<0)tangent=Math.max(tangent,Math.abs(p.y)/-p.z,Math.abs(p.x)/(-p.z*this.camera.aspect));
+    }
+    this.camera.fov=Math.max(48,Math.min(120,THREE.MathUtils.radToDeg(2*Math.atan(tangent*1.15))));
+    this.camera.updateProjectionMatrix();this.needsRender=true;
+  }
+  align(id,visual=false) {
     const position=new THREE.Vector3(TRAIN.interiorStartX-TRAIN.interiorLength,WORLD.eyeHeight+TRAIN.floorY,TRAIN.centerZ);
     if(id==='07')position.set(-6.08,2.19,TRAIN.centerZ);
     const target=this.camera.clone();target.position.copy(position);target.lookAt(new THREE.Vector3(-9,id==='07'?2.111:2,TRAIN.centerZ));
-    this.alignment={fromPosition:this.camera.position.clone(),fromQuaternion:this.camera.quaternion.clone(),position,quaternion:target.quaternion.clone()};this.handheld.reset();
+    const fromPosition=this.camera.position.clone(),fromQuaternion=this.camera.quaternion.clone();
+    this.camera.fov=48;this.camera.updateProjectionMatrix();
+    if(visual&&this.camera.aspect<1&&id!=='07'){
+      this.fitVisualObservation(id);position.copy(this.camera.position);target.quaternion.copy(this.camera.quaternion);
+      this.camera.position.copy(fromPosition);this.camera.quaternion.copy(fromQuaternion);
+    }
+    this.alignment={fromPosition,fromQuaternion,position,quaternion:target.quaternion.clone()};this.handheld.reset();
   }
   alignProgress(t) {
     if(!this.alignment)return;

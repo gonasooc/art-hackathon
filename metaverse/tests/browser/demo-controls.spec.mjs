@@ -23,9 +23,10 @@ test('demo controls reveal near the toolbar, hide after mouse use, and support k
 
 test.describe('touch controls',()=>{
   test.use({hasTouch:true,viewport:{width:390,height:844}});
-  test('remain visible without hover',async({page})=>{
+  test('can reveal controls by touch without hover',async({page})=>{
     await page.goto('./?mode=visual');
     await expect(page.locator('body')).toHaveAttribute('data-mode','demo');
+    await page.locator('#mobile-controls-toggle').tap();
     await expect(page.locator('.experience-controls')).toHaveCSS('opacity','1');
     await page.locator('#demo-pause').tap();
     await expect(page.locator('#demo-pause')).toHaveAttribute('aria-pressed','true');
