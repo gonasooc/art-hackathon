@@ -181,3 +181,9 @@ Figma 16개 노드와 로컬 숲·임종 병원 영상의 샘플 프레임을 �
 
 - 마우스 환경의 자동 시연에서 조작 영역을 숨기고 상하 24px·좌우 20px 주변 호버 또는 키보드 포커스 시 표시한다. 클릭 후 마우스를 벗어나면 다시 숨기며 터치 환경에서는 항상 표시한다.
 - `npm --prefix metaverse run test:e2e -- tests/browser/demo-controls.spec.mjs`: 2개 통과. 주변 호버 표시, 일시정지 클릭 후 숨김, Tab 접근, 종료, 모바일 터치 일시정지를 확인했다.
+
+## 2026-11-07 공통 소멸 연출 시간 단축
+
+- 일반 소멸 2.6초 → 1.3초, 동작 줄이기 0.7초 → 0.35초. 응시·깜빡임 인식 조건은 변경하지 않았다.
+- `npm --prefix metaverse test`: 25개 통과.
+- `npm --prefix metaverse run test:e2e -- tests/browser/incense-finale.spec.mjs`: 2개 통과. 향 소멸 후 피날레, 일시정지·복원·재생, 동작 줄이기 흐름을 확인했다.

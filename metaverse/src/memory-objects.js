@@ -81,7 +81,7 @@ float memoryNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mi
  update(dt,reduced){
   this.cueTime=(this.cueTime||0)+dt;
   for(const t of this.targets){const strength=t.car===this.car&&!t.gone&&t.progress===null?(this.focusedId===t.id?.2:(reduced?.055:.055+.015*Math.sin(this.cueTime*.9))):0;t.focusUniforms.forEach(u=>u.value=strength);}
-  for(const t of this.targets){if(t.progress===null)continue;t.progress+=dt;const duration=reduced?.7:2.6,p=Math.min(1,t.progress/duration);
+  for(const t of this.targets){if(t.progress===null)continue;t.progress+=dt;const duration=reduced?.35:1.3,p=Math.min(1,t.progress/duration);
    t.uniforms.forEach(u=>u.value=Math.min(1,p*1.3));t.group.traverse(m=>{if(m.isMesh)m.material.opacity=1-p;});t.group.visible=p<.85;
    const attr=t.smoke.geometry.attributes.position;
    for(let i=0;i<t.origins.length;i++){const [x,y,z]=t.origins[i];attr.setXYZ(i,x+(reduced?0:Math.sin(i+t.progress*1.6)*p*.35),y+(reduced?0:p*(.8+(i%9)*.1)),z+(reduced?0:Math.cos(i*.7+t.progress)*p*.3));}
