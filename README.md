@@ -2,6 +2,14 @@
 
 예술·기술 실험 두 작품을 하나의 정적 사이트에서 제공하는 저장소입니다. 루트 진입 페이지는 작품별 그래픽·소개·전체 클릭 영역을 갖춘 반응형 갤러리이며, 각 작품은 독립된 하위 경로에서 실행합니다. 2026-11-07 코드 기준입니다.
 
+## 함께 만든 사람들
+
+- 최관수 — Programmer
+- 백승민 — Sound Engineer
+- 박혜원 — Visual Artist
+- 이엘리 — Visual Architecture Creator
+- 강기원 — Director
+
 ## 프로젝트
 
 | 폴더 | 프로젝트 | GitHub Pages |
